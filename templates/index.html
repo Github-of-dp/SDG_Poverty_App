@@ -2,85 +2,141 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SDG-1 Poverty Risk Predictor</title>
+<title>SDG-1 Poverty Risk App</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e293b); color: #fff; margin:0; padding:0; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; }
-.container { margin-top:50px; width:100%; max-width:450px; }
-.card { background:#1e293b; border-radius:16px; padding:30px; box-shadow:0 8px 25px rgba(0,0,0,0.4); }
-h1 { text-align:center; color:#38bdf8; margin-bottom:10px; }
-p.subtitle { text-align:center; color:#94a3b8; margin-bottom:30px; }
-form { display:flex; flex-direction:column; }
-input, button { padding:14px; margin-bottom:15px; border-radius:8px; border:none; font-size:16px; }
-input { background:#334155; color:#fff; }
-input::placeholder { color:#94a3b8; }
-button { background:#22c55e; color:#000; font-weight:bold; cursor:pointer; transition: background 0.3s; }
-button:hover { background:#16a34a; }
-.result-card { background:#334155; padding:20px; border-radius:12px; margin-top:25px; text-align:center; animation:fadeIn 0.5s ease-in-out; }
-.result-card h2 { color:#facc15; margin-bottom:10px; }
-.disclaimer { font-size:12px; color:#94a3b8; margin-top:10px; }
-.gauge-container { position:relative; width:250px; height:125px; margin:20px auto; }
-.gauge-bg { width:100%; height:100%; border-top-left-radius:125px; border-top-right-radius:125px; background: conic-gradient(#facc15 0deg, #22c55e 180deg); }
-.gauge-pointer { position:absolute; bottom:0; left:50%; width:4px; height:100px; background:#fff; transform-origin:bottom; transform:rotate(0deg); border-radius:2px; transition:transform 0.8s ease-out; }
-.gauge-center { position:absolute; bottom:0; left:50%; width:16px; height:16px; background:#fff; border-radius:50%; transform:translateX(-50%); }
-@keyframes fadeIn { from {opacity:0; transform:translateY(-10px);} to {opacity:1; transform:translateY(0);} }
-@media(max-width:500px){ .card{padding:20px;} input,button{font-size:14px;} }
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to bottom, #0f172a, #1e293b);
+    color: #fff;
+    margin: 0;
+}
+.container { max-width: 900px; margin: auto; padding: 20px; }
+.card {
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+h1, h2 { color: #38bdf8; text-align: center; }
+input, button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: none;
+}
+input { background: #334155; color: #fff; }
+button {
+    background: #22c55e;
+    font-weight: bold;
+    cursor: pointer;
+}
+.result { text-align: center; margin-top: 10px; }
 </style>
 </head>
+
 <body>
 <div class="container">
+
+<!-- HERO FEATURE -->
 <div class="card">
-<h1>SDG-1: No Poverty</h1>
-<p class="subtitle">AI-Based Poverty Risk Prediction</p>
-
-<form id="predictForm">
-<input type="number" step="any" id="income" placeholder="Monthly Income" required>
-<input type="number" step="any" id="household_size" placeholder="Household Size" required>
-<input type="number" step="any" id="education" placeholder="Education Level" required>
-<input type="number" step="any" id="employment" placeholder="Employment Status (0=No, 1=Yes)" required>
-<button type="submit">Predict</button>
-</form>
-
-<div class="result-card">
-<h2 id="status">Enter your details</h2>
-<p id="probability">Risk Probability: 0%</p>
-<p id="poverty_line">Poverty Line Reference: $500 (Source: World Bank)</p>
-<div class="gauge-container">
-<div class="gauge-bg"></div>
-<div class="gauge-pointer" id="pointer"></div>
-<div class="gauge-center"></div>
-</div>
+<h1>SDG-1: Poverty Risk Predictor</h1>
+<input id="income" placeholder="Monthly Income">
+<input id="education" placeholder="Education Level">
+<input id="employment" placeholder="Employment (0/1)">
+<button onclick="predict()">Predict Risk</button>
+<div class="result" id="riskResult"></div>
 </div>
 
-<div class="disclaimer">
-This estimate is for educational purposes and does not determine official eligibility for benefits.
+<!-- BUDGET PLANNER -->
+<div class="card">
+<h2>Budget Planner</h2>
+<input id="budgetIncome" placeholder="Monthly Income">
+<input id="expenses" placeholder="Monthly Expenses">
+<button onclick="budget()">Calculate</button>
+<div class="result" id="budgetResult"></div>
 </div>
+
+<!-- RECOMMENDATIONS -->
+<div class="card">
+<h2>Personalized Recommendations</h2>
+<button onclick="getTips()">Get Tips</button>
+<ul id="tips"></ul>
 </div>
+
+<!-- TRENDS -->
+<div class="card">
+<h2>Poverty Trend Analytics</h2>
+<canvas id="trendChart"></canvas>
+</div>
+
 </div>
 
 <script>
-const pointer = document.getElementById('pointer');
-const status = document.getElementById('status');
-const probabilityText = document.getElementById('probability');
-const form = document.getElementById('predictForm');
+let latestRisk = 0;
 
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const data = {
-        income: parseFloat(document.getElementById('income').value),
-        household_size: parseFloat(document.getElementById('household_size').value),
-        education: parseFloat(document.getElementById('education').value),
-        employment: parseInt(document.getElementById('employment').value)
-    };
-    const response = await fetch('/predict', {
-        method: 'POST',
-        headers: {'Content-Type':'application/x-www-form-urlencoded'},
-        body: new URLSearchParams(data)
-    });
-    const result = await response.json();
-    status.textContent = result.status;
-    probabilityText.textContent = `Risk Probability: ${result.probability}%`;
-    pointer.style.transform = `rotate(${result.probability * 1.8}deg)`;
+function predict() {
+fetch('/predict', {
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body: JSON.stringify({
+    income: income.value,
+    education: education.value,
+    employment: employment.value
+})
+})
+.then(r=>r.json())
+.then(d=>{
+    latestRisk = d.risk;
+    riskResult.innerHTML = `<h3>${d.status}</h3>Risk Probability: ${d.risk}%`;
+});
+}
+
+function budget() {
+fetch('/budget', {
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body: JSON.stringify({
+    income: budgetIncome.value,
+    expenses: expenses.value
+})
+})
+.then(r=>r.json())
+.then(d=>{
+    budgetResult.innerHTML = `Remaining: ${d.remaining}<br>${d.suggestion}`;
+});
+}
+
+function getTips() {
+fetch('/recommendations', {
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body: JSON.stringify({ risk: latestRisk })
+})
+.then(r=>r.json())
+.then(d=>{
+    tips.innerHTML = d.tips.map(t=>`<li>${t}</li>`).join('');
+});
+}
+
+fetch('/trends')
+.then(r=>r.json())
+.then(d=>{
+new Chart(document.getElementById('trendChart'),{
+type:'line',
+data:{
+labels:d.income,
+datasets:[{
+label:'Poverty Risk',
+data:d.risk,
+borderColor:'#22c55e',
+fill:false
+}]
+}
 });
 </script>
 </body>
