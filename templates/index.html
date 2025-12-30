@@ -17,11 +17,7 @@
             min-height: 100vh;
         }
 
-        .container {
-            margin-top: 50px;
-            width: 100%;
-            max-width: 450px;
-        }
+        .container { margin-top: 50px; width: 100%; max-width: 450px; }
 
         .card {
             background: #1e293b;
@@ -30,51 +26,20 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.4);
         }
 
-        h1 {
-            text-align: center;
-            color: #38bdf8;
-            margin-bottom: 10px;
-        }
+        h1 { text-align: center; color: #38bdf8; margin-bottom: 10px; }
+        p.subtitle { text-align: center; color: #94a3b8; margin-bottom: 30px; }
 
-        p.subtitle {
-            text-align: center;
-            color: #94a3b8;
-            margin-bottom: 30px;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-
+        form { display: flex; flex-direction: column; }
         input, button {
-            padding: 14px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border: none;
-            font-size: 16px;
+            padding: 14px; margin-bottom: 15px; border-radius: 8px; border: none; font-size: 16px;
         }
-
-        input {
-            background: #334155;
-            color: #fff;
-        }
-
-        input::placeholder {
-            color: #94a3b8;
-        }
-
+        input { background: #334155; color: #fff; }
+        input::placeholder { color: #94a3b8; }
         button {
-            background: #22c55e;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
+            background: #22c55e; color: #000; font-weight: bold; cursor: pointer;
             transition: background 0.3s;
         }
-
-        button:hover {
-            background: #16a34a;
-        }
+        button:hover { background: #16a34a; }
 
         .result-card {
             background: #334155;
@@ -84,32 +49,52 @@
             text-align: center;
             animation: fadeIn 0.5s ease-in-out;
         }
+        .result-card h2 { color: #facc15; margin-bottom: 10px; }
+        .disclaimer { font-size: 12px; color: #94a3b8; margin-top: 10px; }
 
-        .result-card h2 {
-            color: #facc15;
-            margin-bottom: 10px;
+        /* Gauge container */
+        .gauge-container {
+            position: relative;
+            width: 250px;
+            height: 125px;
+            margin: 20px auto;
         }
 
-        .disclaimer {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 10px;
+        .gauge-bg {
+            width: 100%;
+            height: 100%;
+            border-top-left-radius: 125px;
+            border-top-right-radius: 125px;
+            background: conic-gradient(#facc15 0deg, #22c55e 180deg);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px);}
-            to { opacity: 1; transform: translateY(0);}
+        .gauge-pointer {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            height: 100px;
+            background: #fff;
+            transform-origin: bottom;
+            transform: rotate(0deg);
+            border-radius: 2px;
+            transition: transform 0.8s ease-out;
         }
 
-        /* Mobile tweaks */
-        @media (max-width: 500px) {
-            .card {
-                padding: 20px;
-            }
-            input, button {
-                font-size: 14px;
-            }
+        .gauge-center {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translateX(-50%);
         }
+
+        @keyframes fadeIn { from {opacity: 0; transform: translateY(-10px);} to {opacity:1; transform: translateY(0);} }
+
+        @media (max-width: 500px) { .card { padding: 20px; } input, button { font-size: 14px; } }
     </style>
 </head>
 <body>
@@ -118,24 +103,54 @@
             <h1>SDG-1: No Poverty</h1>
             <p class="subtitle">AI-Based Poverty Risk Prediction</p>
 
-            <form method="POST">
-                <input type="number" step="any" name="income" placeholder="Monthly Income" required>
-                <input type="number" step="any" name="household_size" placeholder="Household Size" required>
-                <input type="number" step="any" name="education" placeholder="Education Level" required>
-                <input type="number" step="any" name="employment" placeholder="Employment Status (0=No, 1=Yes)" required>
-                <button type="submit">Predict Risk</button>
+            <form id="predictForm">
+                <input type="number" step="any" id="income" placeholder="Monthly Income" required>
+                <input type="number" step="any" id="household_size" placeholder="Household Size" required>
+                <input type="number" step="any" id="education" placeholder="Education Level" required>
+                <input type="number" step="any" id="employment" placeholder="Employment Status (0=No, 1=Yes)" required>
             </form>
 
-            {% if prediction %}
             <div class="result-card">
-                <h2>Result: {{ prediction }}</h2>
-                <p>Risk Probability: {{ probability }}%</p>
-                <p>Poverty Line Reference: {{ poverty_line }} (Source: {{ source }})</p>
+                <h2 id="status">Enter your details</h2>
+                <p id="probability">Risk Probability: 0%</p>
+                <p id="poverty_line">Poverty Line Reference: $500 (Source: World Bank)</p>
+
+                <!-- Gauge -->
+                <div class="gauge-container">
+                    <div class="gauge-bg"></div>
+                    <div class="gauge-pointer" id="pointer"></div>
+                    <div class="gauge-center"></div>
+                </div>
             </div>
+
             <div class="disclaimer">
                 This estimate is for educational purposes and does not determine official eligibility for benefits.
             </div>
-            {% endif %}
+
+            <script>
+                const pointer = document.getElementById('pointer');
+                const status = document.getElementById('status');
+                const probabilityText = document.getElementById('probability');
+
+                const formInputs = ['income', 'household_size', 'education', 'employment'].map(id => document.getElementById(id));
+
+                function calculateRisk() {
+                    const income = parseFloat(document.getElementById('income').value) || 0;
+                    const household = parseFloat(document.getElementById('household_size').value) || 1;
+                    const education = parseFloat(document.getElementById('education').value) || 0;
+                    const employment = parseFloat(document.getElementById('employment').value) || 0;
+
+                    // Simple risk formula (for demo)
+                    let risk = 100 - (income / (household * 500)) * 40 - (education * 10) - (employment * 10);
+                    risk = Math.max(0, Math.min(100, risk));
+
+                    pointer.style.transform = `rotate(${risk * 1.8}deg)`;
+                    probabilityText.textContent = `Risk Probability: ${risk.toFixed(1)}%`;
+                    status.textContent = risk > 50 ? "High Poverty Risk" : "Low Poverty Risk";
+                }
+
+                formInputs.forEach(input => input.addEventListener('input', calculateRisk));
+            </script>
         </div>
     </div>
 </body>
