@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 app = Flask(__name__)
@@ -8,42 +9,36 @@ app = Flask(__name__)
 # Load dataset
 df = pd.read_csv("poverty_data.csv")
 
-X = df.drop("poverty_risk", axis=1)
-y = df["poverty_risk"]
+X = df[['income', 'education', 'employment']]
+y = df['poverty_risk']
 
-# Scale data
+# Scale features
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # Train model
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2, random_state=42
+)
+
 model = LogisticRegression(max_iter=1000)
-model.fit(X_scaled, y)
+model.fit(X_train, y_train)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    prediction_text = ""
+    prediction = None
 
     if request.method == "POST":
         income = float(request.form["income"])
-        education = int(request.form["education"])
-        employed = int(request.form["employed"])
-        family_size = int(request.form["family_size"])
-        facilities = int(request.form["facilities"])
+        education = float(request.form["education"])
+        employment = float(request.form["employment"])
 
-        user_data = pd.DataFrame(
-            [[income, education, employed, family_size, facilities]],
-            columns=["income", "education", "employed", "family_size", "facilities"]
-        )
+        input_data = scaler.transform([[income, education, employment]])
+        result = model.predict(input_data)[0]
 
-        user_scaled = scaler.transform(user_data)
-        prediction = model.predict(user_scaled)
+        prediction = "At Poverty Risk" if result == 1 else "Not At Risk"
 
-        if prediction[0] == 1:
-            prediction_text = "⚠️ Household is at Poverty Risk"
-        else:
-            prediction_text = "✅ Household is NOT at Poverty Risk"
-
-    return render_template("index.html", result=prediction_text)
+    return render_template("index.html", prediction=prediction)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run()
