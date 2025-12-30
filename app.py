@@ -1,53 +1,48 @@
 from flask import Flask, render_template, request
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
 
 app = Flask(__name__)
 
-# Load dataset
-df = pd.read_csv("poverty_data.csv")
+CSV_FILE = "poverty_data.csv"
 
-# Features and target
+# Load dataset
+df = pd.read_csv(CSV_FILE)
+
+# Check if household_size exists, else add default 1
+if 'household_size' not in df.columns:
+    df['household_size'] = 1
+
+# Prepare features and target
 X = df[['income', 'education', 'employment', 'household_size']]
 y = df['poverty_risk']
 
-# Scale features
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+# Train model
+model = LogisticRegression(max_iter=500)
+model.fit(X, y)
 
-# Train Logistic Regression model
-model = LogisticRegression(max_iter=1000)
-model.fit(X_scaled, y)
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    prediction = None
-    probability = None
-    poverty_line = 20000  # Example official poverty line
-    source = "World Bank $2.15/day (2025)"
+@app.route("/predict", methods=["POST"])
+def predict():
+    # Get form data
+    income = float(request.form['income'])
+    education = float(request.form['education'])
+    employment = int(request.form['employment'])
+    household_size = int(request.form['household_size'])
 
-    if request.method == "POST":
-        income = float(request.form["income"])
-        education = float(request.form["education"])
-        employment = float(request.form["employment"])
-        household_size = float(request.form["household_size"])
+    # Make prediction
+    prediction = model.predict([[income, education, employment, household_size]])[0]
+    risk = "at Poverty Risk" if prediction == 1 else "not at Poverty Risk"
 
-        input_data = scaler.transform([[income, education, employment, household_size]])
-        result_prob = model.predict_proba(input_data)[0][1]
-        result = model.predict(input_data)[0]
+    # Save new data to CSV
+    new_row = pd.DataFrame([[income, education, employment, household_size, prediction]],
+                           columns=['income','education','employment','household_size','poverty_risk'])
+    new_row.to_csv(CSV_FILE, mode='a', header=False, index=False)
 
-        # Display risk % and safe wording
-        probability = round(result_prob * 100, 2)
-        prediction = "Below poverty line" if result == 1 else "Above poverty line"
-
-    return render_template(
-        "index.html",
-        prediction=prediction,
-        probability=probability,
-        poverty_line=poverty_line,
-        source=source
-    )
+    return render_template("index.html", result=f"Household is {risk}")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(debug=True)
