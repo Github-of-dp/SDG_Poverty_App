@@ -1,7 +1,7 @@
-income,education,employment,poverty_risk
-15000,5,0,1
-30000,10,1,0
-12000,6,0,1
-45000,12,1,0
-20000,8,0,1
-50000,14,1,0
+income,education,employment,household_size,poverty_risk
+15000,5,0,3,1
+30000,10,1,4,0
+12000,6,0,2,1
+45000,12,1,5,0
+20000,8,0,3,1
+50000,14,1,4,0
