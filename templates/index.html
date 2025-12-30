@@ -5,60 +5,46 @@
     <style>
         body {
             font-family: Arial;
-            background-color: #f2f2f2;
+            background: #0f172a;
+            color: white;
             text-align: center;
+            padding-top: 50px;
         }
-        .box {
-            background: white;
-            padding: 20px;
-            width: 350px;
-            margin: auto;
-            margin-top: 50px;
-            border-radius: 10px;
+        form {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            display: inline-block;
         }
-        input, select {
-            width: 90%;
-            padding: 8px;
-            margin: 5px;
+        input, button {
+            padding: 10px;
+            margin: 8px;
+            width: 200px;
+            border-radius: 6px;
+            border: none;
         }
         button {
-            padding: 10px;
-            background: green;
-            color: white;
-            border: none;
-            border-radius: 5px;
+            background: #22c55e;
+            font-weight: bold;
+            cursor: pointer;
         }
-        h2 {
-            color: darkgreen;
-        }
+        h1 { color: #38bdf8; }
     </style>
 </head>
 
 <body>
-    <div class="box">
-        <h2>SDG-1 Poverty Risk Predictor</h2>
+    <h1>SDG-1: No Poverty</h1>
+    <p>AI-Based Poverty Risk Prediction</p>
 
-        <form method="POST">
-            <input type="number" name="income" placeholder="Monthly Income" required>
-            <input type="number" name="education" placeholder="Years of Education" required>
+    <form method="POST">
+        <input type="number" step="any" name="income" placeholder="Income" required><br>
+        <input type="number" step="any" name="education" placeholder="Education Level" required><br>
+        <input type="number" step="any" name="employment" placeholder="Employment Status" required><br>
+        <button type="submit">Predict</button>
+    </form>
 
-            <select name="employed">
-                <option value="1">Employed</option>
-                <option value="0">Unemployed</option>
-            </select>
-
-            <input type="number" name="family_size" placeholder="Family Size" required>
-
-            <select name="facilities">
-                <option value="1">Basic Facilities Available</option>
-                <option value="0">No Basic Facilities</option>
-            </select>
-
-            <br><br>
-            <button type="submit">Predict</button>
-        </form>
-
-        <h3>{{ result }}</h3>
-    </div>
+    {% if prediction %}
+        <h2>Result: {{ prediction }}</h2>
+    {% endif %}
 </body>
 </html>
