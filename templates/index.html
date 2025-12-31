@@ -108,33 +108,42 @@ It aligns with the **UN Sustainable Development Goal-1 (No Poverty)** framework.
 </div>
 
 <script>
-function predict() {
-    fetch("/predict", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            country: country.value,
-            income: income.value,
-            education: education.value,
-            employment: employment.value
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        result.style.display = "block";
-        riskText.innerText = `Poverty Risk: ${data.risk}%`;
-        barFill.style.width = data.risk + "%";
-        comparison.innerText = data.comparison;
-        povertyLine.innerText = `Country Poverty Line Reference: ${data.poverty_line}`;
+const pointer = document.getElementById("pointer");
+const statusText = document.getElementById("status");
+const probabilityText = document.getElementById("probability");
 
-        suggestions.innerHTML = "";
-        data.suggestions.forEach(s => {
-            let li = document.createElement("li");
-            li.innerText = s;
-            suggestions.appendChild(li);
-        });
+const inputs = ["income", "education", "employment"].map(
+    id => document.getElementById(id)
+);
+
+async function predictRisk() {
+    const income = parseFloat(document.getElementById("income").value);
+    const education = parseFloat(document.getElementById("education").value);
+    const employment = parseInt(document.getElementById("employment").value);
+
+    if (isNaN(income) || isNaN(education) || isNaN(employment)) return;
+
+    const response = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            income: income,
+            education: education,
+            employment: employment
+        })
     });
+
+    const result = await response.json();
+
+    const risk = result.probability;
+
+    pointer.style.transform = `rotate(${risk * 1.8}deg)`;
+    probabilityText.textContent = `Risk Probability: ${risk}%`;
+    statusText.textContent =
+        result.poverty_risk === 1 ? "High Poverty Risk" : "Low Poverty Risk";
 }
+
+inputs.forEach(input => input.addEventListener("input", predictRisk));
 </script>
 
 </body>
