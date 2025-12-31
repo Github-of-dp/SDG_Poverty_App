@@ -1,25 +1,43 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from datetime import datetime
+from sklearn.preprocessing import StandardScaler
+import numpy as np
 
 app = Flask(__name__)
 
-# ---------- MODEL ----------
+# -----------------------------
+# Country-based poverty lines (monthly, approx)
+# -----------------------------
+POVERTY_LINES = {
+    "India": 8000,
+    "USA": 1100,
+    "UK": 900,
+    "UAE": 3000
+}
+
+# -----------------------------
+# Load dataset
+# -----------------------------
 df = pd.read_csv("poverty_data.csv")
+
 X = df[['income', 'education', 'employment']]
 y = df['poverty_risk']
 
-model = LogisticRegression()
-model.fit(X, y)
+# Scale features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
 
-# ---------- STORAGE (Feature E) ----------
-history = []
+# Train model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_scaled, y)
 
-# ---------- ROUTES ----------
+# -----------------------------
+# Routes
+# -----------------------------
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html", countries=POVERTY_LINES.keys())
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -28,40 +46,24 @@ def predict():
     income = float(data["income"])
     education = float(data["education"])
     employment = float(data["employment"])
+    country = data["country"]
 
-    prob = model.predict_proba([[income, education, employment]])[0][1]
-    risk = round(prob * 100, 2)
+    poverty_line = POVERTY_LINES[country]
 
-    status = "High Poverty Risk" if risk > 50 else "Low Poverty Risk"
+    # Normalize income by country poverty line
+    normalized_income = income / poverty_line
 
-    # Feature B – Recommendations
-    recommendations = []
-    if risk > 50:
-        recommendations = [
-            "Government welfare schemes",
-            "Skill development programs",
-            "Education scholarships",
-            "Employment assistance"
-        ]
+    features = np.array([[normalized_income, education, employment]])
+    features_scaled = scaler.transform(features)
 
-    # Feature D – Awareness Comparison
-    comparison = {
-        "global_average_risk": 35,
-        "your_risk": risk
-    }
+    probability = model.predict_proba(features_scaled)[0][1] * 100
 
-    # Feature E – Progress tracking
-    history.append({
-        "time": datetime.now().strftime("%H:%M:%S"),
-        "risk": risk
-    })
+    status = "High Poverty Risk" if probability > 50 else "Low Poverty Risk"
 
     return jsonify({
-        "risk": risk,
+        "risk": round(probability, 2),
         "status": status,
-        "recommendations": recommendations,
-        "comparison": comparison,
-        "history": history[-5:]  # last 5 checks
+        "poverty_line": poverty_line
     })
 
 if __name__ == "__main__":
