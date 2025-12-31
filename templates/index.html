@@ -2,50 +2,59 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SDG-1 | Poverty Risk AI</title>
+<title>Poverty Risk Predictor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
-    font-family: system-ui;
-    background: linear-gradient(135deg,#020617,#1e293b);
-    color: white;
-    display:flex;
-    justify-content:center;
-    padding:40px;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to bottom, #0f172a, #1e293b);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
 }
 .card {
-    background:#0f172a;
-    padding:30px;
-    border-radius:20px;
-    width:100%;
-    max-width:460px;
-    box-shadow:0 0 40px rgba(0,0,0,.6);
+    background: #1e293b;
+    max-width: 500px;
+    width: 100%;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
 }
-h1 { text-align:center; color:#38bdf8; }
-input, button {
-    width:100%;
-    padding:14px;
-    margin-top:12px;
-    border-radius:10px;
-    border:none;
-    font-size:16px;
+h1 { text-align: center; color: #38bdf8; }
+p { color: #94a3b8; font-size: 14px; }
+
+input, select, button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
 }
-input { background:#1e293b; color:white; }
+input, select { background: #334155; color: white; }
 button {
-    background:#22c55e;
-    font-weight:bold;
-    cursor:pointer;
+    background: #22c55e;
+    font-weight: bold;
+    cursor: pointer;
 }
-button:hover { background:#16a34a; }
-.section {
-    margin-top:25px;
-    padding:15px;
-    background:#1e293b;
-    border-radius:12px;
+button:hover { background: #16a34a; }
+
+.result {
+    margin-top: 25px;
+    background: #334155;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
 }
-.hidden { display:none; }
-ul { padding-left:18px; }
+
+.footer {
+    margin-top: 25px;
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.6;
+}
 </style>
 </head>
 
@@ -53,85 +62,62 @@ ul { padding-left:18px; }
 <div class="card">
 
 <h1>SDG-1: No Poverty</h1>
-<p style="text-align:center;color:#94a3b8">
-AI-Based Poverty Risk Prediction
+<p><b>AI-Based Poverty Risk Estimation</b></p>
+
+<p>
+⚠️ <b>Educational Use Only</b><br>
+This tool provides an estimate based on simplified economic indicators.
+Income is adjusted using country-specific poverty thresholds to reduce regional bias.
 </p>
+
+<select id="country">
+{% for c in countries %}
+<option value="{{c}}">{{c}}</option>
+{% endfor %}
+</select>
 
 <input id="income" type="number" placeholder="Monthly Income">
-<input id="education" type="number" placeholder="Education Level">
-<input id="employment" type="number" placeholder="Employment (0/1)">
+<input id="education" type="number" placeholder="Years of Education">
+<input id="employment" type="number" placeholder="Employment Status (0 = No, 1 = Yes)">
 
-<button onclick="predict()">Analyze Poverty Risk</button>
+<button onclick="predict()">Check Poverty Risk</button>
 
-<!-- CENTRAL FEATURE -->
-<div id="result" class="section hidden">
+<div class="result" id="result" style="display:none;">
 <h2 id="status"></h2>
 <p id="risk"></p>
+<p id="pline"></p>
 </div>
 
-<!-- FEATURE B -->
-<div id="help" class="section hidden">
-<h3>Suggested Support Options</h3>
-<ul id="recommendations"></ul>
-</div>
+<div class="footer">
+<b>How this works:</b><br>
+• Income is normalized using official poverty thresholds<br>
+• A logistic regression model estimates poverty risk probability<br>
+• Results vary by country due to cost-of-living differences<br><br>
 
-<!-- FEATURE D -->
-<div id="compare" class="section hidden">
-<h3>Awareness Comparison</h3>
-<p id="comparison"></p>
+This estimate does <b>not</b> determine eligibility for benefits and should not be used for policy decisions.
 </div>
-
-<!-- FEATURE E -->
-<div id="progress" class="section hidden">
-<h3>Your Recent Checks</h3>
-<ul id="history"></ul>
-</div>
-
-<p style="font-size:12px;color:#94a3b8;margin-top:15px">
-Educational estimate · Based on sample data · SDG-1 awareness tool
-</p>
 
 </div>
 
 <script>
-async function predict(){
-    const income = incomeInput = document.getElementById("income").value;
-    const education = document.getElementById("education").value;
-    const employment = document.getElementById("employment").value;
-
-    const res = await fetch("/predict",{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ income, education, employment })
-    });
-
-    const data = await res.json();
-
-    document.getElementById("result").classList.remove("hidden");
-    document.getElementById("status").innerText = data.status;
-    document.getElementById("risk").innerText = `Risk Probability: ${data.risk}%`;
-
-    // Feature B
-    const recList = document.getElementById("recommendations");
-    recList.innerHTML = "";
-    if(data.recommendations.length > 0){
-        document.getElementById("help").classList.remove("hidden");
-        data.recommendations.forEach(r=>{
-            recList.innerHTML += `<li>${r}</li>`;
-        });
-    }
-
-    // Feature D
-    document.getElementById("compare").classList.remove("hidden");
-    document.getElementById("comparison").innerText =
-        `Your Risk: ${data.comparison.your_risk}% | Global Avg: ${data.comparison.global_average_risk}%`;
-
-    // Feature E
-    document.getElementById("progress").classList.remove("hidden");
-    const hist = document.getElementById("history");
-    hist.innerHTML = "";
-    data.history.forEach(h=>{
-        hist.innerHTML += `<li>${h.time} → ${h.risk}%</li>`;
+function predict() {
+    fetch("/predict", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            country: document.getElementById("country").value,
+            income: document.getElementById("income").value,
+            education: document.getElementById("education").value,
+            employment: document.getElementById("employment").value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("result").style.display = "block";
+        document.getElementById("status").innerText = data.status;
+        document.getElementById("risk").innerText = "Risk Probability: " + data.risk + "%";
+        document.getElementById("pline").innerText =
+            "Country Poverty Line Used: " + data.poverty_line;
     });
 }
 </script>
