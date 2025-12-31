@@ -2,101 +2,109 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Poverty Risk Predictor</title>
+<title>SDG-1 Poverty Risk Assessment</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(to bottom, #0f172a, #1e293b);
+    font-family: Arial, sans-serif;
+    background: #0f172a;
     color: #fff;
     display: flex;
     justify-content: center;
-    padding: 40px;
+    padding: 30px;
+}
+.container {
+    max-width: 500px;
+    width: 100%;
 }
 .card {
     background: #1e293b;
-    max-width: 500px;
-    width: 100%;
-    padding: 30px;
-    border-radius: 18px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    padding: 25px;
+    border-radius: 16px;
 }
-h1 { text-align: center; color: #38bdf8; }
-p { color: #94a3b8; font-size: 14px; }
-
+h1 { color: #38bdf8; text-align: center; }
+.warning, .disclaimer {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 15px;
+}
 input, select, button {
     width: 100%;
-    padding: 14px;
-    margin-top: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
     border-radius: 8px;
     border: none;
-    font-size: 15px;
 }
-input, select { background: #334155; color: white; }
+input, select { background: #334155; color: #fff; }
 button {
     background: #22c55e;
     font-weight: bold;
     cursor: pointer;
 }
-button:hover { background: #16a34a; }
-
 .result {
-    margin-top: 25px;
+    margin-top: 20px;
     background: #334155;
-    padding: 20px;
+    padding: 15px;
     border-radius: 12px;
-    text-align: center;
 }
-
-.footer {
-    margin-top: 25px;
-    font-size: 12px;
-    color: #94a3b8;
-    line-height: 1.6;
+.bar {
+    height: 14px;
+    background: #0f172a;
+    border-radius: 7px;
+    overflow: hidden;
+    margin: 10px 0;
 }
+.fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, #22c55e, #facc15, #ef4444);
+    transition: width 0.8s;
+}
+ul { padding-left: 18px; }
 </style>
 </head>
 
 <body>
+<div class="container">
 <div class="card">
 
-<h1>SDG-1: No Poverty</h1>
-<p><b>AI-Based Poverty Risk Estimation</b></p>
+<h1>SDG-1: Poverty Risk Assessment</h1>
 
-<p>
-⚠️ <b>Educational Use Only</b><br>
-This tool provides an estimate based on simplified economic indicators.
-Income is adjusted using country-specific poverty thresholds to reduce regional bias.
-</p>
+<div class="warning">
+⚠ This tool is for **educational and awareness purposes only**.  
+Income standards vary by country and region.
+</div>
 
 <select id="country">
-{% for c in countries %}
-<option value="{{c}}">{{c}}</option>
-{% endfor %}
+    <option>India</option>
+    <option>USA</option>
+    <option>UK</option>
+    <option>UAE</option>
 </select>
 
-<input id="income" type="number" placeholder="Monthly Income">
-<input id="education" type="number" placeholder="Years of Education">
-<input id="employment" type="number" placeholder="Employment Status (0 = No, 1 = Yes)">
+<input type="number" id="income" placeholder="Monthly Income">
+<input type="number" id="education" placeholder="Years of Education">
+<input type="number" id="employment" placeholder="Employment (0 = No, 1 = Yes)">
 
-<button onclick="predict()">Check Poverty Risk</button>
+<button onclick="predict()">Assess Risk</button>
 
 <div class="result" id="result" style="display:none;">
-<h2 id="status"></h2>
-<p id="risk"></p>
-<p id="pline"></p>
+    <h3 id="riskText"></h3>
+    <div class="bar"><div class="fill" id="barFill"></div></div>
+    <p id="comparison"></p>
+    <p id="povertyLine"></p>
+
+    <h4>Suggested Interventions</h4>
+    <ul id="suggestions"></ul>
 </div>
 
-<div class="footer">
-<b>How this works:</b><br>
-• Income is normalized using official poverty thresholds<br>
-• A logistic regression model estimates poverty risk probability<br>
-• Results vary by country due to cost-of-living differences<br><br>
-
-This estimate does <b>not</b> determine eligibility for benefits and should not be used for policy decisions.
+<div class="disclaimer">
+This assessment does not determine legal, financial, or welfare eligibility.
+It aligns with the **UN Sustainable Development Goal-1 (No Poverty)** framework.
 </div>
 
+</div>
 </div>
 
 <script>
@@ -105,19 +113,26 @@ function predict() {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-            country: document.getElementById("country").value,
-            income: document.getElementById("income").value,
-            education: document.getElementById("education").value,
-            employment: document.getElementById("employment").value
+            country: country.value,
+            income: income.value,
+            education: education.value,
+            employment: employment.value
         })
     })
     .then(res => res.json())
     .then(data => {
-        document.getElementById("result").style.display = "block";
-        document.getElementById("status").innerText = data.status;
-        document.getElementById("risk").innerText = "Risk Probability: " + data.risk + "%";
-        document.getElementById("pline").innerText =
-            "Country Poverty Line Used: " + data.poverty_line;
+        result.style.display = "block";
+        riskText.innerText = `Poverty Risk: ${data.risk}%`;
+        barFill.style.width = data.risk + "%";
+        comparison.innerText = data.comparison;
+        povertyLine.innerText = `Country Poverty Line Reference: ${data.poverty_line}`;
+
+        suggestions.innerHTML = "";
+        data.suggestions.forEach(s => {
+            let li = document.createElement("li");
+            li.innerText = s;
+            suggestions.appendChild(li);
+        });
     });
 }
 </script>
