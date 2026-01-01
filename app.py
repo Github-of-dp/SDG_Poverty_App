@@ -13,27 +13,30 @@ y = data["poverty_risk"]
 model = LogisticRegression()
 model.fit(X, y)
 
-# Home route (THIS FIXES 404)
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# Prediction API
 @app.route("/predict", methods=["POST"])
 def predict():
-    data = request.json
+    try:
+        user_data = request.get_json()
 
-    income = data["income"]
-    education = data["education"]
-    employment = data["employment"]
+        income = float(user_data["income"])
+        education = float(user_data["education"])
+        employment = int(user_data["employment"])
 
-    prediction = model.predict([[income, education, employment]])[0]
-    probability = model.predict_proba([[income, education, employment]])[0][1]
+        prediction = model.predict([[income, education, employment]])[0]
+        probability = model.predict_proba([[income, education, employment]])[0][1]
 
-    return jsonify({
-        "poverty_risk": int(prediction),
-        "probability": round(probability * 100, 2)
-    })
+        return jsonify({
+            "poverty_risk": int(prediction),
+            "probability": round(probability * 100, 1)
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000)
