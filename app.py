@@ -51,9 +51,12 @@ def predict():
     employment = int(request.form["employment"])
     country = request.form["country"]
 
+    # ---------------- FIX: Proper country normalization ----------------
+    # Multiply by country index instead of dividing, so higher income gives lower risk
     index = COUNTRY_INCOME_INDEX.get(country, 1.0)
-    normalized_income = income / index
+    normalized_income = income * index  # <-- changed from income / index
 
+    # Scale features according to training
     features = scaler.transform([[normalized_income, education, employment]])
     probability = model.predict_proba(features)[0][1]
     risk_percent = round(probability * 100, 2)
@@ -88,3 +91,4 @@ def predict():
 
 if __name__ == "__main__":
     app.run()
+
