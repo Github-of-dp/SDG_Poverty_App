@@ -4,73 +4,73 @@ import numpy as np
 
 app = Flask(__name__)
 
-# Sample dataset for demo (replace with real dataset if available)
-poverty_data = pd.DataFrame({
-    'country': ['India', 'USA', 'India', 'USA', 'India', 'USA'],
-    'income': [15000, 3000, 12000, 4500, 20000, 5000],
-    'education': [5, 10, 6, 12, 8, 14],
-    'employment': [0, 1, 0, 1, 0, 1],
-    'household_size': [4, 1, 3, 1, 5, 2],
-    'poverty_risk': [1, 0, 1, 0, 1, 0]
-})
+# -----------------------------
+# Sample poverty dataset (simplified for demo)
+# Columns: income, education, employment, country, household_size, poverty_risk
+poverty_data = pd.DataFrame([
+    {'income':15000, 'education':5, 'employment':0, 'household_size':1, 'country':'India', 'poverty_risk':1},
+    {'income':30000, 'education':10, 'employment':1, 'household_size':2, 'country':'India', 'poverty_risk':0},
+    {'income':12000, 'education':6, 'employment':0, 'household_size':1, 'country':'India', 'poverty_risk':1},
+    {'income':45000, 'education':12, 'employment':1, 'household_size':3, 'country':'USA', 'poverty_risk':0},
+    {'income':20000, 'education':8, 'employment':0, 'household_size':2, 'country':'India', 'poverty_risk':1},
+    {'income':50000, 'education':14, 'employment':1, 'household_size':4, 'country':'USA', 'poverty_risk':0},
+])
 
-# Country-specific poverty line (monthly USD)
-poverty_lines = {
-    'India': 150,  # USD/month
-    'USA': 1200
+# Country poverty line for normalization (monthly income)
+COUNTRY_POVERTY_LINE = {
+    'India': 10000,
+    'USA': 4000,
+    'UK': 3500,
+    'Germany': 3300,
+    'Brazil': 1200,
+    'Nigeria': 500,
 }
 
-# Country-specific help suggestions
-help_suggestions = {
-    'India': "Check government welfare schemes and local NGOs supporting low-income households.",
-    'USA': "Check SNAP, Medicaid, and other local support programs."
+# Feature B: country-specific help suggestions
+HELP_SUGGESTIONS = {
+    'India': ['Check govt. welfare programs', 'Skill development courses available'],
+    'USA': ['Check SNAP benefits', 'Explore job retraining programs'],
+    'UK': ['Visit Universal Credit services', 'Seek local housing assistance'],
+    'Germany': ['Check Sozialhilfe benefits', 'Vocational training programs'],
+    'Brazil': ['Access Bolsa Família support', 'Local skill workshops'],
+    'Nigeria': ['Check N-Power programs', 'Community support initiatives'],
 }
 
-# Global average income for comparison (USD/month)
-global_avg_income = {
-    'India': 500,
-    'USA': 4000
-}
+# -----------------------------
+def calculate_risk(income, education, employment, household_size, country):
+    # Normalize income using country poverty line
+    poverty_line = COUNTRY_POVERTY_LINE.get(country, 1000)
+    normalized_income = income / (household_size * poverty_line)
+    
+    # Risk calculation formula
+    risk = 100 - (normalized_income * 50) - (education * 5) - (employment * 10)
+    risk = np.clip(risk, 0, 100)
+    
+    return round(risk, 1), poverty_line
 
 @app.route('/')
 def index():
-    countries = list(poverty_lines.keys())
+    countries = list(COUNTRY_POVERTY_LINE.keys())
     return render_template('index.html', countries=countries)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.get_json()
-    country = data['country']
-    income = float(data['income'])
-    household = int(data['household_size'])
-    education = int(data['education'])
-    employment = int(data['employment'])
+    data = request.json
+    income = float(data.get('income', 0))
+    household_size = float(data.get('household_size', 1))
+    education = float(data.get('education', 0))
+    employment = int(data.get('employment', 0))
+    country = data.get('country', 'India')
 
-    # Normalize income with country poverty line
-    poverty_line = poverty_lines.get(country, 500)
-    global_income = global_avg_income.get(country, 1000)
-
-    # Risk formula
-    base_risk = 100 - ((income / (household * poverty_line)) * 50)  # weight 50%
-    edu_risk = max(0, 30 - (education * 1.5))  # higher education lowers risk
-    emp_risk = 0 if employment else 15
-
-    risk = base_risk + edu_risk + emp_risk
-    risk = np.clip(risk, 0, 100)
-
-    # Global comparison
-    if income >= global_income:
-        global_msg = "Your income is above the global average for your country."
-    else:
-        global_msg = "Your income is below the global average for your country."
-
-    help_text = help_suggestions.get(country, "")
-
+    risk, poverty_line = calculate_risk(income, education, employment, household_size, country)
+    status = "High Poverty Risk" if risk > 50 else "Low Poverty Risk"
+    help_tips = HELP_SUGGESTIONS.get(country, [])
+    
     return jsonify({
-        'risk': round(risk, 1),
+        'risk': risk,
+        'status': status,
         'poverty_line': poverty_line,
-        'global_msg': global_msg,
-        'help_text': help_text
+        'help_tips': help_tips
     })
 
 if __name__ == '__main__':
