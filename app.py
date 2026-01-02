@@ -1,77 +1,90 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
-import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
 
 app = Flask(__name__)
 
-# -----------------------------
-# Sample poverty dataset (simplified for demo)
-# Columns: income, education, employment, country, household_size, poverty_risk
-poverty_data = pd.DataFrame([
-    {'income':15000, 'education':5, 'employment':0, 'household_size':1, 'country':'India', 'poverty_risk':1},
-    {'income':30000, 'education':10, 'employment':1, 'household_size':2, 'country':'India', 'poverty_risk':0},
-    {'income':12000, 'education':6, 'employment':0, 'household_size':1, 'country':'India', 'poverty_risk':1},
-    {'income':45000, 'education':12, 'employment':1, 'household_size':3, 'country':'USA', 'poverty_risk':0},
-    {'income':20000, 'education':8, 'employment':0, 'household_size':2, 'country':'India', 'poverty_risk':1},
-    {'income':50000, 'education':14, 'employment':1, 'household_size':4, 'country':'USA', 'poverty_risk':0},
-])
+# ---------------- DATA + MODEL ----------------
+data = pd.read_csv("poverty_data.csv")
 
-# Country poverty line for normalization (monthly income)
-COUNTRY_POVERTY_LINE = {
-    'India': 10000,
-    'USA': 4000,
-    'UK': 3500,
-    'Germany': 3300,
-    'Brazil': 1200,
-    'Nigeria': 500,
+X = data[["income", "education", "employment"]]
+y = data["poverty_risk"]
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+model = LogisticRegression()
+model.fit(X_scaled, y)
+
+# ---------------- COUNTRY NORMALIZATION ----------------
+COUNTRY_INCOME_INDEX = {
+    "India": 0.4,
+    "USA": 1.0,
+    "UK": 0.9,
+    "UAE": 1.1,
+    "Nigeria": 0.3,
+    "Brazil": 0.6
 }
 
-# Feature B: country-specific help suggestions
+GLOBAL_AVG_INDEX = 1.0
+
+# ---------------- HELP SUGGESTIONS ----------------
 HELP_SUGGESTIONS = {
-    'India': ['Check govt. welfare programs', 'Skill development courses available'],
-    'USA': ['Check SNAP benefits', 'Explore job retraining programs'],
-    'UK': ['Visit Universal Credit services', 'Seek local housing assistance'],
-    'Germany': ['Check Sozialhilfe benefits', 'Vocational training programs'],
-    'Brazil': ['Access Bolsa Família support', 'Local skill workshops'],
-    'Nigeria': ['Check N-Power programs', 'Community support initiatives'],
+    "India": "Explore government welfare schemes, skill development programs, and local NGOs.",
+    "USA": "Look into SNAP benefits, job reskilling programs, and community support services.",
+    "UK": "Check Universal Credit support and employment training programs.",
+    "UAE": "Explore workforce upskilling initiatives and social support entities.",
+    "Nigeria": "Seek NGO assistance, microfinance programs, and vocational training.",
+    "Brazil": "Look into Bolsa Família programs and employment support services."
 }
 
-# -----------------------------
-def calculate_risk(income, education, employment, household_size, country):
-    # Normalize income using country poverty line
-    poverty_line = COUNTRY_POVERTY_LINE.get(country, 1000)
-    normalized_income = income / (household_size * poverty_line)
-    
-    # Risk calculation formula
-    risk = 100 - (normalized_income * 50) - (education * 5) - (employment * 10)
-    risk = np.clip(risk, 0, 100)
-    
-    return round(risk, 1), poverty_line
+# ---------------- ROUTES ----------------
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-@app.route('/')
-def index():
-    countries = list(COUNTRY_POVERTY_LINE.keys())
-    return render_template('index.html', countries=countries)
-
-@app.route('/predict', methods=['POST'])
+@app.route("/predict", methods=["POST"])
 def predict():
-    data = request.json
-    income = float(data.get('income', 0))
-    household_size = float(data.get('household_size', 1))
-    education = float(data.get('education', 0))
-    employment = int(data.get('employment', 0))
-    country = data.get('country', 'India')
+    income = float(request.form["income"])
+    education = float(request.form["education"])
+    employment = int(request.form["employment"])
+    country = request.form["country"]
 
-    risk, poverty_line = calculate_risk(income, education, employment, household_size, country)
-    status = "High Poverty Risk" if risk > 50 else "Low Poverty Risk"
-    help_tips = HELP_SUGGESTIONS.get(country, [])
-    
+    index = COUNTRY_INCOME_INDEX.get(country, 1.0)
+    normalized_income = income / index
+
+    features = scaler.transform([[normalized_income, education, employment]])
+    probability = model.predict_proba(features)[0][1]
+    risk_percent = round(probability * 100, 2)
+
+    # Risk label
+    if risk_percent < 35:
+        level = "Low"
+        color = "green"
+    elif risk_percent < 65:
+        level = "Medium"
+        color = "orange"
+    else:
+        level = "High"
+        color = "red"
+
+    # Global comparison
+    comparison = (
+        "Below global average" if index < GLOBAL_AVG_INDEX else
+        "Near global average" if index == GLOBAL_AVG_INDEX else
+        "Above global average"
+    )
+
+    help_text = HELP_SUGGESTIONS.get(country, "Seek local community and educational support.")
+
     return jsonify({
-        'risk': risk,
-        'status': status,
-        'poverty_line': poverty_line,
-        'help_tips': help_tips
+        "risk": risk_percent,
+        "level": level,
+        "color": color,
+        "comparison": comparison,
+        "help": help_text
     })
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run()
