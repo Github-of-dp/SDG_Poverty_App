@@ -7,36 +7,79 @@
 
 <style>
 body {
-    font-family: 'Segoe UI', Tahoma;
-    background: linear-gradient(to bottom, #0f172a, #1e293b);
-    color: #fff;
-    display: flex;
-    justify-content: center;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to bottom, #020617, #0f172a);
+    color: white;
+    margin: 0;
 }
-.container { margin-top: 40px; max-width: 450px; width: 100%; }
+.container {
+    max-width: 500px;
+    margin: auto;
+    padding: 30px;
+}
 .card {
     background: #1e293b;
+    padding: 25px;
     border-radius: 16px;
-    padding: 30px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
 }
+h1 { color: #38bdf8; text-align: center; }
+.subtitle { text-align: center; color: #94a3b8; }
+
+.warning {
+    background: #020617;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #e5e7eb;
+    margin-bottom: 20px;
+}
+
 input, select {
     width: 100%;
-    padding: 14px;
-    margin-bottom: 12px;
+    padding: 12px;
+    margin: 10px 0;
     border-radius: 8px;
     border: none;
     background: #334155;
     color: white;
 }
+
 .result {
+    margin-top: 25px;
+    padding: 20px;
     background: #334155;
-    padding: 15px;
     border-radius: 12px;
+    text-align: center;
+}
+
+.gauge {
+    margin: 20px auto;
+    width: 200px;
+    height: 100px;
+    background: conic-gradient(#22c55e 0deg, #facc15 90deg, #ef4444 180deg);
+    border-radius: 200px 200px 0 0;
+    position: relative;
+}
+
+.pointer {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    height: 90px;
+    background: white;
+    transform-origin: bottom;
+    transform: rotate(0deg);
+    transition: transform 0.8s ease;
+}
+
+.footer {
+    font-size: 12px;
+    color: #94a3b8;
     margin-top: 20px;
     text-align: center;
 }
-small { color: #94a3b8; }
 </style>
 </head>
 
@@ -44,68 +87,67 @@ small { color: #94a3b8; }
 <div class="container">
 <div class="card">
 
-<h2 style="text-align:center;color:#38bdf8">SDG-1: No Poverty</h2>
+<h1>SDG-1: No Poverty</h1>
+<p class="subtitle">AI-Based Poverty Risk Estimator</p>
 
-<small>
-This AI-based tool estimates poverty risk using income, education, employment,
-and regional normalization.  
-Educational purpose only — not an official assessment.
-</small>
-
-<br><br>
+<div class="warning">
+⚠ This tool is for <b>educational purposes only</b>.  
+Results are estimates based on regional income normalization and do not determine official eligibility.
+</div>
 
 <select id="country">
-    <option>India</option>
-    <option>USA</option>
-    <option>UK</option>
-    <option>UAE</option>
-    <option>Nigeria</option>
+{% for c in countries %}
+<option value="{{c}}">{{c}}</option>
+{% endfor %}
 </select>
 
 <input id="income" type="number" placeholder="Monthly Income">
-<input id="education" type="number" placeholder="Education (Years)">
+<input id="education" type="number" placeholder="Years of Education">
 <input id="employment" type="number" placeholder="Employment (0 = No, 1 = Yes)">
 
 <div class="result">
-    <h3 id="status">Waiting for input</h3>
-    <p id="probability">Risk: 0%</p>
-    <small id="note"></small>
+<h2 id="status">Waiting for input</h2>
+<p id="prob">Risk Probability: 0%</p>
+
+<div class="gauge">
+<div class="pointer" id="pointer"></div>
+</div>
+</div>
+
+<div class="footer">
+This model uses income, education, employment, and country-specific baselines  
+(Source reference: World Bank poverty thresholds)
 </div>
 
 </div>
 </div>
 
 <script>
-async function predict() {
-    const payload = {
-        income: document.getElementById("income").value,
-        education: document.getElementById("education").value,
-        employment: document.getElementById("employment").value,
-        country: document.getElementById("country").value
-    };
+const inputs = ["income", "education", "employment", "country"];
+inputs.forEach(id => document.getElementById(id).addEventListener("input", predict));
 
-    if (!payload.income || !payload.education || !payload.employment) return;
+function predict() {
+    const income = document.getElementById("income").value;
+    if (!income) return;
 
-    const res = await fetch("/predict", {
+    fetch("/predict", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+            income: income,
+            education: document.getElementById("education").value,
+            employment: document.getElementById("employment").value,
+            country: document.getElementById("country").value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("status").innerText = data.status;
+        document.getElementById("prob").innerText = `Risk Probability: ${data.risk_probability}%`;
+        document.getElementById("pointer").style.transform =
+            `rotate(${data.risk_probability * 1.8}deg)`;
     });
-
-    const data = await res.json();
-
-    document.getElementById("probability").innerText =
-        `Risk Probability: ${data.probability}%`;
-
-    document.getElementById("status").innerText =
-        data.risk ? "High Poverty Risk" : "Low Poverty Risk";
-
-    document.getElementById("note").innerText =
-        `Income normalized for ${payload.country}`;
 }
-
-document.querySelectorAll("input, select")
-.forEach(el => el.addEventListener("input", predict));
 </script>
 
 </body>
