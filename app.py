@@ -17,26 +17,18 @@ X_scaled = scaler.fit_transform(X)
 model = LogisticRegression()
 model.fit(X_scaled, y)
 
-# ---------------- COUNTRY INCOME & CURRENCY ----------------
+# ---------------- COUNTRY NORMALIZATION ----------------
+# Average monthly income in local currency used as reference
 COUNTRY_INCOME_INDEX = {
-    "India": 15000,   # average monthly poverty line in INR
-    "USA": 1200,      # USD
-    "UK": 900,        # GBP
-    "UAE": 4500,      # AED
-    "Nigeria": 150000, # NGN
-    "Brazil": 500     # BRL
+    "India": 15000,     # INR
+    "USA": 3000,        # USD
+    "UK": 2500,         # GBP
+    "UAE": 5000,        # AED
+    "Nigeria": 60000,   # NGN
+    "Brazil": 2000      # BRL
 }
 
-CURRENCY_CONVERSION = {
-    "India": 1,      # INR → INR
-    "USA": 82,       # USD → INR
-    "UK": 100,       # GBP → INR
-    "UAE": 22,       # AED → INR
-    "Nigeria": 0.18, # NGN → INR
-    "Brazil": 16     # BRL → INR
-}
-
-GLOBAL_AVG_INDEX = 1.0  # For comparison bar
+GLOBAL_AVG_INDEX = 1.0
 
 # ---------------- HELP SUGGESTIONS ----------------
 HELP_SUGGESTIONS = {
@@ -55,34 +47,38 @@ def home():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    # Get user input
     income = float(request.form["income"])
     education = float(request.form["education"])
     employment = int(request.form["employment"])
     country = request.form["country"]
 
-    # ---------------- Convert income to base currency (INR) ----------------
-    conversion_rate = CURRENCY_CONVERSION.get(country, 1)
-    income_in_base = income * conversion_rate
+    # ---------------- Country normalization ----------------
+    country_ref = COUNTRY_INCOME_INDEX.get(country, 15000)
+    normalized_income = income / country_ref  # income as fraction of avg income
 
-    # ---------------- Country-normalized income ----------------
-    country_poverty_line = COUNTRY_INCOME_INDEX.get(country, 15000)
-    normalized_income = income_in_base / country_poverty_line  # <1 → below poverty line, >1 → above
+    # ---------------- Rule-based base risk ----------------
+    if normalized_income <= 0:
+        base_risk = 100
+    elif normalized_income < 0.2:
+        base_risk = 90
+    elif normalized_income < 0.5:
+        base_risk = 75
+    elif normalized_income < 0.8:
+        base_risk = 50
+    elif normalized_income < 1.0:
+        base_risk = 35
+    else:
+        base_risk = 20
 
-    # ---------------- Feature vector for model ----------------
-    features = scaler.transform([[normalized_income * 15000, education, employment]])  # rescale to training scale
-    probability = model.predict_proba(features)[0][1]
-    risk_percent = round(probability * 100, 2)
+    # ---------------- Model adjustment ----------------
+    # Use model to adjust risk slightly based on education & employment
+    # income set to 1 so that model adjustment is small
+    features = scaler.transform([[1, education, employment]])
+    model_adj = model.predict_proba(features)[0][1] * 10  # small contribution
 
-    # ---------------- Rule-based boost for very low incomes ----------------
-    if normalized_income < 0.2:   # income <20% of poverty line
-        risk_percent = max(risk_percent, 90)
-    elif normalized_income < 0.5: # income <50% of poverty line
-        risk_percent = max(risk_percent, 70)
-    elif normalized_income < 0.8: # income <80% of poverty line
-        risk_percent = max(risk_percent, 50)
+    risk_percent = min(100, round(base_risk + model_adj, 2))
 
-    # Risk label & color
+    # ---------------- Risk label & color ----------------
     if risk_percent < 35:
         level = "Low"
         color = "green"
@@ -109,6 +105,7 @@ def predict():
         "comparison": comparison,
         "help": help_text
     })
+
 
 if __name__ == "__main__":
     app.run()
