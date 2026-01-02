@@ -1,90 +1,77 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
+import numpy as np
 
 app = Flask(__name__)
 
-# ---------------- DATA + MODEL ----------------
-data = pd.read_csv("poverty_data.csv")
+# Sample dataset for demo (replace with real dataset if available)
+poverty_data = pd.DataFrame({
+    'country': ['India', 'USA', 'India', 'USA', 'India', 'USA'],
+    'income': [15000, 3000, 12000, 4500, 20000, 5000],
+    'education': [5, 10, 6, 12, 8, 14],
+    'employment': [0, 1, 0, 1, 0, 1],
+    'household_size': [4, 1, 3, 1, 5, 2],
+    'poverty_risk': [1, 0, 1, 0, 1, 0]
+})
 
-X = data[["income", "education", "employment"]]
-y = data["poverty_risk"]
-
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
-model = LogisticRegression()
-model.fit(X_scaled, y)
-
-# ---------------- COUNTRY NORMALIZATION ----------------
-COUNTRY_INCOME_INDEX = {
-    "India": 0.4,
-    "USA": 1.0,
-    "UK": 0.9,
-    "UAE": 1.1,
-    "Nigeria": 0.3,
-    "Brazil": 0.6
+# Country-specific poverty line (monthly USD)
+poverty_lines = {
+    'India': 150,  # USD/month
+    'USA': 1200
 }
 
-GLOBAL_AVG_INDEX = 1.0
-
-# ---------------- HELP SUGGESTIONS ----------------
-HELP_SUGGESTIONS = {
-    "India": "Explore government welfare schemes, skill development programs, and local NGOs.",
-    "USA": "Look into SNAP benefits, job reskilling programs, and community support services.",
-    "UK": "Check Universal Credit support and employment training programs.",
-    "UAE": "Explore workforce upskilling initiatives and social support entities.",
-    "Nigeria": "Seek NGO assistance, microfinance programs, and vocational training.",
-    "Brazil": "Look into Bolsa Família programs and employment support services."
+# Country-specific help suggestions
+help_suggestions = {
+    'India': "Check government welfare schemes and local NGOs supporting low-income households.",
+    'USA': "Check SNAP, Medicaid, and other local support programs."
 }
 
-# ---------------- ROUTES ----------------
-@app.route("/")
-def home():
-    return render_template("index.html")
+# Global average income for comparison (USD/month)
+global_avg_income = {
+    'India': 500,
+    'USA': 4000
+}
 
-@app.route("/predict", methods=["POST"])
+@app.route('/')
+def index():
+    countries = list(poverty_lines.keys())
+    return render_template('index.html', countries=countries)
+
+@app.route('/predict', methods=['POST'])
 def predict():
-    income = float(request.form["income"])
-    education = float(request.form["education"])
-    employment = int(request.form["employment"])
-    country = request.form["country"]
+    data = request.get_json()
+    country = data['country']
+    income = float(data['income'])
+    household = int(data['household_size'])
+    education = int(data['education'])
+    employment = int(data['employment'])
 
-    index = COUNTRY_INCOME_INDEX.get(country, 1.0)
-    normalized_income = income / index
+    # Normalize income with country poverty line
+    poverty_line = poverty_lines.get(country, 500)
+    global_income = global_avg_income.get(country, 1000)
 
-    features = scaler.transform([[normalized_income, education, employment]])
-    probability = model.predict_proba(features)[0][1]
-    risk_percent = round(probability * 100, 2)
+    # Risk formula
+    base_risk = 100 - ((income / (household * poverty_line)) * 50)  # weight 50%
+    edu_risk = max(0, 30 - (education * 1.5))  # higher education lowers risk
+    emp_risk = 0 if employment else 15
 
-    # Risk label
-    if risk_percent < 35:
-        level = "Low"
-        color = "green"
-    elif risk_percent < 65:
-        level = "Medium"
-        color = "orange"
-    else:
-        level = "High"
-        color = "red"
+    risk = base_risk + edu_risk + emp_risk
+    risk = np.clip(risk, 0, 100)
 
     # Global comparison
-    comparison = (
-        "Below global average" if index < GLOBAL_AVG_INDEX else
-        "Near global average" if index == GLOBAL_AVG_INDEX else
-        "Above global average"
-    )
+    if income >= global_income:
+        global_msg = "Your income is above the global average for your country."
+    else:
+        global_msg = "Your income is below the global average for your country."
 
-    help_text = HELP_SUGGESTIONS.get(country, "Seek local community and educational support.")
+    help_text = help_suggestions.get(country, "")
 
     return jsonify({
-        "risk": risk_percent,
-        "level": level,
-        "color": color,
-        "comparison": comparison,
-        "help": help_text
+        'risk': round(risk, 1),
+        'poverty_line': poverty_line,
+        'global_msg': global_msg,
+        'help_text': help_text
     })
 
-if __name__ == "__main__":
-    app.run()
+if __name__ == '__main__':
+    app.run(debug=True)
