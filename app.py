@@ -3,15 +3,6 @@ from flask import Flask, render_template, request, jsonify
 app = Flask(__name__)
 
 # ---------------- COUNTRY DATA ----------------
-COUNTRY_INCOME_INDEX = {
-    "India": 1.0,      # local currency: INR
-    "USA": 1.0,        # USD
-    "UK": 1.0,         # GBP
-    "UAE": 1.0,        # AED
-    "Nigeria": 1.0,    # NGN
-    "Brazil": 1.0      # BRL
-}
-
 POVERTY_LINE = {
     "India": 10000,    # annual income in local currency
     "USA": 15000,
@@ -38,6 +29,7 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     income = float(request.form["income"])
+    income = max(0, income)  # <-- Ensure income cannot be negative
     education = float(request.form["education"])
     employment = int(request.form["employment"])
     country = request.form["country"]
@@ -46,18 +38,19 @@ def predict():
 
     # ---------------- RULE-BASED RISK ----------------
     if income >= poverty_line:
-        base_risk = max(10, 30 - (income - poverty_line) * 0.001)  # Slightly lower for above poverty
+        base_risk = max(10, 30 - (income - poverty_line) * 0.001)
     else:
         deficit_ratio = (poverty_line - income) / poverty_line
-        base_risk = 90 * deficit_ratio + 10  # Scales 10->100% based on deficit
+        base_risk = 90 * deficit_ratio + 10
 
-    # Apply education/employment modifiers
+    # Apply education/employment modifiers safely
     modifier = education * 1.5 + employment * 5
     if base_risk > 50:
-        risk_percent = max(base_risk - modifier, 50)  # Never drop below 50 if poor
+        risk_percent = max(base_risk - modifier, 50)  # Don't go below 50 if below poverty
     else:
         risk_percent = max(base_risk - modifier, 10)
 
+    # Clamp final risk between 0-100%
     risk_percent = min(100, max(0, risk_percent))
 
     # Risk label & color
