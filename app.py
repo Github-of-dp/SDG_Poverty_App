@@ -1,44 +1,17 @@
 from flask import Flask, render_template, request, jsonify
-import pandas as pd
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
 
 app = Flask(__name__)
 
-# ---------------- DATA + MODEL ----------------
-data = pd.read_csv("poverty_data.csv")
-
-X = data[["income", "education", "employment"]]
-y = data["poverty_risk"]
-
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
-model = LogisticRegression()
-model.fit(X_scaled, y)
-
-# ---------------- COUNTRY INCOME & CURRENCY ----------------
-COUNTRY_INCOME_INDEX = {
-    "India": 15000,   # average monthly poverty line in INR
-    "USA": 1200,      # USD
-    "UK": 900,        # GBP
-    "UAE": 4500,      # AED
-    "Nigeria": 150000, # NGN
-    "Brazil": 500     # BRL
+# ---------------- COUNTRY DATA ----------------
+POVERTY_LINE = {
+    "India": 10000,    # annual income in local currency
+    "USA": 15000,
+    "UK": 14000,
+    "UAE": 16000,
+    "Nigeria": 1200,
+    "Brazil": 4000
 }
 
-CURRENCY_CONVERSION = {
-    "India": 1,      # INR → INR
-    "USA": 82,       # USD → INR
-    "UK": 100,       # GBP → INR
-    "UAE": 22,       # AED → INR
-    "Nigeria": 0.18, # NGN → INR
-    "Brazil": 16     # BRL → INR
-}
-
-GLOBAL_AVG_INDEX = 1.0  # For comparison bar
-
-# ---------------- HELP SUGGESTIONS ----------------
 HELP_SUGGESTIONS = {
     "India": "Explore government welfare schemes, skill development programs, and local NGOs.",
     "USA": "Look into SNAP benefits, job reskilling programs, and community support services.",
@@ -55,32 +28,33 @@ def home():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    # Get user input
     income = float(request.form["income"])
+    income = max(0, income)  # prevent negative income
     education = float(request.form["education"])
     employment = int(request.form["employment"])
     country = request.form["country"]
 
-    # ---------------- Convert income to base currency (INR) ----------------
-    conversion_rate = CURRENCY_CONVERSION.get(country, 1)
-    income_in_base = income * conversion_rate
+    poverty_line = POVERTY_LINE.get(country, 10000)
 
-    # ---------------- Country-normalized income ----------------
-    country_poverty_line = COUNTRY_INCOME_INDEX.get(country, 15000)
-    normalized_income = income_in_base / country_poverty_line  # <1 → below poverty line, >1 → above
+    # ---------------- RULE-BASED RISK ----------------
+    if income >= poverty_line:
+        base_risk = max(10, 30 - (income - poverty_line) * 0.001)
+    else:
+        deficit_ratio = (poverty_line - income) / poverty_line
+        base_risk = 90 * deficit_ratio + 10
 
-    # ---------------- Feature vector for model ----------------
-    features = scaler.transform([[normalized_income * 15000, education, employment]])  # rescale to training scale
-    probability = model.predict_proba(features)[0][1]
-    risk_percent = round(probability * 100, 2)
+    # ---------------- MODIFIER ----------------
+    # Limit modifier effect for very low incomes
+    if income < 0.2 * poverty_line:
+        max_modifier = 10  # cannot reduce below 80%
+    else:
+        max_modifier = 50
 
-    # ---------------- Rule-based boost for very low incomes ----------------
-    if normalized_income < 0.2:   # income <20% of poverty line
-        risk_percent = max(risk_percent, 90)
-    elif normalized_income < 0.5: # income <50% of poverty line
-        risk_percent = max(risk_percent, 70)
-    elif normalized_income < 0.8: # income <80% of poverty line
-        risk_percent = max(risk_percent, 50)
+    modifier = min(education * 1.5 + employment * 5, max_modifier)
+    risk_percent = base_risk - modifier
+
+    # Clamp final risk between 0-100%
+    risk_percent = min(100, max(0, risk_percent))
 
     # Risk label & color
     if risk_percent < 35:
@@ -93,17 +67,11 @@ def predict():
         level = "High"
         color = "red"
 
-    # Global comparison
-    comparison = (
-        "Below global average" if normalized_income < GLOBAL_AVG_INDEX else
-        "Near global average" if normalized_income == GLOBAL_AVG_INDEX else
-        "Above global average"
-    )
-
-    help_text = HELP_SUGGESTIONS.get(country, "Seek local community and educational support.")
+    comparison = "Below global average" if income < poverty_line else "Above global average"
+    help_text = HELP_SUGGESTIONS.get(country, "Seek local support programs.")
 
     return jsonify({
-        "risk": risk_percent,
+        "risk": round(risk_percent, 2),
         "level": level,
         "color": color,
         "comparison": comparison,
@@ -111,4 +79,4 @@ def predict():
     })
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
