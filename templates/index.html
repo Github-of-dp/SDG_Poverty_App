@@ -1,153 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>SDG-1 Poverty Risk Predictor</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(to bottom, #020617, #0f172a);
-    color: white;
-    margin: 0;
-}
-.container {
-    max-width: 500px;
-    margin: auto;
-    padding: 30px;
-}
-.card {
-    background: #1e293b;
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-}
-h1 { color: #38bdf8; text-align: center; }
-.subtitle { text-align: center; color: #94a3b8; }
-
-.warning {
-    background: #020617;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 13px;
-    color: #e5e7eb;
-    margin-bottom: 20px;
-}
-
-input, select {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border: none;
-    background: #334155;
-    color: white;
-}
-
-.result {
-    margin-top: 25px;
-    padding: 20px;
-    background: #334155;
-    border-radius: 12px;
-    text-align: center;
-}
-
-.gauge {
-    margin: 20px auto;
-    width: 200px;
-    height: 100px;
-    background: conic-gradient(#22c55e 0deg, #facc15 90deg, #ef4444 180deg);
-    border-radius: 200px 200px 0 0;
-    position: relative;
-}
-
-.pointer {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 4px;
-    height: 90px;
-    background: white;
-    transform-origin: bottom;
-    transform: rotate(0deg);
-    transition: transform 0.8s ease;
-}
-
-.footer {
-    font-size: 12px;
-    color: #94a3b8;
-    margin-top: 20px;
-    text-align: center;
-}
-</style>
+    <title>Poverty Risk Predictor</title>
+    <style>
+        body { font-family: Arial; background: #f4f6f8; padding: 30px; }
+        .box { background: white; padding: 25px; max-width: 520px; margin: auto; border-radius: 12px; }
+        h1 { text-align: center; }
+        input, select, button {
+            width: 100%; padding: 10px; margin: 8px 0;
+            border-radius: 6px; border: 1px solid #ccc;
+        }
+        button { background: #2563eb; color: white; border: none; cursor: pointer; }
+        .bar { height: 20px; border-radius: 10px; background: #ddd; margin-top: 15px; }
+        .fill { height: 100%; border-radius: 10px; width: 0%; }
+        .note { font-size: 13px; color: #555; margin-top: 10px; }
+    </style>
 </head>
-
 <body>
-<div class="container">
-<div class="card">
 
-<h1>SDG-1: No Poverty</h1>
-<p class="subtitle">AI-Based Poverty Risk Estimator</p>
+<div class="box">
+<h1>🌍 Poverty Risk Predictor</h1>
 
-<div class="warning">
-⚠ This tool is for <b>educational purposes only</b>.  
-Results are estimates based on regional income normalization and do not determine official eligibility.
+<p class="note">
+⚠ Educational tool only. Results are estimates based on country-normalized data.
+Income standards vary by region and cost of living.
+</p>
+
+<form id="form">
+    <input type="number" name="income" placeholder="Annual Income" required>
+    <input type="number" name="education" placeholder="Years of Education" required>
+
+    <select name="employment">
+        <option value="1">Employed</option>
+        <option value="0">Unemployed</option>
+    </select>
+
+    <select name="country">
+        <option>India</option>
+        <option>USA</option>
+        <option>UK</option>
+        <option>UAE</option>
+        <option>Nigeria</option>
+        <option>Brazil</option>
+    </select>
+
+    <button type="submit">Check Risk</button>
+</form>
+
+<h3 id="result"></h3>
+<div class="bar">
+    <div id="fill" class="fill"></div>
 </div>
 
-<select id="country">
-{% for c in countries %}
-<option value="{{c}}">{{c}}</option>
-{% endfor %}
-</select>
+<p id="comparison"></p>
+<p id="help"></p>
 
-<input id="income" type="number" placeholder="Monthly Income">
-<input id="education" type="number" placeholder="Years of Education">
-<input id="employment" type="number" placeholder="Employment (0 = No, 1 = Yes)">
+<p class="note">
+This model uses income normalization, education level, and employment status
+to estimate relative poverty risk. It is **not** a financial or legal assessment.
+</p>
 
-<div class="result">
-<h2 id="status">Waiting for input</h2>
-<p id="prob">Risk Probability: 0%</p>
-
-<div class="gauge">
-<div class="pointer" id="pointer"></div>
-</div>
-</div>
-
-<div class="footer">
-This model uses income, education, employment, and country-specific baselines  
-(Source reference: World Bank poverty thresholds)
-</div>
-
-</div>
 </div>
 
 <script>
-const inputs = ["income", "education", "employment", "country"];
-inputs.forEach(id => document.getElementById(id).addEventListener("input", predict));
-
-function predict() {
-    const income = document.getElementById("income").value;
-    if (!income) return;
-
-    fetch("/predict", {
+document.getElementById("form").onsubmit = async (e) => {
+    e.preventDefault();
+    const res = await fetch("/predict", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            income: income,
-            education: document.getElementById("education").value,
-            employment: document.getElementById("employment").value,
-            country: document.getElementById("country").value
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("status").innerText = data.status;
-        document.getElementById("prob").innerText = `Risk Probability: ${data.risk_probability}%`;
-        document.getElementById("pointer").style.transform =
-            `rotate(${data.risk_probability * 1.8}deg)`;
+        body: new FormData(e.target)
     });
-}
+    const data = await res.json();
+
+    document.getElementById("result").innerText =
+        `Poverty Risk: ${data.risk}% (${data.level})`;
+
+    const fill = document.getElementById("fill");
+    fill.style.width = data.risk + "%";
+    fill.style.background = data.color;
+
+    document.getElementById("comparison").innerText =
+        "Global comparison: " + data.comparison;
+
+    document.getElementById("help").innerText =
+        "Suggested support: " + data.help;
+};
 </script>
 
 </body>
