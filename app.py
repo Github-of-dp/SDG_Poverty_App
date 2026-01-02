@@ -1,39 +1,28 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
 
 app = Flask(__name__)
 
-# ---------------- DATA + MODEL ----------------
-data = pd.read_csv("poverty_data.csv")
-X = data[["income", "education", "employment"]]
-y = data["poverty_risk"]
-
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
-model = LogisticRegression()
-model.fit(X_scaled, y)
-
-# ---------------- COUNTRY & CURRENCY ----------------
-CURRENCY_TO_USD = {
-    "India": 0.012,    # INR to USD
-    "USA": 1.0,        # USD
-    "UK": 1.25,        # GBP to USD
-    "UAE": 0.27,       # AED to USD
-    "Nigeria": 0.0026, # NGN to USD
-    "Brazil": 0.20     # BRL to USD
+# ---------------- DATA + HELP ----------------
+COUNTRY_INCOME_INDEX = {
+    "India": 0.013,      # 1 INR = 0.013 USD
+    "USA": 1.0,          # USD
+    "UK": 1.22,          # 1 GBP = 1.22 USD
+    "UAE": 0.27,         # 1 AED = 0.27 USD
+    "Nigeria": 0.0022,   # 1 NGN = 0.0022 USD
+    "Brazil": 0.19       # 1 BRL = 0.19 USD
 }
 
 POVERTY_LINE_USD = {
-    "India": 2000,
-    "USA": 13000,
-    "UK": 16000,
-    "UAE": 22000,
-    "Nigeria": 600,
-    "Brazil": 2500
+    "India": 200,        # monthly USD equivalent
+    "USA": 1500,
+    "UK": 1400,
+    "UAE": 1600,
+    "Nigeria": 100,
+    "Brazil": 300
 }
+
+GLOBAL_AVG_INDEX = 1.0
 
 HELP_SUGGESTIONS = {
     "India": "Explore government welfare schemes, skill development programs, and local NGOs.",
@@ -44,8 +33,6 @@ HELP_SUGGESTIONS = {
     "Brazil": "Look into Bolsa Família programs and employment support services."
 }
 
-GLOBAL_AVG_INDEX = 1.0
-
 # ---------------- ROUTES ----------------
 @app.route("/")
 def home():
@@ -53,29 +40,30 @@ def home():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    # ---- Fetch inputs ----
     income_local = float(request.form["income"])
     education = float(request.form["education"])
     employment = int(request.form["employment"])
     country = request.form["country"]
 
-    # ---- Convert income to USD ----
-    conversion_rate = CURRENCY_TO_USD.get(country, 1.0)
+    # Convert local currency to USD
+    conversion_rate = COUNTRY_INCOME_INDEX.get(country, 1.0)
     income_usd = income_local * conversion_rate
-    poverty_threshold = POVERTY_LINE_USD.get(country, 10000)
+    poverty_threshold = POVERTY_LINE_USD.get(country, 1000)
 
-    # ---- Manual rule-based risk ----
-    income_ratio = income_usd / poverty_threshold
-    if income_ratio < 1:
-        base_risk = 80 + (1 - income_ratio) * 20   # Boost if below poverty line
+    # ---------------- Better rule-based risk calculation ----------------
+    if income_usd < poverty_threshold:
+        # Below poverty line: high risk
+        base_risk = 50 + 50 * (1 - income_usd / poverty_threshold)
     else:
-        base_risk = max(0, 50 - (income_ratio - 1) * 30)  # Lower risk for higher income
+        # Above poverty line: low risk
+        excess = min(income_usd - poverty_threshold, poverty_threshold)
+        base_risk = 50 - 45 * (excess / poverty_threshold)
 
-    # ---- Adjust with education & employment ----
+    # Adjust for education and employment
     risk_percent = base_risk - (education * 2) - (employment * 10)
     risk_percent = max(0, min(100, risk_percent))
 
-    # ---- Risk label & color ----
+    # Risk label & color
     if risk_percent < 35:
         level = "Low"
         color = "green"
@@ -86,7 +74,8 @@ def predict():
         level = "High"
         color = "red"
 
-    # ---- Global comparison ----
+    # Global comparison
+    income_ratio = income_usd / poverty_threshold
     comparison = (
         "Below global average" if income_ratio < GLOBAL_AVG_INDEX else
         "Near global average" if income_ratio == GLOBAL_AVG_INDEX else
@@ -104,4 +93,4 @@ def predict():
     })
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
