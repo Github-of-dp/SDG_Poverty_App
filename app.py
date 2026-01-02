@@ -1,9 +1,8 @@
 from flask import Flask, render_template, request, jsonify
-import pandas as pd
 
 app = Flask(__name__)
 
-# ---------------- DATA + HELP ----------------
+# ---------------- COUNTRY NORMALIZATION + POVERTY LINE ----------------
 COUNTRY_INCOME_INDEX = {
     "India": 0.013,      # 1 INR = 0.013 USD
     "USA": 1.0,          # USD
@@ -14,15 +13,13 @@ COUNTRY_INCOME_INDEX = {
 }
 
 POVERTY_LINE_USD = {
-    "India": 200,        # monthly USD equivalent
+    "India": 200,        
     "USA": 1500,
     "UK": 1400,
     "UAE": 1600,
     "Nigeria": 100,
     "Brazil": 300
 }
-
-GLOBAL_AVG_INDEX = 1.0
 
 HELP_SUGGESTIONS = {
     "India": "Explore government welfare schemes, skill development programs, and local NGOs.",
@@ -32,6 +29,8 @@ HELP_SUGGESTIONS = {
     "Nigeria": "Seek NGO assistance, microfinance programs, and vocational training.",
     "Brazil": "Look into Bolsa Família programs and employment support services."
 }
+
+GLOBAL_AVG_INDEX = 1.0
 
 # ---------------- ROUTES ----------------
 @app.route("/")
@@ -50,14 +49,16 @@ def predict():
     income_usd = income_local * conversion_rate
     poverty_threshold = POVERTY_LINE_USD.get(country, 1000)
 
-    # ---------------- Better rule-based risk calculation ----------------
+    # ---------------- REALISTIC RISK FORMULA ----------------
+    # If income < poverty line -> high risk
     if income_usd < poverty_threshold:
-        # Below poverty line: high risk
-        base_risk = 50 + 50 * (1 - income_usd / poverty_threshold)
+        # Scale from 90-100% as income drops far below poverty line
+        deficit_ratio = (poverty_threshold - income_usd) / poverty_threshold
+        base_risk = 90 + 10 * min(deficit_ratio, 1.0)
     else:
-        # Above poverty line: low risk
-        excess = min(income_usd - poverty_threshold, poverty_threshold)
-        base_risk = 50 - 45 * (excess / poverty_threshold)
+        # Income above poverty line -> low risk scaling 0-50%
+        excess_ratio = min(income_usd - poverty_threshold, poverty_threshold) / poverty_threshold
+        base_risk = max(0, 50 - 50 * excess_ratio)
 
     # Adjust for education and employment
     risk_percent = base_risk - (education * 2) - (employment * 10)
