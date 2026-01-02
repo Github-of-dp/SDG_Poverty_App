@@ -2,23 +2,23 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# ---------------- COUNTRY NORMALIZATION + POVERTY LINE ----------------
+# ---------------- COUNTRY DATA ----------------
 COUNTRY_INCOME_INDEX = {
-    "India": 0.013,      # 1 INR = 0.013 USD
-    "USA": 1.0,          # USD
-    "UK": 1.22,          # 1 GBP = 1.22 USD
-    "UAE": 0.27,         # 1 AED = 0.27 USD
-    "Nigeria": 0.0022,   # 1 NGN = 0.0022 USD
-    "Brazil": 0.19       # 1 BRL = 0.19 USD
+    "India": 1.0,      # local currency: INR
+    "USA": 1.0,        # USD
+    "UK": 1.0,         # GBP
+    "UAE": 1.0,        # AED
+    "Nigeria": 1.0,    # NGN
+    "Brazil": 1.0      # BRL
 }
 
-POVERTY_LINE_USD = {
-    "India": 200,        
-    "USA": 1500,
-    "UK": 1400,
-    "UAE": 1600,
-    "Nigeria": 100,
-    "Brazil": 300
+POVERTY_LINE = {
+    "India": 10000,    # annual income in local currency
+    "USA": 15000,
+    "UK": 14000,
+    "UAE": 16000,
+    "Nigeria": 1200,
+    "Brazil": 4000
 }
 
 HELP_SUGGESTIONS = {
@@ -30,8 +30,6 @@ HELP_SUGGESTIONS = {
     "Brazil": "Look into Bolsa Família programs and employment support services."
 }
 
-GLOBAL_AVG_INDEX = 1.0
-
 # ---------------- ROUTES ----------------
 @app.route("/")
 def home():
@@ -39,30 +37,28 @@ def home():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    income_local = float(request.form["income"])
+    income = float(request.form["income"])
     education = float(request.form["education"])
     employment = int(request.form["employment"])
     country = request.form["country"]
 
-    # Convert local currency to USD
-    conversion_rate = COUNTRY_INCOME_INDEX.get(country, 1.0)
-    income_usd = income_local * conversion_rate
-    poverty_threshold = POVERTY_LINE_USD.get(country, 1000)
+    poverty_line = POVERTY_LINE.get(country, 10000)
 
-    # ---------------- REALISTIC RISK FORMULA ----------------
-    # If income < poverty line -> high risk
-    if income_usd < poverty_threshold:
-        # Scale from 90-100% as income drops far below poverty line
-        deficit_ratio = (poverty_threshold - income_usd) / poverty_threshold
-        base_risk = 90 + 10 * min(deficit_ratio, 1.0)
+    # ---------------- RULE-BASED RISK ----------------
+    if income >= poverty_line:
+        base_risk = max(10, 30 - (income - poverty_line) * 0.001)  # Slightly lower for above poverty
     else:
-        # Income above poverty line -> low risk scaling 0-50%
-        excess_ratio = min(income_usd - poverty_threshold, poverty_threshold) / poverty_threshold
-        base_risk = max(0, 50 - 50 * excess_ratio)
+        deficit_ratio = (poverty_line - income) / poverty_line
+        base_risk = 90 * deficit_ratio + 10  # Scales 10->100% based on deficit
 
-    # Adjust for education and employment
-    risk_percent = base_risk - (education * 2) - (employment * 10)
-    risk_percent = max(0, min(100, risk_percent))
+    # Apply education/employment modifiers
+    modifier = education * 1.5 + employment * 5
+    if base_risk > 50:
+        risk_percent = max(base_risk - modifier, 50)  # Never drop below 50 if poor
+    else:
+        risk_percent = max(base_risk - modifier, 10)
+
+    risk_percent = min(100, max(0, risk_percent))
 
     # Risk label & color
     if risk_percent < 35:
@@ -75,15 +71,8 @@ def predict():
         level = "High"
         color = "red"
 
-    # Global comparison
-    income_ratio = income_usd / poverty_threshold
-    comparison = (
-        "Below global average" if income_ratio < GLOBAL_AVG_INDEX else
-        "Near global average" if income_ratio == GLOBAL_AVG_INDEX else
-        "Above global average"
-    )
-
-    help_text = HELP_SUGGESTIONS.get(country, "Seek local community and educational support.")
+    comparison = "Below global average" if income < poverty_line else "Above global average"
+    help_text = HELP_SUGGESTIONS.get(country, "Seek local support programs.")
 
     return jsonify({
         "risk": round(risk_percent, 2),
