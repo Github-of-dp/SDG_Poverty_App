@@ -29,7 +29,7 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     income = float(request.form["income"])
-    income = max(0, income)  # prevent negative income
+    income = max(0, income)  # <-- Ensure income cannot be negative
     education = float(request.form["education"])
     employment = int(request.form["employment"])
     country = request.form["country"]
@@ -43,15 +43,12 @@ def predict():
         deficit_ratio = (poverty_line - income) / poverty_line
         base_risk = 90 * deficit_ratio + 10
 
-    # ---------------- MODIFIER ----------------
-    # Limit modifier effect for very low incomes
-    if income < 0.2 * poverty_line:
-        max_modifier = 10  # cannot reduce below 80%
+    # Apply education/employment modifiers safely
+    modifier = education * 1.5 + employment * 5
+    if base_risk > 50:
+        risk_percent = max(base_risk - modifier, 50)  # Don't go below 50 if below poverty
     else:
-        max_modifier = 50
-
-    modifier = min(education * 1.5 + employment * 5, max_modifier)
-    risk_percent = base_risk - modifier
+        risk_percent = max(base_risk - modifier, 10)
 
     # Clamp final risk between 0-100%
     risk_percent = min(100, max(0, risk_percent))
