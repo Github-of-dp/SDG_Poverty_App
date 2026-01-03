@@ -1,145 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Poverty Risk Predictor</title>
-
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Poverty Risk Analyzer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
+            background: #020617;
             color: #e5e7eb;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
         }
 
-        .box {
-            background: linear-gradient(180deg, #111827, #1f2937);
-            padding: 30px;
+        .container {
             width: 100%;
-            max-width: 540px;
+            max-width: 520px;
+            background: #020617;
+            padding: 24px;
             border-radius: 18px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            border: 1px solid #334155;
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 10px;
-            font-weight: 700;
-            color: #e5e7eb;
+            margin-bottom: 20px;
         }
 
-        .subtitle {
-            text-align: center;
-            font-size: 14px;
-            color: #9ca3af;
-            margin-bottom: 20px;
+        label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
         }
 
         input, select, button {
             width: 100%;
-            padding: 12px;
-            margin: 8px 0;
+            margin-top: 6px;
+            padding: 10px;
             border-radius: 10px;
             border: none;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
+            font-size: 15px;
         }
 
         input, select {
             background: #020617;
-            color: #e5e7eb;
+            color: white;
             border: 1px solid #334155;
         }
 
-        input::placeholder {
-            color: #64748b;
-        }
-
         button {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            margin-top: 18px;
+            background: #2563eb;
             color: white;
-            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(37,99,235,0.4);
-        }
-
-        .note {
-            font-size: 12.5px;
-            color: #9ca3af;
-            margin-top: 12px;
-            line-height: 1.4;
-        }
-
-        .result {
-            margin-top: 20px;
-            font-size: 16px;
-            font-weight: 600;
+            background: #1d4ed8;
         }
 
         .bar {
-            height: 16px;
+            margin-top: 16px;
+            height: 14px;
             background: #334155;
-            border-radius: 999px;
-            margin-top: 10px;
+            border-radius: 8px;
             overflow: hidden;
         }
 
         .fill {
             height: 100%;
             width: 0%;
-            border-radius: 999px;
-            transition: width 0.6s ease, background 0.4s ease;
+            transition: width 0.6s ease;
         }
 
         .info {
             margin-top: 10px;
-            font-size: 13px;
-            color: #cbd5f5;
+            font-size: 14px;
         }
 
-        footer {
+        .extra-card {
+            display: none;
             margin-top: 20px;
-            font-size: 12px;
-            color: #94a3b8;
-            text-align: center;
+            padding: 16px;
+            border-radius: 14px;
+            background: #020617;
+            border: 1px solid #334155;
         }
     </style>
 </head>
 
 <body>
+<div class="container">
 
-<div class="box">
-    <h1>🌍 Poverty Risk Predictor</h1>
-    <div class="subtitle">
-        AI-powered educational model aligned with <b>SDG-1: No Poverty</b>
-    </div>
-
-    <p class="note">
-        ⚠ This tool is for <b>educational and awareness purposes only</b>.  
-        Poverty standards vary by country, cost of living, and social context.
-    </p>
+    <h1>Poverty Risk Analyzer</h1>
 
     <form id="form">
-        <input type="number" name="income" placeholder="Annual Income" required>
-        <input type="number" name="education" placeholder="Years of Education" required>
-
-        <select name="employment">
-            <option value="1">Employed</option>
-            <option value="0">Unemployed</option>
-        </select>
-
-        <select name="country">
+        <label>Country</label>
+        <select name="country" required>
             <option>India</option>
             <option>USA</option>
             <option>UK</option>
@@ -148,34 +107,45 @@
             <option>Brazil</option>
         </select>
 
+        <label>Monthly Income (local currency)</label>
+        <input type="number" name="income" required>
+
+        <label>Years of Education</label>
+        <input type="number" name="education" required>
+
+        <label>Employment Status</label>
+        <select name="employment">
+            <option value="1">Employed</option>
+            <option value="0">Unemployed</option>
+        </select>
+
         <button type="submit">Analyze Poverty Risk</button>
     </form>
 
-    <div id="result" class="result"></div>
+    <div id="result" class="info"></div>
 
     <div class="bar">
         <div id="fill" class="fill"></div>
     </div>
 
-    <div id="comparison" class="info"></div>
-    <div id="help" class="info"></div>
+    <!-- Extra Information Card -->
+    <div id="extra-card" class="extra-card">
+        <div id="extra-comparison" class="info"></div>
+        <div id="extra-help" class="info"></div>
+    </div>
 
-    <footer>
-        This model uses income normalization, education level, and employment status  
-        to estimate <b>relative poverty risk</b> — not absolute financial standing.
-    </footer>
 </div>
 
 <script>
 document.getElementById("form").onsubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("/predict", {
+    const response = await fetch("/predict", {
         method: "POST",
         body: new FormData(e.target)
     });
 
-    const data = await res.json();
+    const data = await response.json();
 
     document.getElementById("result").innerText =
         `Poverty Risk: ${data.risk}% (${data.level})`;
@@ -184,10 +154,12 @@ document.getElementById("form").onsubmit = async (e) => {
     fill.style.width = data.risk + "%";
     fill.style.background = data.color;
 
-    document.getElementById("comparison").innerText =
-        "🌐 Global comparison: " + data.comparison;
+    document.getElementById("extra-card").style.display = "block";
 
-    document.getElementById("help").innerText =
+    document.getElementById("extra-comparison").innerText =
+        "🌍 Global comparison: " + data.comparison;
+
+    document.getElementById("extra-help").innerText =
         "🤝 Suggested support: " + data.help;
 };
 </script>
