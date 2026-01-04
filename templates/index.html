@@ -5,121 +5,189 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg,#0f172a,#1e293b);
-    min-height:100vh; display:flex; justify-content:center; align-items:center;
-    color:#e5e7eb; margin:0;
+body{
+    font-family:'Inter',sans-serif;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    margin:0; min-height:100vh;
+    display:flex; justify-content:center; align-items:center;
+    color:#e5e7eb;
 }
-.box {
+.container{
+    display:grid;
+    grid-template-columns: 1fr 420px 1fr;
+    gap:24px;
+    max-width:1200px;
+    width:100%;
+    padding:20px;
+}
+.center{
     background:linear-gradient(180deg,#111827,#1f2937);
-    padding:30px; max-width:580px; width:100%;
-    border-radius:18px; box-shadow:0 25px 50px rgba(0,0,0,.6);
+    padding:26px;
+    border-radius:18px;
+    box-shadow:0 25px 50px rgba(0,0,0,.6);
 }
-input,select,button {
-    width:100%; padding:12px; margin:8px 0; border-radius:10px;
-    background:#020617; border:1px solid #334155; color:#e5e7eb;
+.side{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
 }
-button { background:#2563eb; border:none; cursor:pointer; }
-.bar { height:16px; background:#334155; border-radius:999px; overflow:hidden; margin-top:10px; }
-.fill { height:100%; width:0%; transition:.6s; }
-.card {
-    margin-top:18px; background:#020617; border:1px solid #334155;
-    padding:14px; border-radius:14px;
+.card{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:14px;
+    padding:14px;
 }
-h3 { margin:0 0 8px 0; font-size:15px; }
-ul { padding-left:18px; margin:6px 0; }
-li { font-size:13px; line-height:1.6; color:#cbd5f5; }
-small { color:#94a3b8; }
+h2,h3{margin:0 0 10px 0;}
+small{color:#94a3b8;}
+input,select,button{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border-radius:10px;
+    background:#020617;
+    border:1px solid #334155;
+    color:#e5e7eb;
+}
+button{
+    background:#2563eb;
+    border:none;
+    font-weight:600;
+    cursor:pointer;
+}
+.bar{
+    height:16px;
+    background:#334155;
+    border-radius:999px;
+    overflow:hidden;
+    margin-top:10px;
+}
+.fill{
+    height:100%;
+    width:0%;
+    transition:.6s;
+}
+ul{padding-left:18px;margin:6px 0;}
+li{font-size:13px;color:#cbd5f5;line-height:1.6;}
+.footer{
+    grid-column:1 / -1;
+    text-align:center;
+    font-size:12px;
+    color:#94a3b8;
+    margin-top:10px;
+}
+@media(max-width:1000px){
+    .container{grid-template-columns:1fr;}
+}
 </style>
 </head>
 
 <body>
-<div class="box">
-<h2>🌍 Poverty Risk Predictor</h2>
-<small>Educational model aligned with SDG-1</small>
 
-<form id="form">
-<input type="number" name="income" placeholder="Annual Income" required>
-<input type="number" name="education" placeholder="Years of Education" required>
-<select name="employment"><option value="1">Employed</option><option value="0">Unemployed</option></select>
-<select name="country"><option>India</option><option>USA</option><option>UK</option><option>UAE</option><option>Nigeria</option><option>Brazil</option></select>
-<button>Analyze Poverty Risk</button>
-</form>
+<div class="container">
 
-<div id="result"></div>
-<div class="bar"><div id="fill" class="fill"></div></div>
+    <!-- LEFT SIDE -->
+    <div class="side">
+        <div id="why" class="card" style="display:none;">
+            <h3>🧠 Why this result?</h3>
+            <ul>
+                <li id="w1"></li>
+                <li id="w2"></li>
+                <li id="w3"></li>
+            </ul>
+        </div>
 
-<!-- A -->
-<div id="why" class="card" style="display:none;">
-<h3>🧠 Why this result?</h3>
-<ul>
-<li id="w1"></li><li id="w2"></li><li id="w3"></li>
-</ul>
-</div>
+        <div id="country" class="card" style="display:none;">
+            <h3>🌍 Country Poverty Context</h3>
+            <p id="context"></p>
+        </div>
+    </div>
 
-<!-- B -->
-<div id="country" class="card" style="display:none;">
-<h3>🌍 Country Poverty Context</h3>
-<p id="context"></p>
-</div>
+    <!-- CENTER -->
+    <div class="center">
+        <h2>🌍 Poverty Risk Predictor</h2>
+        <small>Educational AI model aligned with <b>SDG-1: No Poverty</b></small>
 
-<!-- C -->
-<div id="sim" class="card" style="display:none;">
-<h3>🔮 Scenario Simulation</h3>
-<ul>
-<li id="s1"></li><li id="s2"></li>
-</ul>
-</div>
+        <form id="form">
+            <input type="number" name="income" placeholder="Annual Income" required>
+            <input type="number" name="education" placeholder="Years of Education" required>
+            <select name="employment">
+                <option value="1">Employed</option>
+                <option value="0">Unemployed</option>
+            </select>
+            <select name="country">
+                <option>India</option>
+                <option>USA</option>
+                <option>UK</option>
+                <option>UAE</option>
+                <option>Nigeria</option>
+                <option>Brazil</option>
+            </select>
+            <button>Analyze Poverty Risk</button>
+        </form>
 
-<!-- D -->
-<div id="history" class="card" style="display:none;">
-<h3>📜 Session History</h3>
-<ul id="hist"></ul>
-</div>
+        <div id="result" style="margin-top:12px;font-weight:600;"></div>
+        <div class="bar"><div id="fill" class="fill"></div></div>
+    </div>
 
-<!-- E -->
-<div id="sdg" class="card" style="display:none;">
-<h3>🎯 SDG Alignment</h3>
-<p id="sdgtext"></p>
-</div>
+    <!-- RIGHT SIDE -->
+    <div class="side">
+        <div id="sim" class="card" style="display:none;">
+            <h3>🔮 Scenario Simulation</h3>
+            <ul>
+                <li id="s1"></li>
+                <li id="s2"></li>
+            </ul>
+        </div>
+
+        <div id="sdg" class="card" style="display:none;">
+            <h3>🎯 SDG Alignment</h3>
+            <p id="sdgtext"></p>
+        </div>
+    </div>
+
+    <!-- SESSION HISTORY -->
+    <div id="history" class="card" style="display:none;">
+        <h3>📜 Session History</h3>
+        <ul id="hist"></ul>
+    </div>
+
+    <div class="footer">
+        This tool is for educational & awareness purposes only.  
+        Poverty is influenced by regional, social, and economic factors.
+    </div>
 
 </div>
 
 <script>
 document.getElementById("form").onsubmit = async e => {
-e.preventDefault();
-const res = await fetch("/predict",{method:"POST",body:new FormData(e.target)});
-const d = await res.json();
+    e.preventDefault();
+    const res = await fetch("/predict",{method:"POST",body:new FormData(e.target)});
+    const d = await res.json();
 
-document.getElementById("result").innerText = `Risk: ${d.risk}% (${d.level})`;
-document.getElementById("fill").style.width = d.risk+"%";
-document.getElementById("fill").style.background = d.color;
+    result.innerText = `Poverty Risk: ${d.risk}% (${d.level})`;
+    fill.style.width = d.risk + "%";
+    fill.style.background = d.color;
 
-// A
-document.getElementById("why").style.display="block";
-w1.innerText=`Base poverty risk: ${d.base_risk}%`;
-w2.innerText=`Education reduced risk by ${d.education_impact}%`;
-w3.innerText=`Employment reduced risk by ${d.employment_impact}%`;
+    why.style.display="block";
+    w1.innerText=`Base poverty risk: ${d.base_risk}%`;
+    w2.innerText=`Education reduced risk by ${d.education_impact}%`;
+    w3.innerText=`Employment reduced risk by ${d.employment_impact}%`;
 
-// B
-document.getElementById("country").style.display="block";
-context.innerText = d.country_context;
+    country.style.display="block";
+    context.innerText=d.country_context;
 
-// C
-document.getElementById("sim").style.display="block";
-s1.innerText=`If income increases by 20% → Risk ≈ ${d.simulations.income_plus_20}%`;
-s2.innerText=`If income decreases by 20% → Risk ≈ ${d.simulations.income_minus_20}%`;
+    sim.style.display="block";
+    s1.innerText=`If income increases by 20% → Risk ≈ ${d.simulations.income_plus_20}%`;
+    s2.innerText=`If income decreases by 20% → Risk ≈ ${d.simulations.income_minus_20}%`;
 
-// D
-document.getElementById("history").style.display="block";
-hist.innerHTML="";
-d.history.forEach(h=>hist.innerHTML+=`<li>${h.time} – ${h.country} – ${h.risk}%</li>`);
+    sdg.style.display="block";
+    sdgtext.innerText=`${d.sdg.goal} | Impact: ${d.sdg.impact}`;
 
-// E
-document.getElementById("sdg").style.display="block";
-sdgtext.innerText=`${d.sdg.goal} | Impact Level: ${d.sdg.impact}`;
+    history.style.display="block";
+    hist.innerHTML="";
+    d.history.forEach(h=>hist.innerHTML+=`<li>${h.time} – ${h.country} – ${h.risk}%</li>`);
 }
 </script>
+
 </body>
 </html>
