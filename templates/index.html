@@ -1,168 +1,125 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Poverty Risk Analyzer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poverty Risk Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-            background: #020617;
-            color: #e5e7eb;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            padding: 40px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 520px;
-            background: #020617;
-            padding: 24px;
-            border-radius: 18px;
-            border: 1px solid #334155;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-top: 12px;
-            font-weight: bold;
-        }
-
-        input, select, button {
-            width: 100%;
-            margin-top: 6px;
-            padding: 10px;
-            border-radius: 10px;
-            border: none;
-            font-size: 15px;
-        }
-
-        input, select {
-            background: #020617;
-            color: white;
-            border: 1px solid #334155;
-        }
-
-        button {
-            margin-top: 18px;
-            background: #2563eb;
-            color: white;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #1d4ed8;
-        }
-
-        .bar {
-            margin-top: 16px;
-            height: 14px;
-            background: #334155;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .fill {
-            height: 100%;
-            width: 0%;
-            transition: width 0.6s ease;
-        }
-
-        .info {
-            margin-top: 10px;
-            font-size: 14px;
-        }
-
-        .extra-card {
-            display: none;
-            margin-top: 20px;
-            padding: 16px;
-            border-radius: 14px;
-            background: #020617;
-            border: 1px solid #334155;
-        }
-    </style>
+<style>
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    min-height:100vh; display:flex; justify-content:center; align-items:center;
+    color:#e5e7eb; margin:0;
+}
+.box {
+    background:linear-gradient(180deg,#111827,#1f2937);
+    padding:30px; max-width:580px; width:100%;
+    border-radius:18px; box-shadow:0 25px 50px rgba(0,0,0,.6);
+}
+input,select,button {
+    width:100%; padding:12px; margin:8px 0; border-radius:10px;
+    background:#020617; border:1px solid #334155; color:#e5e7eb;
+}
+button { background:#2563eb; border:none; cursor:pointer; }
+.bar { height:16px; background:#334155; border-radius:999px; overflow:hidden; margin-top:10px; }
+.fill { height:100%; width:0%; transition:.6s; }
+.card {
+    margin-top:18px; background:#020617; border:1px solid #334155;
+    padding:14px; border-radius:14px;
+}
+h3 { margin:0 0 8px 0; font-size:15px; }
+ul { padding-left:18px; margin:6px 0; }
+li { font-size:13px; line-height:1.6; color:#cbd5f5; }
+small { color:#94a3b8; }
+</style>
 </head>
 
 <body>
-<div class="container">
+<div class="box">
+<h2>🌍 Poverty Risk Predictor</h2>
+<small>Educational model aligned with SDG-1</small>
 
-    <h1>Poverty Risk Analyzer</h1>
+<form id="form">
+<input type="number" name="income" placeholder="Annual Income" required>
+<input type="number" name="education" placeholder="Years of Education" required>
+<select name="employment"><option value="1">Employed</option><option value="0">Unemployed</option></select>
+<select name="country"><option>India</option><option>USA</option><option>UK</option><option>UAE</option><option>Nigeria</option><option>Brazil</option></select>
+<button>Analyze Poverty Risk</button>
+</form>
 
-    <form id="form">
-        <label>Country</label>
-        <select name="country" required>
-            <option>India</option>
-            <option>USA</option>
-            <option>UK</option>
-            <option>UAE</option>
-            <option>Nigeria</option>
-            <option>Brazil</option>
-        </select>
+<div id="result"></div>
+<div class="bar"><div id="fill" class="fill"></div></div>
 
-        <label>Monthly Income (local currency)</label>
-        <input type="number" name="income" required>
+<!-- A -->
+<div id="why" class="card" style="display:none;">
+<h3>🧠 Why this result?</h3>
+<ul>
+<li id="w1"></li><li id="w2"></li><li id="w3"></li>
+</ul>
+</div>
 
-        <label>Years of Education</label>
-        <input type="number" name="education" required>
+<!-- B -->
+<div id="country" class="card" style="display:none;">
+<h3>🌍 Country Poverty Context</h3>
+<p id="context"></p>
+</div>
 
-        <label>Employment Status</label>
-        <select name="employment">
-            <option value="1">Employed</option>
-            <option value="0">Unemployed</option>
-        </select>
+<!-- C -->
+<div id="sim" class="card" style="display:none;">
+<h3>🔮 Scenario Simulation</h3>
+<ul>
+<li id="s1"></li><li id="s2"></li>
+</ul>
+</div>
 
-        <button type="submit">Analyze Poverty Risk</button>
-    </form>
+<!-- D -->
+<div id="history" class="card" style="display:none;">
+<h3>📜 Session History</h3>
+<ul id="hist"></ul>
+</div>
 
-    <div id="result" class="info"></div>
-
-    <div class="bar">
-        <div id="fill" class="fill"></div>
-    </div>
-
-    <!-- Extra Information Card -->
-    <div id="extra-card" class="extra-card">
-        <div id="extra-comparison" class="info"></div>
-        <div id="extra-help" class="info"></div>
-    </div>
+<!-- E -->
+<div id="sdg" class="card" style="display:none;">
+<h3>🎯 SDG Alignment</h3>
+<p id="sdgtext"></p>
+</div>
 
 </div>
 
 <script>
-document.getElementById("form").onsubmit = async (e) => {
-    e.preventDefault();
+document.getElementById("form").onsubmit = async e => {
+e.preventDefault();
+const res = await fetch("/predict",{method:"POST",body:new FormData(e.target)});
+const d = await res.json();
 
-    const response = await fetch("/predict", {
-        method: "POST",
-        body: new FormData(e.target)
-    });
+document.getElementById("result").innerText = `Risk: ${d.risk}% (${d.level})`;
+document.getElementById("fill").style.width = d.risk+"%";
+document.getElementById("fill").style.background = d.color;
 
-    const data = await response.json();
+// A
+document.getElementById("why").style.display="block";
+w1.innerText=`Base poverty risk: ${d.base_risk}%`;
+w2.innerText=`Education reduced risk by ${d.education_impact}%`;
+w3.innerText=`Employment reduced risk by ${d.employment_impact}%`;
 
-    document.getElementById("result").innerText =
-        `Poverty Risk: ${data.risk}% (${data.level})`;
+// B
+document.getElementById("country").style.display="block";
+context.innerText = d.country_context;
 
-    const fill = document.getElementById("fill");
-    fill.style.width = data.risk + "%";
-    fill.style.background = data.color;
+// C
+document.getElementById("sim").style.display="block";
+s1.innerText=`If income increases by 20% → Risk ≈ ${d.simulations.income_plus_20}%`;
+s2.innerText=`If income decreases by 20% → Risk ≈ ${d.simulations.income_minus_20}%`;
 
-    document.getElementById("extra-card").style.display = "block";
+// D
+document.getElementById("history").style.display="block";
+hist.innerHTML="";
+d.history.forEach(h=>hist.innerHTML+=`<li>${h.time} – ${h.country} – ${h.risk}%</li>`);
 
-    document.getElementById("extra-comparison").innerText =
-        "🌍 Global comparison: " + data.comparison;
-
-    document.getElementById("extra-help").innerText =
-        "🤝 Suggested support: " + data.help;
-};
+// E
+document.getElementById("sdg").style.display="block";
+sdgtext.innerText=`${d.sdg.goal} | Impact Level: ${d.sdg.impact}`;
+}
 </script>
-
 </body>
 </html>
