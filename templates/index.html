@@ -1,217 +1,335 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Poverty Risk & SDG Insight Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poverty Risk Predictor</title>
+
+<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-:root{
-    --bg:#f1f5f9;
-    --card:#ffffff;
-    --border:#e2e8f0;
-    --primary:#2563eb;
-    --text:#0f172a;
-    --muted:#475569;
-    --accent:#0ea5e9;
-}
-*{box-sizing:border-box}
-body{
-    margin:0;
-    font-family:Inter,sans-serif;
-    background:linear-gradient(120deg,#e0f2fe,#f8fafc);
-    color:var(--text);
-}
-.container{
-    max-width:1250px;
-    margin:auto;
-    padding:28px;
-    display:grid;
-    grid-template-columns: 1fr 440px 1fr;
-    gap:22px;
-}
-.center{
-    background:var(--card);
-    border-radius:20px;
-    padding:28px;
-    border:1px solid var(--border);
-    box-shadow:0 15px 30px rgba(0,0,0,.06);
-}
-.side{display:flex;flex-direction:column;gap:18px;}
-.card{
-    background:var(--card);
-    border-radius:16px;
-    padding:18px;
-    border:1px solid var(--border);
-}
-h2,h3{margin:0 0 10px}
-small{color:var(--muted)}
-input,select,button{
-    width:100%;
-    padding:12px;
-    margin:8px 0;
-    border-radius:10px;
-    border:1px solid var(--border);
-    font-size:14px;
-}
-button{
-    background:var(--primary);
-    color:white;
-    border:none;
-    font-weight:600;
-    cursor:pointer;
-}
-.bar{
-    height:14px;
-    background:#e5e7eb;
-    border-radius:999px;
-    overflow:hidden;
-    margin-top:10px;
-}
-.fill{height:100%;width:0%;transition:.6s;}
-ul{padding-left:18px;margin:6px 0}
-li{font-size:13px;color:var(--muted);line-height:1.6}
-.info{
-    font-size:13px;
-    color:var(--muted);
-    line-height:1.6;
-}
-.footer{
-    grid-column:1/-1;
-    font-size:12px;
-    color:#64748b;
-    text-align:center;
-    margin-top:14px;
-}
-@media(max-width:1000px){
-    .container{grid-template-columns:1fr}
-}
+    /* ===== Global Styles ===== */
+    body {
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: #e5e7eb;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* ===== Intro Section ===== */
+    .intro {
+        width: 90%;
+        max-width: 900px;
+        padding: 30px 20px;
+        margin-top: 20px;
+        background: linear-gradient(160deg, #1f2937, #111827);
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        text-align: center;
+        line-height: 1.6;
+    }
+
+    .intro h2 {
+        font-size: 28px;
+        margin-bottom: 10px;
+        color: #facc15;
+    }
+
+    .intro p {
+        font-size: 15px;
+        color: #cbd5f5;
+    }
+
+    /* ===== Main Container ===== */
+    .main-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 95%;
+        max-width: 1200px;
+        margin-top: 30px;
+    }
+
+    /* ===== Input / Result Box ===== */
+    .box {
+        background: linear-gradient(180deg, #111827, #1f2937);
+        padding: 30px;
+        width: 100%;
+        max-width: 540px;
+        border-radius: 18px;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 10px;
+        font-weight: 700;
+        color: #e5e7eb;
+    }
+
+    .subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #9ca3af;
+        margin-bottom: 20px;
+    }
+
+    input, select, button {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 10px;
+        border: none;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    input, select {
+        background: #020617;
+        color: #e5e7eb;
+        border: 1px solid #334155;
+    }
+
+    input::placeholder {
+        color: #64748b;
+    }
+
+    button {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37,99,235,0.4);
+    }
+
+    .note {
+        font-size: 12.5px;
+        color: #9ca3af;
+        margin-top: 12px;
+        line-height: 1.4;
+        text-align: center;
+    }
+
+    .result {
+        margin-top: 20px;
+        font-size: 16px;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    /* ===== Progress Bar ===== */
+    .bar {
+        height: 16px;
+        background: #334155;
+        border-radius: 999px;
+        margin-top: 10px;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        transition: width 0.6s ease, background 0.4s ease;
+    }
+
+    /* ===== Cards ===== */
+    .cards-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-left: 30px;
+        min-width: 280px;
+    }
+
+    .card {
+        background: rgba(17, 24, 39, 0.8);
+        padding: 20px;
+        border-radius: 18px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        color: #cbd5f5;
+        font-size: 14px;
+        transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 35px rgba(0,0,0,0.6);
+    }
+
+    .card h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-size: 16px;
+        color: #facc15;
+    }
+
+    /* ===== Info Text inside cards ===== */
+    .info {
+        font-size: 13px;
+        color: #cbd5f5;
+        line-height: 1.4;
+    }
+
+    /* ===== Session History Card ===== */
+    .history {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    /* ===== Footer ===== */
+    footer {
+        margin-top: 30px;
+        font-size: 12px;
+        color: #94a3b8;
+        text-align: center;
+        padding-bottom: 20px;
+    }
+
+    /* ===== Responsive ===== */
+    @media screen and (max-width: 1024px) {
+        .main-container {
+            flex-direction: column;
+            align-items: center;
+        }
+        .cards-container {
+            margin-left: 0;
+            width: 100%;
+            max-width: 540px;
+        }
+    }
 </style>
 </head>
-
 <body>
 
-<div class="container">
-
-<!-- LEFT -->
-<div class="side">
-
-<div class="card">
-<h3>🧠 Why this model exists</h3>
-<p class="info">
-This tool demonstrates how income, education, employment, and geography
-interact to influence poverty vulnerability.  
-It is inspired by policy-level poverty indices used by governments and the UN.
-</p>
-<ul>
-<li>Transparent rule-based logic</li>
-<li>Not a black-box AI</li>
-<li>Educational & awareness focused</li>
-</ul>
+<!-- ===== Intro Section ===== -->
+<div class="intro">
+    <h2>Welcome to the Poverty Risk Predictor</h2>
+    <p>This AI-powered model estimates <b>relative poverty risk</b> based on your income, education, and employment status. It is aligned with <b>SDG-1: No Poverty</b> and aims to create awareness about global and local poverty patterns.</p>
+    <p>Data is normalized according to your country's living standards. This tool is for <b>educational purposes only</b>.</p>
 </div>
 
-<div class="card">
-<h3>🌍 Country Poverty Context</h3>
-<p id="context" class="info">
-Select a country to view a brief socio-economic backdrop based on global poverty trends.
-This helps interpret results beyond just numbers.
-</p>
-</div>
+<!-- ===== Main Container ===== -->
+<div class="main-container">
 
-</div>
+    <!-- ===== Input / Result Box ===== -->
+    <div class="box">
+        <h1>🌍 Poverty Risk Predictor</h1>
+        <div class="subtitle">
+            AI-powered educational model aligned with <b>SDG-1: No Poverty</b>
+        </div>
 
-<!-- CENTER -->
-<div class="center">
-<h2>🌍 Poverty Risk Predictor</h2>
-<small>Aligned with <b>UN Sustainable Development Goal 1 – No Poverty</b></small>
+        <p class="note">
+            ⚠ For educational purposes only. Poverty standards vary by country, cost of living, and social context.
+        </p>
 
-<form id="form">
-<input type="number" name="income" placeholder="Annual Income" required>
-<input type="number" name="education" placeholder="Years of Education" required>
-<select name="employment">
-<option value="1">Employed</option>
-<option value="0">Unemployed</option>
-</select>
-<select name="country">
-<option>India</option>
-<option>USA</option>
-<option>UK</option>
-<option>UAE</option>
-<option>Nigeria</option>
-<option>Brazil</option>
-</select>
-<button>Analyze Poverty Risk</button>
-</form>
+        <form id="form">
+            <input type="number" name="income" placeholder="Annual Income" required>
+            <input type="number" name="education" placeholder="Years of Education" required>
 
-<div id="result" style="margin-top:14px;font-weight:600">
-Enter details to estimate poverty risk.
-</div>
-<div class="bar"><div id="fill" class="fill"></div></div>
+            <select name="employment">
+                <option value="1">Employed</option>
+                <option value="0">Unemployed</option>
+            </select>
 
-<div class="info" style="margin-top:12px">
-⚠️ This is not a real eligibility or classification system.  
-Results are simplified for demonstration and policy awareness.
-</div>
-</div>
+            <select name="country">
+                <option>India</option>
+                <option>USA</option>
+                <option>UK</option>
+                <option>UAE</option>
+                <option>Nigeria</option>
+                <option>Brazil</option>
+            </select>
 
-<!-- RIGHT -->
-<div class="side">
+            <button type="submit">Analyze Poverty Risk</button>
+        </form>
 
-<div class="card">
-<h3>🔮 Scenario Simulation</h3>
-<p class="info">
-Understand how changes in income could impact poverty risk.
-This mirrors sensitivity analysis used in social policy planning.
-</p>
-<ul>
-<li id="s1">Income increase scenario shown here</li>
-<li id="s2">Income decrease scenario shown here</li>
-</ul>
-</div>
+        <div id="result" class="result"></div>
 
-<div class="card">
-<h3>🎯 SDG Alignment</h3>
-<p id="sdgtext" class="info">
-Supports SDG-1 by highlighting economic vulnerability and
-encouraging data-driven poverty reduction strategies.
-</p>
-</div>
+        <div class="bar">
+            <div id="fill" class="fill"></div>
+        </div>
+    </div>
+
+    <!-- ===== Cards Container ===== -->
+    <div class="cards-container">
+        <div class="card" id="why-result">
+            <h3>Why this result?</h3>
+            <div class="info" id="why-text">Enter your details to see the explanation of your risk score.</div>
+        </div>
+
+        <div class="card" id="country-context">
+            <h3>Country Poverty Context</h3>
+            <div class="info" id="context-text">Your country's poverty line will be used to contextualize your results.</div>
+        </div>
+
+        <div class="card" id="sdg-alignment">
+            <h3>SDG Alignment</h3>
+            <div class="info">This model helps raise awareness about <b>SDG-1: No Poverty</b> and highlights local/global poverty awareness.</div>
+        </div>
+
+        <div class="card" id="session-history">
+            <h3>Session History</h3>
+            <div class="info history" id="history-text">
+                No results yet.
+            </div>
+        </div>
+    </div>
 
 </div>
 
-<!-- HISTORY -->
-<div class="card">
-<h3>📜 Session History</h3>
-<ul id="hist">
-<li class="info">Your recent analyses will appear here for comparison.</li>
-</ul>
-</div>
-
-<div class="footer">
-Educational prototype inspired by global poverty indices (World Bank / UNDP style).
-</div>
-
-</div>
+<footer>
+    This model uses income normalization, education level, and employment status to estimate <b>relative poverty risk</b> — not absolute financial standing.
+</footer>
 
 <script>
-document.getElementById("form").onsubmit = async e =>{
-e.preventDefault();
-const r = await fetch("/predict",{method:"POST",body:new FormData(e.target)});
-const d = await r.json();
+    const sessionHistory = [];
 
-result.innerText=`Poverty Risk: ${d.risk}% (${d.level})`;
-fill.style.width=d.risk+"%";
-fill.style.background=d.color;
+    document.getElementById("form").onsubmit = async (e) => {
+        e.preventDefault();
 
-context.innerText=d.country_context;
-s1.innerText=`If income increases by 20% → Risk ≈ ${d.simulations.income_plus_20}%`;
-s2.innerText=`If income decreases by 20% → Risk ≈ ${d.simulations.income_minus_20}%`;
-sdgtext.innerText=`${d.sdg.goal} — ${d.sdg.impact}`;
+        const res = await fetch("/predict", {
+            method: "POST",
+            body: new FormData(e.target)
+        });
 
-hist.innerHTML="";
-d.history.forEach(h=>{
-hist.innerHTML+=`<li>${h.time} · ${h.country} · ${h.risk}%</li>`;
-});
-}
+        const data = await res.json();
+
+        // Update main result
+        document.getElementById("result").innerText =
+            `Poverty Risk: ${data.risk}% (${data.level})`;
+
+        const fill = document.getElementById("fill");
+        fill.style.width = data.risk + "%";
+        fill.style.background = data.color;
+
+        // Update cards
+        document.getElementById("why-text").innerText =
+            `Based on your income, education, and employment, your relative poverty risk is calculated considering your country's living standards.`;
+
+        document.getElementById("context-text").innerText =
+            `Global comparison: ${data.comparison}\nSuggested support: ${data.help}`;
+
+        // Update session history
+        const entry = `Income: ${e.target.income.value}, Education: ${e.target.education.value}, Employment: ${e.target.employment.value == 1 ? "Employed" : "Unemployed"}, Country: ${e.target.country.value} => Risk: ${data.risk}% (${data.level})`;
+        sessionHistory.push(entry);
+        document.getElementById("history-text").innerHTML = sessionHistory.join("<br>");
+    };
 </script>
 
 </body>
