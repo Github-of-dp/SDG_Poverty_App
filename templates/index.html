@@ -1,245 +1,173 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Poverty Risk Predictor</title>
+    <title>Poverty Risk Predictor</title>
 
-<!-- Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<style>
-    /* ===== Global Styles ===== */
-    body {
-        font-family: 'Inter', sans-serif;
-        margin: 0;
-        padding: 0;
-        background: linear-gradient(135deg, #0f172a, #1e293b);
-        color: #e5e7eb;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    /* ===== Intro Section ===== */
-    .intro {
-        width: 90%;
-        max-width: 900px;
-        padding: 30px 20px;
-        margin-top: 20px;
-        background: linear-gradient(160deg, #1f2937, #111827);
-        border-radius: 18px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        text-align: center;
-        line-height: 1.6;
-    }
-
-    .intro h2 {
-        font-size: 28px;
-        margin-bottom: 10px;
-        color: #facc15;
-    }
-
-    .intro p {
-        font-size: 15px;
-        color: #cbd5f5;
-    }
-
-    /* ===== Main Container ===== */
-    .main-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        width: 95%;
-        max-width: 1200px;
-        margin-top: 30px;
-    }
-
-    /* ===== Input / Result Box ===== */
-    .box {
-        background: linear-gradient(180deg, #111827, #1f2937);
-        padding: 30px;
-        width: 100%;
-        max-width: 540px;
-        border-radius: 18px;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.6);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    h1 {
-        text-align: center;
-        margin-bottom: 10px;
-        font-weight: 700;
-        color: #e5e7eb;
-    }
-
-    .subtitle {
-        text-align: center;
-        font-size: 14px;
-        color: #9ca3af;
-        margin-bottom: 20px;
-    }
-
-    input, select, button {
-        width: 100%;
-        padding: 12px;
-        margin: 8px 0;
-        border-radius: 10px;
-        border: none;
-        font-size: 14px;
-        font-family: 'Inter', sans-serif;
-    }
-
-    input, select {
-        background: #020617;
-        color: #e5e7eb;
-        border: 1px solid #334155;
-    }
-
-    input::placeholder {
-        color: #64748b;
-    }
-
-    button {
-        background: linear-gradient(135deg, #2563eb, #1d4ed8);
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(37,99,235,0.4);
-    }
-
-    .note {
-        font-size: 12.5px;
-        color: #9ca3af;
-        margin-top: 12px;
-        line-height: 1.4;
-        text-align: center;
-    }
-
-    .result {
-        margin-top: 20px;
-        font-size: 16px;
-        font-weight: 600;
-        text-align: center;
-    }
-
-    /* ===== Progress Bar ===== */
-    .bar {
-        height: 16px;
-        background: #334155;
-        border-radius: 999px;
-        margin-top: 10px;
-        overflow: hidden;
-        width: 100%;
-    }
-
-    .fill {
-        height: 100%;
-        width: 0%;
-        border-radius: 999px;
-        transition: width 0.6s ease, background 0.4s ease;
-    }
-
-    /* ===== Cards ===== */
-    .cards-container {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        margin-left: 30px;
-        min-width: 280px;
-    }
-
-    .card {
-        background: rgba(17, 24, 39, 0.8);
-        padding: 20px;
-        border-radius: 18px;
-        box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-        color: #cbd5f5;
-        font-size: 14px;
-        transition: transform 0.2s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 35px rgba(0,0,0,0.6);
-    }
-
-    .card h3 {
-        margin-top: 0;
-        margin-bottom: 8px;
-        font-size: 16px;
-        color: #facc15;
-    }
-
-    /* ===== Info Text inside cards ===== */
-    .info {
-        font-size: 13px;
-        color: #cbd5f5;
-        line-height: 1.4;
-    }
-
-    /* ===== Session History Card ===== */
-    .history {
-        max-height: 200px;
-        overflow-y: auto;
-    }
-
-    /* ===== Footer ===== */
-    footer {
-        margin-top: 30px;
-        font-size: 12px;
-        color: #94a3b8;
-        text-align: center;
-        padding-bottom: 20px;
-    }
-
-    /* ===== Responsive ===== */
-    @media screen and (max-width: 1024px) {
-        .main-container {
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #e0e7ff);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
+            color: #1f2937;
         }
-        .cards-container {
-            margin-left: 0;
+
+        /* Intro / Info Section */
+        .intro {
+            text-align: center;
+            padding: 40px 20px 20px 20px;
+            max-width: 900px;
+        }
+        .intro h1 {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            color: #2563eb;
+        }
+        .intro p {
+            font-size: 1rem;
+            margin: 6px 0;
+            color: #334155;
+        }
+
+        /* Central Box */
+        .central-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            gap: 20px;
+        }
+
+        /* Input Card */
+        .input-card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 540px;
+            max-width: 520px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
         }
-    }
-</style>
+
+        .input-card h2 {
+            text-align: center;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 4px 0;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+        }
+
+        button {
+            background: linear-gradient(135deg, #2563eb, #60a5fa);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37,99,235,0.3);
+        }
+
+        /* Cards Around Input */
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 18px 20px;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            flex: 1 1 250px;
+            min-width: 250px;
+            transition: transform 0.2s ease;
+        }
+
+        .card h3 {
+            margin: 0 0 8px 0;
+            color: #2563eb;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        /* Risk Bar */
+        .risk-bar {
+            margin-top: 15px;
+            width: 100%;
+            height: 18px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.6s ease, background 0.4s ease;
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #64748b;
+            text-align: center;
+            padding-bottom: 20px;
+        }
+    </style>
 </head>
+
 <body>
 
-<!-- ===== Intro Section ===== -->
+<!-- Intro / Purpose Section -->
 <div class="intro">
-    <h2>Welcome to the Poverty Risk Predictor</h2>
-    <p>This AI-powered model estimates <b>relative poverty risk</b> based on your income, education, and employment status. It is aligned with <b>SDG-1: No Poverty</b> and aims to create awareness about global and local poverty patterns.</p>
-    <p>Data is normalized according to your country's living standards. This tool is for <b>educational purposes only</b>.</p>
+    <h1>🌍 Poverty Risk Predictor</h1>
+    <p>AI-powered tool to estimate relative poverty risk based on income, education, and employment.</p>
+    <p>Aligned with <b>SDG 1: No Poverty</b>, this tool helps understand how economic and social factors impact poverty levels in different countries.</p>
+    <p>⚠ For educational purposes only. Standards vary by country, cost of living, and context.</p>
 </div>
 
-<!-- ===== Main Container ===== -->
-<div class="main-container">
+<!-- Central Input + Cards -->
+<div class="central-box">
 
-    <!-- ===== Input / Result Box ===== -->
-    <div class="box">
-        <h1>🌍 Poverty Risk Predictor</h1>
-        <div class="subtitle">
-            AI-powered educational model aligned with <b>SDG-1: No Poverty</b>
-        </div>
-
-        <p class="note">
-            ⚠ For educational purposes only. Poverty standards vary by country, cost of living, and social context.
-        </p>
-
+    <!-- Input Card -->
+    <div class="input-card">
+        <h2>Enter Your Details</h2>
         <form id="form">
-            <input type="number" name="income" placeholder="Annual Income" required>
+            <input type="number" name="income" placeholder="Monthly Income" required>
             <input type="number" name="education" placeholder="Years of Education" required>
 
             <select name="employment">
@@ -259,77 +187,72 @@
             <button type="submit">Analyze Poverty Risk</button>
         </form>
 
-        <div id="result" class="result"></div>
-
-        <div class="bar">
+        <div class="risk-bar">
             <div id="fill" class="fill"></div>
         </div>
+
+        <div id="result" style="margin-top: 10px; font-weight: 600; color:#1f2937;"></div>
     </div>
 
-    <!-- ===== Cards Container ===== -->
+    <!-- Cards Around Input -->
     <div class="cards-container">
-        <div class="card" id="why-result">
-            <h3>Why this result?</h3>
-            <div class="info" id="why-text">Enter your details to see the explanation of your risk score.</div>
+        <div class="card">
+            <h3>🌐 Global Comparison</h3>
+            <p id="comparison">Enter details to see comparison</p>
         </div>
 
-        <div class="card" id="country-context">
-            <h3>Country Poverty Context</h3>
-            <div class="info" id="context-text">Your country's poverty line will be used to contextualize your results.</div>
+        <div class="card">
+            <h3>🤝 Suggested Support</h3>
+            <p id="help">Enter details to see support suggestions</p>
         </div>
 
-        <div class="card" id="sdg-alignment">
-            <h3>SDG Alignment</h3>
-            <div class="info">This model helps raise awareness about <b>SDG-1: No Poverty</b> and highlights local/global poverty awareness.</div>
+        <div class="card">
+            <h3>ℹ Why This Result?</h3>
+            <p id="why">Explanation will appear here after analysis</p>
         </div>
 
-        <div class="card" id="session-history">
-            <h3>Session History</h3>
-            <div class="info history" id="history-text">
-                No results yet.
-            </div>
+        <div class="card">
+            <h3>📊 Country Poverty Context</h3>
+            <p id="context">Information will appear here after analysis</p>
         </div>
     </div>
-
 </div>
 
 <footer>
-    This model uses income normalization, education level, and employment status to estimate <b>relative poverty risk</b> — not absolute financial standing.
+    This model estimates <b>relative poverty risk</b> — not absolute financial standing.  
+    Income, education, and employment status are normalized per country context.
 </footer>
 
 <script>
-    const sessionHistory = [];
+document.getElementById("form").onsubmit = async (e) => {
+    e.preventDefault();
 
-    document.getElementById("form").onsubmit = async (e) => {
-        e.preventDefault();
+    const res = await fetch("/predict", {
+        method: "POST",
+        body: new FormData(e.target)
+    });
 
-        const res = await fetch("/predict", {
-            method: "POST",
-            body: new FormData(e.target)
-        });
+    const data = await res.json();
 
-        const data = await res.json();
+    document.getElementById("result").innerText =
+        `Poverty Risk: ${data.risk}% (${data.level})`;
 
-        // Update main result
-        document.getElementById("result").innerText =
-            `Poverty Risk: ${data.risk}% (${data.level})`;
+    const fill = document.getElementById("fill");
+    fill.style.width = data.risk + "%";
+    fill.style.background = data.color;
 
-        const fill = document.getElementById("fill");
-        fill.style.width = data.risk + "%";
-        fill.style.background = data.color;
+    document.getElementById("comparison").innerText =
+        data.comparison;
 
-        // Update cards
-        document.getElementById("why-text").innerText =
-            `Based on your income, education, and employment, your relative poverty risk is calculated considering your country's living standards.`;
+    document.getElementById("help").innerText =
+        data.help;
 
-        document.getElementById("context-text").innerText =
-            `Global comparison: ${data.comparison}\nSuggested support: ${data.help}`;
+    document.getElementById("why").innerText =
+        `This estimate is based on your income, education, and employment status relative to the average in ${data.country || 'your country'}.`;
 
-        // Update session history
-        const entry = `Income: ${e.target.income.value}, Education: ${e.target.education.value}, Employment: ${e.target.employment.value == 1 ? "Employed" : "Unemployed"}, Country: ${e.target.country.value} => Risk: ${data.risk}% (${data.level})`;
-        sessionHistory.push(entry);
-        document.getElementById("history-text").innerHTML = sessionHistory.join("<br>");
-    };
+    document.getElementById("context").innerText =
+        `In ${data.country || 'your country'}, the local poverty line is considered a monthly income of ${data.poverty_line || 'N/A'}.`;
+};
 </script>
 
 </body>
