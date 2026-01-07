@@ -1,15 +1,19 @@
 from flask import Flask, render_template, request, jsonify
+from sklearn.linear_model import LogisticRegression
+import numpy as np
 
 app = Flask(__name__)
 
-# ---------------- COUNTRY DATA ----------------
+# --------------------------------------------------
+# COUNTRY POVERTY LINES (ANNUAL, LOCAL CURRENCY)
+# --------------------------------------------------
 POVERTY_LINE = {
-    "India": 10000,    # monthly income in local currency
-    "USA": 1500,
-    "UK": 1400,
-    "UAE": 6000,
-    "Nigeria": 120,
-    "Brazil": 400
+    "India": 10000,
+    "USA": 15000,
+    "UK": 14000,
+    "UAE": 16000,
+    "Nigeria": 1200,
+    "Brazil": 4000
 }
 
 HELP_SUGGESTIONS = {
@@ -21,58 +25,103 @@ HELP_SUGGESTIONS = {
     "Brazil": "Look into Bolsa Família programs and employment support services."
 }
 
-# ---------------- ROUTES ----------------
+# --------------------------------------------------
+# SIMPLE LOGISTIC REGRESSION (SECONDARY AI LAYER)
+# --------------------------------------------------
+# Trained on logical synthetic patterns
+X_train = np.array([
+    [0, 0, 0],
+    [2000, 5, 0],
+    [5000, 8, 0],
+    [8000, 10, 1],
+    [10000, 12, 1],
+    [15000, 15, 1],
+    [25000, 18, 1]
+])
+
+y_train = np.array([1, 1, 1, 0, 0, 0, 0])
+
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# --------------------------------------------------
+# ROUTES
+# --------------------------------------------------
 @app.route("/")
 def home():
     return render_template("index.html")
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    income = max(0, float(request.form["income"]))
-    education = float(request.form.get("education", 0))
-    employment = int(request.form.get("employment", 0))
-    household_size = int(request.form.get("household_size", 1))
-    working_members = int(request.form.get("working_members", 1))
-    country = request.form.get("country", "India")
+    income = float(request.form["income"])
+    income = max(0, income)  # no negative income
+    education = float(request.form["education"])
+    employment = int(request.form["employment"])
+    country = request.form["country"]
 
     poverty_line = POVERTY_LINE.get(country, 10000)
 
-    # ---------------- RULE-BASED RISK ----------------
-    # Base poverty risk based on income vs country poverty line
-    if income >= poverty_line:
-        base_risk = max(10, 30 - (income - poverty_line)*0.001)
-    else:
+    # --------------------------------------------------
+    # LAYER 1: ECONOMIC REALITY (PRIMARY)
+    # --------------------------------------------------
+    if income == 0:
+        base_risk = 95
+
+    elif income < poverty_line:
         deficit_ratio = (poverty_line - income) / poverty_line
-        base_risk = 90 * deficit_ratio + 10
+        base_risk = 70 + (deficit_ratio * 25)  # 70–95%
 
-    # Household modifier
-    household_factor = max(1, household_size / working_members)
-    base_risk *= household_factor
-
-    # Education/Employment modifier
-    modifier = education*1.5 + employment*5
-    if base_risk > 50:
-        risk_percent = max(base_risk - modifier, 50)
     else:
-        risk_percent = max(base_risk - modifier, 10)
-    risk_percent = min(100, max(0, risk_percent))
+        surplus_ratio = (income - poverty_line) / poverty_line
+        base_risk = max(10, 35 - surplus_ratio * 20)  # 10–35%
 
-    # Risk label & color
-    if risk_percent < 35:
+    # --------------------------------------------------
+    # LAYER 2: ML ADJUSTMENT (SECONDARY)
+    # --------------------------------------------------
+    ai_prob = model.predict_proba([[income, education, employment]])[0][1]
+    ai_adjustment = (ai_prob - 0.5) * 20  # mild influence
+
+    risk = base_risk + ai_adjustment
+
+    # --------------------------------------------------
+    # LAYER 3: EDUCATION & EMPLOYMENT SAFETY LIMITS
+    # --------------------------------------------------
+    if income < poverty_line:
+        risk = max(risk, 60)   # cannot be "low" if below poverty line
+
+    risk -= education * 0.6
+    risk -= employment * 8
+
+    # Final clamp
+    risk = min(100, max(5, risk))
+    risk = round(risk, 2)
+
+    # --------------------------------------------------
+    # OUTPUT METADATA
+    # --------------------------------------------------
+    if risk < 35:
         level = "Low"
         color = "green"
-    elif risk_percent < 65:
+    elif risk < 65:
         level = "Medium"
         color = "orange"
     else:
         level = "High"
         color = "red"
 
-    comparison = "Below global average" if income < poverty_line else "Above global average"
-    help_text = HELP_SUGGESTIONS.get(country, "Seek local support programs.")
+    comparison = (
+        "Below national poverty threshold"
+        if income < poverty_line
+        else "Above national poverty threshold"
+    )
+
+    help_text = HELP_SUGGESTIONS.get(
+        country,
+        "Seek local government and community support programs."
+    )
 
     return jsonify({
-        "risk": round(risk_percent,2),
+        "risk": risk,
         "level": level,
         "color": color,
         "comparison": comparison,
