@@ -1,260 +1,295 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Household Poverty Risk Predictor</title>
+<title>Household Poverty Risk Predictor</title>
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-            min-height: 100vh;
-            margin: 0;
-            color: #0f172a;
-        }
+<style>
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #fef6ff, #f0fdf4, #eff6ff);
+    margin: 0;
+    padding: 30px;
+    color: #1f2937;
+}
 
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            padding: 30px 20px;
-        }
+.container {
+    max-width: 1300px;
+    margin: auto;
+}
 
-        /* ---------- INTRO SECTION ---------- */
-        .intro {
-            text-align: center;
-            margin-bottom: 35px;
-        }
+/* ---------- INTRO ---------- */
+.intro {
+    text-align: center;
+    margin-bottom: 50px;
+    animation: fadeDown 1s ease;
+}
 
-        .intro h1 {
-            font-size: 34px;
-            font-weight: 700;
-        }
+.intro h1 {
+    font-size: 40px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #6366f1, #22c55e, #ec4899);
+    -webkit-background-clip: text;
+    color: transparent;
+}
 
-        .intro p {
-            font-size: 15px;
-            max-width: 750px;
-            margin: 12px auto;
-            color: #475569;
-        }
+.intro p {
+    max-width: 900px;
+    margin: 10px auto;
+    font-size: 15px;
+    color: #475569;
+}
 
-        .disclaimer {
-            font-size: 13px;
-            color: #64748b;
-            margin-top: 10px;
-        }
+.disclaimer {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 10px;
+}
 
-        /* ---------- MAIN GRID ---------- */
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1.4fr 1fr;
-            gap: 22px;
-            align-items: start;
-        }
+/* ---------- GRID ---------- */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 1fr;
+    gap: 26px;
+}
 
-        /* ---------- CARDS ---------- */
-        .card {
-            background: white;
-            padding: 18px;
-            border-radius: 18px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
-        }
+/* ---------- CENTER CLASS ---------- */
+.center {
+    grid-column: 2;
+}
 
-        .card h3 {
-            margin-top: 0;
-            font-size: 16px;
-            color: #1e293b;
-        }
+/* ---------- CARDS ---------- */
+.card {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 26px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+    animation: fadeUp 0.9s ease;
+}
 
-        .card p {
-            font-size: 13px;
-            color: #475569;
-            line-height: 1.5;
-        }
+.card:hover {
+    transform: translateY(-6px);
+    transition: 0.3s ease;
+}
 
-        /* ---------- INPUT CARD ---------- */
-        .input-card {
-            padding: 26px;
-        }
+h3 {
+    margin-top: 0;
+    font-size: 20px;
+}
 
-        input, select, button {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 10px;
-            font-size: 14px;
-            border: 1px solid #cbd5f5;
-        }
+/* ---------- FORM ---------- */
+input, select, button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+}
 
-        input, select {
-            background: #f8fafc;
-        }
+button {
+    background: linear-gradient(135deg, #22c55e, #3b82f6, #ec4899);
+    color: white;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    margin-top: 16px;
+}
 
-        button {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+button:hover {
+    filter: brightness(1.05);
+}
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(37,99,235,0.35);
-        }
+/* ---------- BARS ---------- */
+.bar {
+    height: 18px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 12px;
+}
 
-        /* ---------- RESULT ---------- */
-        .result {
-            margin-top: 16px;
-            font-size: 16px;
-            font-weight: 600;
-        }
+.fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    transition: width 0.7s ease;
+}
 
-        .bar {
-            height: 16px;
-            background: #e5e7eb;
-            border-radius: 999px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
+.info {
+    font-size: 14px;
+    margin-top: 10px;
+    color: #374151;
+}
 
-        .fill {
-            height: 100%;
-            width: 0%;
-            border-radius: 999px;
-            transition: width 0.6s ease, background 0.4s ease;
-        }
+/* ---------- HISTORY ---------- */
+.history-box {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
 
-        /* ---------- INFO CARD ---------- */
-        .info-text {
-            font-size: 13px;
-            margin-top: 8px;
-            color: #334155;
-        }
+.history-item {
+    font-size: 13px;
+    padding: 8px 0;
+    border-bottom: 1px dashed #cbd5e1;
+}
 
-        /* ---------- FOOTER ---------- */
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 12px;
-            color: #64748b;
-        }
+/* ---------- FOOTER ---------- */
+.footer {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 50px;
+    color: #64748b;
+}
 
-    </style>
+/* ---------- ANIMATIONS ---------- */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(25px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
 </head>
 
 <body>
-
 <div class="container">
 
-    <!-- INTRO -->
-    <div class="intro">
-        <h1>🌍 Household Poverty Risk Predictor</h1>
-        <p>
-            An AI-assisted educational prototype aligned with <b>SDG-1: No Poverty</b>.
-            This tool estimates <b>relative household poverty risk</b> using income,
-            education, employment, and country-specific thresholds.
-        </p>
-        <div class="disclaimer">
-            ⚠ Educational use only. Results are estimates — not financial or policy advice.
-        </div>
+<!-- INTRO -->
+<div class="intro">
+    <h1>🏠 Household Poverty Risk Predictor</h1>
+    <p>
+        An AI-driven academic prototype estimating <b>household poverty vulnerability</b>
+        using income, education, employment and household factors — aligned with
+        <b>UN SDG-1: No Poverty</b>.
+    </p>
+    <div class="disclaimer">
+        ⚠ Educational project only. Not an official poverty assessment or policy tool.
     </div>
+</div>
 
-    <!-- MAIN GRID -->
-    <div class="grid">
+<!-- GRID -->
+<div class="grid">
 
-        <!-- LEFT CARD -->
-        <div class="card">
-            <h3>Why this matters</h3>
-            <p>
-                Poverty is multidimensional. This project highlights how income,
-                employment, and education interact differently across countries,
-                reinforcing the importance of localized policy under SDG-1.
-            </p>
-        </div>
+<!-- LEFT CARD -->
+<div class="card" style="background: linear-gradient(135deg,#ecfeff,#f0fdf4);">
+    <h3>📊 Poverty Risk Output</h3>
+    <div id="result">Awaiting analysis</div>
+    <div class="bar"><div id="fill" class="fill"></div></div>
+    <div id="comparison" class="info"></div>
+    <div id="why" class="info"></div>
+</div>
 
-        <!-- CENTER INPUT CARD -->
-        <div class="card input-card">
-            <h3>Household Details</h3>
+<!-- CENTER INPUT CARD -->
+<div class="card center" style="background: linear-gradient(135deg,#fef3c7,#fde68a);">
+    <h3>🏠 Household Details</h3>
+    <form id="form">
+        <input name="income" type="number" placeholder="Monthly Household Income" required>
+        <input name="education" type="number" placeholder="Highest Years of Education" required>
+        <input name="household_size" type="number" placeholder="Total Household Members" required>
+        <input name="working_members" type="number" placeholder="Working Members" required>
 
-            <form id="form" action="javascript:void(0);">
-                <input type="number" name="income" placeholder="Annual Household Income (local currency)" required>
-                <input type="number" name="education" placeholder="Highest Years of Education" required>
+        <select name="employment">
+            <option value="1">At least one employed</option>
+            <option value="0">No employed members</option>
+        </select>
 
-                <select name="employment">
-                    <option value="1">At least one employed member</option>
-                    <option value="0">No employed members</option>
-                </select>
+        <select name="country">
+            <option>India</option>
+            <option>USA</option>
+            <option>UK</option>
+            <option>UAE</option>
+            <option>Nigeria</option>
+        </select>
 
-                <select name="country">
-                    <option>India</option>
-                    <option>USA</option>
-                    <option>UK</option>
-                    <option>UAE</option>
-                    <option>Nigeria</option>
-                    <option>Brazil</option>
-                </select>
+        <button type="submit">Analyze Risk</button>
+    </form>
+</div>
 
-                <button type="submit">Analyze Poverty Risk</button>
-            </form>
+<!-- RIGHT CARD -->
+<div class="card" style="background: linear-gradient(135deg,#fce7f3,#fdf2f8);">
+    <h3>🔮 Scenario Simulation</h3>
+    <p class="info">Test “what-if” improvements</p>
+    <form id="scenario">
+        <input name="income" type="number" placeholder="Hypothetical Income" required>
+        <input name="education" type="number" placeholder="Hypothetical Education" required>
+        <select name="employment">
+            <option value="1">Employed</option>
+            <option value="0">Unemployed</option>
+        </select>
+        <button type="submit">Simulate</button>
+    </form>
+    <div id="scenario-result" class="info"></div>
+    <div class="bar"><div id="scenario-fill" class="fill"></div></div>
+</div>
 
-            <div id="result" class="result"></div>
-
-            <div class="bar">
-                <div id="fill" class="fill"></div>
-            </div>
-        </div>
-
-        <!-- RIGHT CARD -->
-        <div class="card">
-            <h3>Model logic</h3>
-            <p>
-                Risk is computed using country-specific poverty lines, income deficit ratios,
-                and adjusted using education and employment as protective factors.
-            </p>
-        </div>
-
+<!-- BOTTOM LEFT: Session History -->
+<div class="card" style="background: linear-gradient(135deg,#e0e7ff,#eef2ff);">
+    <h3>🕒 Session History</h3>
+    <div class="history-box" id="history">
+        <div class="info">No sessions yet</div>
     </div>
+</div>
 
-    <!-- RESULT INFO CARD -->
-    <div class="card" style="margin-top:22px;">
-        <h3>Context & Support</h3>
-        <div id="comparison" class="info-text"></div>
-        <div id="help" class="info-text"></div>
-    </div>
-
-    <footer>
-        Built as a school AI project using Python & Flask • SDG-1 Focus
-    </footer>
+<!-- BOTTOM RIGHT: SDG Impact -->
+<div class="card" style="background: linear-gradient(135deg,#dcfce7,#bbf7d0);">
+    <h3>🎯 SDG-1 Impact</h3>
+    <p class="info">• Identifies vulnerable households</p>
+    <p class="info">• Demonstrates education & employment leverage</p>
+    <p class="info">• Supports poverty-awareness modelling</p>
+</div>
 
 </div>
 
+<div class="footer">
+Academic AI Prototype • Sustainable Development Goal 1
+</div>
+</div>
+
 <script>
-document.getElementById("form").addEventListener("submit", async function(e) {
+async function predict(form) {
+    const res = await fetch("/predict", { method: "POST", body: new FormData(form) });
+    return await res.json();
+}
+
+// Household Form
+document.getElementById("form").onsubmit = async e => {
     e.preventDefault();
+    const form = e.target;
+    const d = await predict(form);
 
-    const res = await fetch("/predict", {
-        method: "POST",
-        body: new FormData(this)
-    });
+    document.getElementById("result").innerText = `Risk: ${d.risk}% (${d.level})`;
+    document.getElementById("fill").style.width = d.risk + "%";
+    document.getElementById("fill").style.background = d.color;
 
-    const data = await res.json();
+    document.getElementById("comparison").innerText = "🌍 " + d.comparison;
+    document.getElementById("why").innerText = "📌 Reason: " + d.help;
 
-    document.getElementById("result").innerText =
-        `Poverty Risk: ${data.risk}% (${data.level})`;
+    // Session history
+    const item = document.createElement("div");
+    item.className = "history-item";
+    item.innerText = `Income ${form.income.value}, Education ${form.education.value}, Risk ${d.risk}%`;
+    const historyBox = document.getElementById("history");
+    if(historyBox.querySelector(".info")) historyBox.innerHTML = ""; // remove placeholder
+    historyBox.prepend(item);
+};
 
-    const fill = document.getElementById("fill");
-    fill.style.width = data.risk + "%";
-    fill.style.background = data.color;
+// Scenario Simulation Form
+document.getElementById("scenario").onsubmit = async e => {
+    e.preventDefault();
+    const form = e.target;
+    const d = await predict(form);
 
-    document.getElementById("comparison").innerText =
-        "🌐 Global comparison: " + data.comparison;
-
-    document.getElementById("help").innerText =
-        "🤝 Suggested support: " + data.help;
-});
+    document.getElementById("scenario-result").innerText = `Simulated Risk: ${d.risk}% (${d.level})`;
+    document.getElementById("scenario-fill").style.width = d.risk + "%";
+    document.getElementById("scenario-fill").style.background = d.color;
+};
 </script>
 
 </body>
