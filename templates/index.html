@@ -1,75 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Household Poverty Risk Predictor</title>
+    <title>Poverty Risk Predictor</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f0f4f8, #e2e8f0);
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
             min-height: 100vh;
             margin: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .intro {
-            max-width: 800px;
+            justify-content: center;
+            align-items: flex-start;
             padding: 20px;
-            text-align: center;
-            margin-top: 20px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            color: #1e293b;
         }
 
         .container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 30px;
-            gap: 20px;
+            max-width: 900px;
+            width: 100%;
         }
 
-        .box, .card {
-            background: white;
+        .info-section {
+            background: #f0f9ff;
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        /* Input box centralized and consistent size */
-        .box {
-            max-width: 400px;
-            flex: 1 1 400px;
+        .cards {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
         }
 
-        .box form {
-            width: 100%;
+        .input-card, .result-card, .session-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            flex: 1 1 280px;
+            min-width: 280px;
+        }
+
+        h1, h2, h3, h4 {
+            margin: 0 0 10px 0;
         }
 
         input, select, button {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             margin: 8px 0;
             border-radius: 10px;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #94a3b8;
             font-size: 14px;
         }
 
-        input::placeholder {
-            color: #64748b;
-        }
-
         button {
-            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
+            font-weight: 600;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
         }
 
         button:hover {
@@ -77,11 +72,10 @@
         }
 
         .bar {
-            height: 16px;
-            background: #cbd5e1;
+            height: 18px;
+            background: #e2e8f0;
             border-radius: 999px;
             margin-top: 10px;
-            width: 100%;
             overflow: hidden;
         }
 
@@ -92,184 +86,114 @@
             transition: width 0.6s ease, background 0.4s ease;
         }
 
-        .result {
-            margin-top: 10px;
-            font-weight: 600;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
         }
 
-        .card {
-            flex: 1 1 300px;
-            min-width: 280px;
+        th, td {
+            padding: 6px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
         }
 
-        h1,h3 { margin: 0 0 10px 0; text-align: center; }
-        p { text-align: center; }
-
-        .slider-container {
-            margin-top: 20px;
+        .session-card {
+            max-height: 300px;
+            overflow-y: auto;
         }
 
-        .slider {
-            margin: 10px 0;
+        @media(max-width: 768px){
+            .cards { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-
-<div class="intro">
-    <h1>🌍 Household Poverty Risk Predictor</h1>
-    <p>This tool estimates the <b>poverty risk of a household</b> based on income, education, employment, household size, and working members.</p>
-    <p>Aligned with <b>SDG-1: No Poverty</b>, it encourages awareness, scenario simulation, and actionable steps.</p>
-</div>
-
 <div class="container">
-    <!-- INPUT BOX -->
-    <div class="box">
-        <h3>Enter Household Details</h3>
-        <form id="form">
-            <input type="number" name="income" placeholder="Annual Household Income" required>
-            <input type="number" name="education" placeholder="Average Years of Education" required>
-            <select name="employment" required>
-                <option value="">Employment Status</option>
-                <option value="1">Employed</option>
-                <option value="0">Unemployed</option>
-            </select>
-            <input type="number" name="household_size" placeholder="Household Size" required>
-            <input type="number" name="working_members" placeholder="Working Members" required>
-            <select name="country" required>
-                <option value="">Select Country</option>
-                <option>India</option>
-                <option>USA</option>
-                <option>UK</option>
-                <option>UAE</option>
-                <option>Nigeria</option>
-                <option>Brazil</option>
-            </select>
-            <button type="submit">Analyze Poverty Risk</button>
-        </form>
+    <div class="info-section">
+        <h1>🌍 Poverty Risk Predictor</h1>
+        <p>AI-powered educational tool aligned with <b>SDG-1: No Poverty</b>. Understand your household's relative poverty risk and access support resources.</p>
+        <p>{{ sdg_info }}</p>
+    </div>
 
-        <div class="result" id="result"></div>
-        <div class="bar">
-            <div class="fill" id="fill"></div>
+    <div class="cards">
+        <!-- Input Card -->
+        <div class="input-card">
+            <h3>Enter Household Details</h3>
+            <form id="form">
+                <input type="number" name="income" placeholder="Annual Income" required>
+                <input type="number" name="education" placeholder="Years of Education" required>
+                <input type="number" name="household_size" placeholder="Household Size" required>
+                <input type="number" name="working_members" placeholder="Working Members" required>
+                <select name="employment">
+                    <option value="1">Employed</option>
+                    <option value="0">Unemployed</option>
+                </select>
+                <select name="country">
+                    <option>India</option>
+                    <option>USA</option>
+                    <option>UK</option>
+                    <option>UAE</option>
+                    <option>Nigeria</option>
+                    <option>Brazil</option>
+                </select>
+                <button type="submit">Analyze Poverty Risk</button>
+            </form>
         </div>
 
-        <!-- Scenario Simulation -->
-        <div class="slider-container">
-            <h4>💡 Scenario Simulation</h4>
-            <label>Income: <span id="sim-income-display">0</span></label>
-            <input type="range" id="sim-income" min="0" max="50000" value="0" class="slider">
-
-            <label>Education Years: <span id="sim-edu-display">0</span></label>
-            <input type="range" id="sim-education" min="0" max="25" value="0" class="slider">
-
-            <label>Working Members: <span id="sim-working-display">0</span></label>
-            <input type="range" id="sim-working" min="0" max="10" value="0" class="slider">
+        <!-- Result Card -->
+        <div class="result-card">
+            <h3>🏷️ Risk Result</h3>
+            <div id="result">No prediction yet</div>
+            <div class="bar"><div id="fill" class="fill"></div></div>
+            <div id="comparison" style="margin-top:10px;"></div>
+            <div id="help" style="margin-top:5px;"></div>
         </div>
-    </div>
 
-    <!-- GLOBAL COMPARISON + HELP CARD -->
-    <div class="card">
-        <h3>🌐 Global Comparison & Support</h3>
-        <p id="comparison">-</p>
-        <p id="help">-</p>
-    </div>
-
-    <!-- SESSION INSIGHTS CARD -->
-    <div class="card">
-        <h3>📊 Session Insights</h3>
-        <p id="session-insights">No data yet.</p>
-        <button id="clear-history">Clear History</button>
-    </div>
-
-    <!-- SDG ALIGNMENT CARD -->
-    <div class="card">
-        <h3>🌱 SDG-1 Alignment</h3>
-        <p id="sdg-text">This tool contributes to SDG-1: No Poverty by raising household awareness and actionable insights.</p>
-        <p id="sdg-stats">-</p>
+        <!-- Session Insights Card -->
+        <div class="session-card">
+            <h3>📝 Session Insights</h3>
+            <div id="session-history"><p>No predictions yet.</p></div>
+        </div>
     </div>
 </div>
 
 <script>
-let lastData = {}; // store last submitted form data
-
-// Update form risk
 document.getElementById("form").onsubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch("/predict", {method: "POST", body: new FormData(e.target)});
+    const res = await fetch("/predict", {method:"POST", body:new FormData(e.target)});
     const data = await res.json();
-    lastData = {
-        income: parseFloat(e.target.income.value),
-        education: parseFloat(e.target.education.value),
-        employment: parseInt(e.target.employment.value),
-        household_size: parseInt(e.target.household_size.value),
-        working_members: parseInt(e.target.working_members.value),
-        country: e.target.country.value
-    };
-    updateAllCards(data);
-    updateSimulationSliders(lastData);
-};
 
-// Update cards
-function updateAllCards(data){
-    document.getElementById("result").innerText = `Poverty Risk: ${data.risk}% (${data.level})`;
+    // Update main result
+    document.getElementById("result").innerText =
+        `Poverty Risk: ${data.risk}% (${data.level})`;
     const fill = document.getElementById("fill");
     fill.style.width = data.risk + "%";
     fill.style.background = data.color;
 
-    document.getElementById("comparison").innerText = "🌐 Global comparison: " + data.comparison;
-    document.getElementById("help").innerText = "🤝 Suggested support: " + data.help;
+    document.getElementById("comparison").innerText =
+        "🌐 Global comparison: " + data.comparison;
+    document.getElementById("help").innerText =
+        "🤝 Suggested support: " + data.help;
 
-    const s = data.session_insights;
-    document.getElementById("session-insights").innerText =
-        `Total Entries: ${s.total_entries}\nHighest Risk: ${s.highest_risk}%\nLowest Risk: ${s.lowest_risk}%\nAverage Risk: ${s.average_risk}%`;
-
-    document.getElementById("sdg-stats").innerText =
-        `Highest risk this session: ${s.highest_risk}% | Average household risk: ${s.average_risk}%`;
-}
-
-// Update sliders to match input
-function updateSimulationSliders(data){
-    document.getElementById("sim-income").value = data.income;
-    document.getElementById("sim-education").value = data.education;
-    document.getElementById("sim-working").value = data.working_members;
-
-    document.getElementById("sim-income-display").innerText = data.income;
-    document.getElementById("sim-edu-display").innerText = data.education;
-    document.getElementById("sim-working-display").innerText = data.working_members;
-}
-
-// Dynamic Scenario Simulation
-["sim-income","sim-education","sim-working"].forEach(id=>{
-    document.getElementById(id).oninput = async (e)=>{
-        if(Object.keys(lastData).length === 0) return;
-        const simData = {
-            income: id==="sim-income"?parseFloat(e.target.value):lastData.income,
-            education: id==="sim-education"?parseFloat(e.target.value):lastData.education,
-            employment: lastData.employment,
-            household_size: lastData.household_size,
-            working_members: id==="sim-working"?parseInt(e.target.value):lastData.working_members,
-            country: lastData.country
-        };
-
-        document.getElementById("sim-income-display").innerText = simData.income;
-        document.getElementById("sim-edu-display").innerText = simData.education;
-        document.getElementById("sim-working-display").innerText = simData.working_members;
-
-        const formData = new FormData();
-        for(let key in simData) formData.append(key, simData[key]);
-        const res = await fetch("/predict", {method:"POST", body:formData});
-        const data = await res.json();
-        updateAllCards(data);
-    };
-});
-
-// Clear history
-document.getElementById("clear-history").onclick = async () => {
-    await fetch("/clear_history", {method: "POST"});
-    document.getElementById("session-insights").innerText = "No data yet.";
-    document.getElementById("sdg-stats").innerText = "-";
+    // Update session history
+    const container = document.getElementById("session-history");
+    if (!data.history || data.history.length === 0) {
+        container.innerHTML = "<p>No predictions yet.</p>";
+        return;
+    }
+    let html = "<table><tr><th>Time</th><th>Income</th><th>Education</th><th>Risk</th></tr>";
+    data.history.slice(-5).reverse().forEach(item=>{
+        html += `<tr>
+            <td>${item.timestamp}</td>
+            <td>${item.income}</td>
+            <td>${item.education}</td>
+            <td>${item.risk}% (${item.level})</td>
+        </tr>`;
+    });
+    html += "</table>";
+    container.innerHTML = html;
 };
 </script>
-
 </body>
 </html>
