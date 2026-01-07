@@ -1,25 +1,17 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = "supersecretkey"  # Needed for session
 
 # ---------------- COUNTRY DATA ----------------
 POVERTY_LINE = {
-    "India": 10000,
+    "India": 12000,    # Annual income in local currency
     "USA": 15000,
     "UK": 14000,
     "UAE": 16000,
     "Nigeria": 1200,
     "Brazil": 4000
-}
-
-COUNTRY_CONTEXT = {
-    "India": "Large income inequality; poverty is influenced by informal employment and access to education.",
-    "USA": "Poverty often relates to healthcare access, housing costs, and job stability.",
-    "UK": "Living costs and welfare dependency significantly affect poverty risk.",
-    "UAE": "Income disparities exist between skilled and unskilled migrant workers.",
-    "Nigeria": "Poverty strongly linked to unemployment and limited access to education.",
-    "Brazil": "Social inequality and regional development gaps impact poverty levels."
 }
 
 HELP_SUGGESTIONS = {
@@ -30,9 +22,6 @@ HELP_SUGGESTIONS = {
     "Nigeria": "Seek NGO assistance, microfinance programs, and vocational training.",
     "Brazil": "Look into Bolsa Família programs and employment support services."
 }
-
-# ---------------- SESSION HISTORY (D) ----------------
-SESSION_HISTORY = []
 
 # ---------------- ROUTES ----------------
 @app.route("/")
@@ -45,81 +34,80 @@ def predict():
     education = float(request.form["education"])
     employment = int(request.form["employment"])
     country = request.form["country"]
+    household_size = int(request.form.get("household_size", 1))
+    working_members = int(request.form.get("working_members", 1))
 
     poverty_line = POVERTY_LINE.get(country, 10000)
 
-    # ---------------- RULE-BASED CORE MODEL ----------------
-    if income <= 0:
-        base_risk = 95
-    elif income < poverty_line:
-        deficit_ratio = (poverty_line - income) / poverty_line
-        base_risk = 60 + deficit_ratio * 35
-    else:
-        surplus_ratio = (income - poverty_line) / poverty_line
-        base_risk = max(10, 35 - surplus_ratio * 20)
+    # ---------------- RULE-BASED RISK ----------------
+    # Household-adjusted poverty risk
+    per_capita_income = income / max(1, household_size)
+    deficit_ratio = max(0, poverty_line - per_capita_income) / poverty_line
+    base_risk = 90 * deficit_ratio + 10  # Minimum 10% risk
 
-    # Modifiers
-    education_impact = min(education * 1.2, 20)
-    employment_impact = 8 if employment == 1 else 0
+    # Education/employment/working members modifiers
+    modifier = education * 1.5 + employment * 5 + working_members * 2
+    risk_percent = max(base_risk - modifier, 5)
+    risk_percent = min(100, risk_percent)
 
-    risk_percent = base_risk - education_impact - employment_impact
-    risk_percent = min(100, max(5, risk_percent))
-
-    # Risk label
+    # Risk label & color
     if risk_percent < 35:
         level = "Low"
-        color = "green"
+        color = "#22c55e"  # green
     elif risk_percent < 65:
         level = "Medium"
-        color = "orange"
+        color = "#f97316"  # orange
     else:
         level = "High"
-        color = "red"
+        color = "#ef4444"  # red
 
-    comparison = "Below poverty line" if income < poverty_line else "Above poverty line"
+    # Global comparison
+    comparison = "Below global average" if per_capita_income < poverty_line else "Above global average"
 
-    # ---------------- SDG ALIGNMENT (E) ----------------
-    sdg_alignment = {
-        "goal": "SDG 1: No Poverty",
-        "impact": "High" if risk_percent >= 65 else "Moderate" if risk_percent >= 35 else "Low"
+    help_text = HELP_SUGGESTIONS.get(country, "Seek local support programs.")
+
+    # ---------------- SESSION HISTORY ----------------
+    entry = {
+        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "income": income,
+        "education": education,
+        "employment": employment,
+        "household_size": household_size,
+        "working_members": working_members,
+        "risk": round(risk_percent, 2),
+        "level": level,
+        "comparison": comparison,
+        "help": help_text
     }
 
-    # ---------------- SAVE SESSION (D) ----------------
-    SESSION_HISTORY.append({
-        "time": datetime.now().strftime("%H:%M:%S"),
-        "country": country,
-        "risk": round(risk_percent, 2)
-    })
+    if "history" not in session:
+        session["history"] = []
+    history = session["history"]
+    history.append(entry)
+    session["history"] = history
 
-    SESSION_HISTORY[:] = SESSION_HISTORY[-5:]  # keep last 5
+    # ---------------- SESSION INSIGHTS ----------------
+    risks = [h["risk"] for h in history]
+    session_insights = {
+        "highest_risk": max(risks),
+        "lowest_risk": min(risks),
+        "average_risk": round(sum(risks)/len(risks), 2),
+        "total_entries": len(risks)
+    }
 
     return jsonify({
         "risk": round(risk_percent, 2),
         "level": level,
         "color": color,
-
-        # A) Explainability
-        "base_risk": round(base_risk, 2),
-        "education_impact": round(education_impact, 2),
-        "employment_impact": employment_impact,
-
-        # B) Country context
-        "country_context": COUNTRY_CONTEXT.get(country),
         "comparison": comparison,
-        "help": HELP_SUGGESTIONS.get(country),
-
-        # C) Scenario simulation
-        "simulations": {
-            "income_plus_20": round(max(5, risk_percent - 10), 2),
-            "income_minus_20": round(min(100, risk_percent + 15), 2)
-        },
-
-        # D) Session history
-        "history": SESSION_HISTORY,
-
-        # E) SDG
-        "sdg": sdg_alignment
+        "help": help_text,
+        "session_insights": session_insights
     })
+
+@app.route("/clear_history", methods=["POST"])
+def clear_history():
+    session.pop("history", None)
+    return jsonify({"status": "cleared"})
 
 if __name__ == "__main__":
     app.run(debug=True)
