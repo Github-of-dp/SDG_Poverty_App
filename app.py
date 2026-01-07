@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
+from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = "sdg1sessionkey"
 
 # ---------------- COUNTRY DATA ----------------
 POVERTY_LINE = {
-    "India": 10000,    # annual household income in local currency
+    "India": 10000,    # annual income in local currency
     "USA": 15000,
     "UK": 14000,
     "UAE": 16000,
@@ -21,87 +23,77 @@ HELP_SUGGESTIONS = {
     "Brazil": "Look into Bolsa Família programs and employment support services."
 }
 
-# ---------------- SESSION STORAGE ----------------
-SESSION_HISTORY = []
+SDG_INFO = "This model aligns with SDG-1: No Poverty, by helping households understand relative poverty risk and access support options."
 
-# ---------------- UTILITY FUNCTIONS ----------------
-def calculate_risk(income, education, employment, household_size, working_members, country):
-    poverty_line = POVERTY_LINE.get(country, 10000)
+# ---------------- ROUTES ----------------
+@app.route("/")
+def home():
+    return render_template("index.html", sdg_info=SDG_INFO)
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    income = float(request.form["income"])
     income = max(0, income)
+    education = float(request.form["education"])
+    employment = int(request.form["employment"])
+    household_size = int(request.form.get("household_size", 1))
+    working_members = int(request.form.get("working_members", 1))
+    country = request.form["country"]
 
-    # ---------------- RULE-BASED POVERTY RISK ----------------
+    poverty_line = POVERTY_LINE.get(country, 10000)
+
+    # ---------------- RULE-BASED RISK ----------------
     if income >= poverty_line:
         base_risk = max(10, 30 - (income - poverty_line) * 0.001)
     else:
         deficit_ratio = (poverty_line - income) / poverty_line
         base_risk = 90 * deficit_ratio + 10
 
-    # Household factors: average education per household, working ratio
-    working_ratio = working_members / max(1, household_size)
-    modifier = education * 1.5 + employment * 5 + working_ratio * 10
-
+    modifier = education * 1.5 + employment * 5
     if base_risk > 50:
         risk_percent = max(base_risk - modifier, 50)
     else:
         risk_percent = max(base_risk - modifier, 10)
 
-    # Clamp final risk between 0-100%
     risk_percent = min(100, max(0, risk_percent))
-    return round(risk_percent, 2)
 
-def risk_label_color(risk_percent):
     if risk_percent < 35:
-        return "Low", "green"
+        level = "Low"
+        color = "#22c55e"
     elif risk_percent < 65:
-        return "Medium", "orange"
+        level = "Medium"
+        color = "#f59e0b"
     else:
-        return "High", "red"
+        level = "High"
+        color = "#ef4444"
 
-def global_comparison(income, country):
-    poverty_line = POVERTY_LINE.get(country, 10000)
-    return "Below global average" if income < poverty_line else "Above global average"
-
-def update_session(risk):
-    SESSION_HISTORY.append(risk)
-    total = len(SESSION_HISTORY)
-    highest = max(SESSION_HISTORY)
-    lowest = min(SESSION_HISTORY)
-    average = round(sum(SESSION_HISTORY)/total,2)
-    return {"total_entries": total, "highest_risk": highest, "lowest_risk": lowest, "average_risk": average}
-
-# ---------------- ROUTES ----------------
-@app.route("/")
-def home():
-    return render_template("index.html")
-
-@app.route("/predict", methods=["POST"])
-def predict():
-    income = float(request.form.get("income", 0))
-    education = float(request.form.get("education", 0))
-    employment = int(request.form.get("employment", 0))
-    household_size = int(request.form.get("household_size", 1))
-    working_members = int(request.form.get("working_members", 1))
-    country = request.form.get("country", "India")
-
-    risk_percent = calculate_risk(income, education, employment, household_size, working_members, country)
-    level, color = risk_label_color(risk_percent)
-    comparison = global_comparison(income, country)
+    comparison = "Below global average" if income < poverty_line else "Above global average"
     help_text = HELP_SUGGESTIONS.get(country, "Seek local support programs.")
-    session_stats = update_session(risk_percent)
+
+    # ---------------- SESSION INSIGHTS ----------------
+    if "history" not in session:
+        session["history"] = []
+
+    session["history"].append({
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "income": income,
+        "education": education,
+        "employment": employment,
+        "household_size": household_size,
+        "working_members": working_members,
+        "risk": round(risk_percent, 2),
+        "level": level
+    })
+    session.modified = True
 
     return jsonify({
-        "risk": risk_percent,
+        "risk": round(risk_percent, 2),
         "level": level,
         "color": color,
         "comparison": comparison,
         "help": help_text,
-        "session_insights": session_stats
+        "history": session["history"]
     })
-
-@app.route("/clear_history", methods=["POST"])
-def clear_history():
-    SESSION_HISTORY.clear()
-    return jsonify({"status": "cleared"})
 
 if __name__ == "__main__":
     app.run(debug=True)
