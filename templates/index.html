@@ -6,194 +6,172 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
             min-height: 100vh;
             margin: 0;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            padding: 20px;
+            padding: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+        /* Intro Section */
+        .intro {
+            text-align: center;
+            margin-bottom: 30px;
             color: #1e293b;
         }
-
-        .container {
-            max-width: 900px;
-            width: 100%;
-        }
-
-        .info-section {
-            background: #f0f9ff;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-        .cards {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .input-card, .result-card, .session-card {
+        .intro h1 { font-size: 32px; margin-bottom: 10px; }
+        .intro p { font-size: 16px; margin: 5px 0; }
+        /* Cards layout */
+        .cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        .input-card, .result-card, .scenario-card, .session-card, .sdg-card {
             background: #ffffff;
-            padding: 20px;
             border-radius: 15px;
+            padding: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            flex: 1 1 280px;
-            min-width: 280px;
+            width: 280px;
         }
-
-        h1, h2, h3, h4 {
-            margin: 0 0 10px 0;
-        }
-
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 10px;
-            border: 1px solid #94a3b8;
-            font-size: 14px;
-        }
-
-        button {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-        }
-
-        .bar {
-            height: 18px;
-            background: #e2e8f0;
-            border-radius: 999px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        .fill {
-            height: 100%;
-            width: 0%;
-            border-radius: 999px;
-            transition: width 0.6s ease, background 0.4s ease;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-
-        th, td {
-            padding: 6px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .session-card {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        @media(max-width: 768px){
-            .cards { flex-direction: column; }
-        }
+        h3 { margin-top:0; color:#0f172a; }
+        input, select, button { width: 100%; padding:10px; margin:8px 0; border-radius:8px; border:1px solid #cbd5e1; }
+        input::placeholder { color: #94a3b8; }
+        button { background: linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; font-weight:600; cursor:pointer; transition:0.2s; }
+        button:hover { transform: translateY(-2px); box-shadow:0 6px 15px rgba(37,99,235,0.4); }
+        .bar { height: 16px; background:#e2e8f0; border-radius:999px; margin-top:10px; overflow:hidden; }
+        .fill { height:100%; width:0%; border-radius:999px; transition: width 0.6s ease, background 0.4s ease; }
+        .session-entry { font-size:14px; border-bottom:1px solid #cbd5e1; padding:5px 0; }
+        .sdg-card p { font-size:14px; color:#334155; margin:5px 0; }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="info-section">
-        <h1>🌍 Poverty Risk Predictor</h1>
-        <p>AI-powered educational tool aligned with <b>SDG-1: No Poverty</b>. Understand your household's relative poverty risk and access support resources.</p>
-        <p>{{ sdg_info }}</p>
+    <div class="container">
+        <!-- Intro Section -->
+        <div class="intro">
+            <h1>🌍 Household Poverty Risk Predictor</h1>
+            <p>Aligned with <b>SDG-1: No Poverty</b></p>
+            <p>Estimate household poverty risk based on income, education, employment, and household members.</p>
+            <p>This tool is for <b>educational and awareness purposes</b> only.</p>
+        </div>
+
+        <div class="cards">
+            <!-- Main Input Card -->
+            <div class="input-card">
+                <h3>🏠 Household Details</h3>
+                <form id="main-form">
+                    <input type="number" name="income" placeholder="Monthly Income" required>
+                    <input type="number" name="education" placeholder="Years of Education" required>
+                    <input type="number" name="household_size" placeholder="Household Members" required>
+                    <input type="number" name="working_members" placeholder="Working Members" required>
+                    <select name="employment">
+                        <option value="1">Employed</option>
+                        <option value="0">Unemployed</option>
+                    </select>
+                    <select name="country">
+                        <option>India</option>
+                        <option>USA</option>
+                        <option>UK</option>
+                        <option>UAE</option>
+                        <option>Nigeria</option>
+                        <option>Brazil</option>
+                    </select>
+                    <button type="submit">Analyze Poverty Risk</button>
+                </form>
+            </div>
+
+            <!-- Result Card -->
+            <div class="result-card">
+                <h3>📊 Risk Result</h3>
+                <div id="result">No prediction yet</div>
+                <div class="bar"><div id="fill" class="fill"></div></div>
+                <div id="comparison" style="margin-top:8px;"></div>
+                <div id="help" style="margin-top:5px;"></div>
+            </div>
+
+            <!-- Scenario Simulation Card -->
+            <div class="scenario-card">
+                <h3>🔮 Scenario Simulation</h3>
+                <form id="scenario-form">
+                    <input type="number" name="income" placeholder="Hypothetical Income" required>
+                    <input type="number" name="education" placeholder="Hypothetical Years of Education" required>
+                    <select name="employment">
+                        <option value="1">Employed</option>
+                        <option value="0">Unemployed</option>
+                    </select>
+                    <button type="submit">Simulate Risk</button>
+                </form>
+                <div id="scenario-result" style="margin-top:10px;">No simulation yet</div>
+                <div class="bar"><div id="scenario-fill" class="fill"></div></div>
+                <div id="scenario-help" style="margin-top:5px;"></div>
+            </div>
+
+            <!-- Session History Card -->
+            <div class="session-card">
+                <h3>🕒 Session History</h3>
+                <div id="session-history">No sessions yet</div>
+            </div>
+
+            <!-- SDG Alignment Card -->
+            <div class="sdg-card">
+                <h3>🎯 SDG Alignment</h3>
+                <p>This predictor aligns with <b>SDG-1: No Poverty</b> by educating households about risk factors.</p>
+                <p>Supports awareness for governments, NGOs, and communities.</p>
+                <p>Encourages informed decisions for income, education, and employment improvement.</p>
+            </div>
+        </div>
     </div>
 
-    <div class="cards">
-        <!-- Input Card -->
-        <div class="input-card">
-            <h3>Enter Household Details</h3>
-            <form id="form">
-                <input type="number" name="income" placeholder="Annual Income" required>
-                <input type="number" name="education" placeholder="Years of Education" required>
-                <input type="number" name="household_size" placeholder="Household Size" required>
-                <input type="number" name="working_members" placeholder="Working Members" required>
-                <select name="employment">
-                    <option value="1">Employed</option>
-                    <option value="0">Unemployed</option>
-                </select>
-                <select name="country">
-                    <option>India</option>
-                    <option>USA</option>
-                    <option>UK</option>
-                    <option>UAE</option>
-                    <option>Nigeria</option>
-                    <option>Brazil</option>
-                </select>
-                <button type="submit">Analyze Poverty Risk</button>
-            </form>
-        </div>
+    <script>
+    // Main Prediction
+    document.getElementById("main-form").onsubmit = async (e) => {
+        e.preventDefault();
+        const res = await fetch("/predict", {method:"POST", body: new FormData(e.target)});
+        const data = await res.json();
 
-        <!-- Result Card -->
-        <div class="result-card">
-            <h3>🏷️ Risk Result</h3>
-            <div id="result">No prediction yet</div>
-            <div class="bar"><div id="fill" class="fill"></div></div>
-            <div id="comparison" style="margin-top:10px;"></div>
-            <div id="help" style="margin-top:5px;"></div>
-        </div>
+        document.getElementById("result").innerText =
+            `Poverty Risk: ${data.risk}% (${data.level})`;
 
-        <!-- Session Insights Card -->
-        <div class="session-card">
-            <h3>📝 Session Insights</h3>
-            <div id="session-history"><p>No predictions yet.</p></div>
-        </div>
-    </div>
-</div>
+        const fill = document.getElementById("fill");
+        fill.style.width = data.risk + "%";
+        fill.style.background = data.color;
 
-<script>
-document.getElementById("form").onsubmit = async (e) => {
-    e.preventDefault();
-    const res = await fetch("/predict", {method:"POST", body:new FormData(e.target)});
-    const data = await res.json();
+        document.getElementById("comparison").innerText =
+            "🌐 Global comparison: " + data.comparison;
 
-    // Update main result
-    document.getElementById("result").innerText =
-        `Poverty Risk: ${data.risk}% (${data.level})`;
-    const fill = document.getElementById("fill");
-    fill.style.width = data.risk + "%";
-    fill.style.background = data.color;
+        document.getElementById("help").innerText =
+            "🤝 Suggested support: " + data.help;
 
-    document.getElementById("comparison").innerText =
-        "🌐 Global comparison: " + data.comparison;
-    document.getElementById("help").innerText =
-        "🤝 Suggested support: " + data.help;
+        // Update session history
+        const history = document.getElementById("session-history");
+        const entry = document.createElement("div");
+        entry.className = "session-entry";
+        entry.innerText = `Income: ${e.target.income.value}, Education: ${e.target.education.value}, Household: ${e.target.household_size.value}, Working: ${e.target.working_members.value}, Risk: ${data.risk}% (${data.level})`;
+        history.prepend(entry);
+    };
 
-    // Update session history
-    const container = document.getElementById("session-history");
-    if (!data.history || data.history.length === 0) {
-        container.innerHTML = "<p>No predictions yet.</p>";
-        return;
-    }
-    let html = "<table><tr><th>Time</th><th>Income</th><th>Education</th><th>Risk</th></tr>";
-    data.history.slice(-5).reverse().forEach(item=>{
-        html += `<tr>
-            <td>${item.timestamp}</td>
-            <td>${item.income}</td>
-            <td>${item.education}</td>
-            <td>${item.risk}% (${item.level})</td>
-        </tr>`;
-    });
-    html += "</table>";
-    container.innerHTML = html;
-};
-</script>
+    // Scenario Simulation
+    document.getElementById("scenario-form").onsubmit = async (e) => {
+        e.preventDefault();
+        const country = document.querySelector("select[name='country']").value;
+        const formData = new FormData(e.target);
+        formData.append("household_size", 1);
+        formData.append("working_members", 1);
+        formData.append("country", country);
+
+        const res = await fetch("/predict", {method:"POST", body: formData});
+        const data = await res.json();
+
+        const result = document.getElementById("scenario-result");
+        result.innerText = `Simulated Risk: ${data.risk}% (${data.level})`;
+
+        const fill = document.getElementById("scenario-fill");
+        fill.style.width = data.risk + "%";
+        fill.style.background = data.color;
+
+        document.getElementById("scenario-help").innerText =
+            "🤝 Suggested support: " + data.help;
+    };
+    </script>
 </body>
 </html>
