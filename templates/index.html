@@ -1,201 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<title>Household Poverty Risk Predictor</title>
+    <title>Household Poverty Risk Predictor</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<style>
-body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #fef6ff, #f0fdf4, #eff6ff);
-    margin: 0;
-    padding: 30px;
-    color: #1f2937;
-}
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            color: #e5e7eb;
+        }
 
-.container {
-    max-width: 1300px;
-    margin: auto;
-}
+        .box {
+            background: linear-gradient(180deg, #111827, #1f2937);
+            padding: 30px;
+            width: 100%;
+            max-width: 540px;
+            border-radius: 18px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+        }
 
-/* ---------- INTRO ---------- */
-.intro {
-    text-align: center;
-    margin-bottom: 50px;
-    animation: fadeDown 1s ease;
-}
+        h1 {
+            text-align: center;
+            font-weight: 700;
+        }
 
-.intro h1 {
-    font-size: 40px;
-    font-weight: 800;
-    background: linear-gradient(90deg, #6366f1, #22c55e, #ec4899);
-    -webkit-background-clip: text;
-    color: transparent;
-}
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+        }
 
-.intro p {
-    max-width: 900px;
-    margin: 10px auto;
-    font-size: 15px;
-    color: #475569;
-}
+        input, select {
+            background: #020617;
+            color: #e5e7eb;
+            border: 1px solid #334155;
+        }
 
-.disclaimer {
-    font-size: 13px;
-    color: #64748b;
-    margin-top: 10px;
-}
+        button {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
 
-/* ---------- GRID ---------- */
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1.3fr 1fr;
-    gap: 26px;
-}
+        .bar {
+            height: 16px;
+            background: #334155;
+            border-radius: 999px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
 
-.center {
-    grid-column: 2;
-}
+        .fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.6s ease;
+        }
 
-.card {
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(12px);
-    border-radius: 24px;
-    padding: 26px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.08);
-    animation: fadeUp 0.9s ease;
-}
-
-.card:hover {
-    transform: translateY(-6px);
-    transition: 0.3s ease;
-}
-
-h3 {
-    margin-top: 0;
-    font-size: 20px;
-}
-
-/* ---------- FORM ---------- */
-input, select, button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 8px;
-    border-radius: 12px;
-    border: 1px solid #cbd5e1;
-    font-size: 14px;
-}
-
-button {
-    background: linear-gradient(135deg, #22c55e, #3b82f6, #ec4899);
-    color: white;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    margin-top: 16px;
-}
-
-button:hover {
-    filter: brightness(1.05);
-}
-
-/* ---------- BARS ---------- */
-.bar {
-    height: 18px;
-    background: #e5e7eb;
-    border-radius: 999px;
-    overflow: hidden;
-    margin-top: 12px;
-}
-
-.fill {
-    height: 100%;
-    width: 0%;
-    border-radius: 999px;
-    transition: width 0.7s ease;
-}
-
-.info {
-    font-size: 14px;
-    margin-top: 10px;
-    color: #374151;
-}
-
-/* ---------- HISTORY ---------- */
-.history-box {
-    max-height: 200px;
-    overflow-y: auto;
-    padding-right: 6px;
-}
-
-.history-item {
-    font-size: 13px;
-    padding: 8px 0;
-    border-bottom: 1px dashed #cbd5e1;
-}
-
-/* ---------- FOOTER ---------- */
-.footer {
-    text-align: center;
-    font-size: 13px;
-    margin-top: 50px;
-    color: #64748b;
-}
-
-/* ---------- ANIMATIONS ---------- */
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(25px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-</style>
+        .info {
+            margin-top: 8px;
+            font-size: 13px;
+        }
+    </style>
 </head>
 
 <body>
-<div class="container">
 
-<!-- INTRO -->
-<div class="intro">
-    <h1>🏠 Household Poverty Risk Predictor</h1>
-    <p>
-        An AI-driven academic prototype estimating <b>household poverty vulnerability</b>
-        using income, education, employment and dependency factors — aligned with
-        <b>UN SDG-1: No Poverty</b>.
-    </p>
-    <div class="disclaimer">
-        ⚠ Educational project only. Not an official poverty assessment or policy tool.
-    </div>
-</div>
+<div class="box">
+    <h1>🌍 Household Poverty Risk Predictor</h1>
 
-<!-- GRID -->
-<div class="grid">
-
-<!-- LEFT -->
-<div class="card" style="background: linear-gradient(135deg,#ecfeff,#f0fdf4);">
-    <h3>📊 Poverty Risk Output</h3>
-    <div id="result">Awaiting analysis</div>
-    <div class="bar"><div id="fill" class="fill"></div></div>
-    <div id="comparison" class="info"></div>
-    <div id="why" class="info"></div>
-</div>
-
-<!-- CENTER -->
-<div class="card center" style="background: linear-gradient(135deg,#fef3c7,#fde68a);">
-    <h3>🏠 Household Details</h3>
-    <form id="form">
-        <input name="income" type="number" placeholder="Monthly Household Income" required>
-        <input name="education" type="number" placeholder="Highest Years of Education" required>
-        <input name="household_size" type="number" placeholder="Total Members" required>
-        <input name="working_members" type="number" placeholder="Working Members" required>
+    <!-- 🔒 ACTION BLOCKED -->
+    <form id="form" action="javascript:void(0);">
+        <input type="number" name="income" placeholder="Annual Household Income" required>
+        <input type="number" name="education" placeholder="Years of Education (Head)" required>
 
         <select name="employment">
-            <option value="1">At least one employed</option>
-            <option value="0">No employed members</option>
+            <option value="1">Employed</option>
+            <option value="0">Unemployed</option>
         </select>
 
         <select name="country">
@@ -204,82 +96,47 @@ button:hover {
             <option>UK</option>
             <option>UAE</option>
             <option>Nigeria</option>
+            <option>Brazil</option>
         </select>
 
-        <button>Analyze Risk</button>
+        <!-- 🔒 TYPE EXPLICIT -->
+        <button type="submit">Analyze Poverty Risk</button>
     </form>
-</div>
 
-<!-- RIGHT -->
-<div class="card" style="background: linear-gradient(135deg,#fce7f3,#fdf2f8);">
-    <h3>🔮 Scenario Simulation</h3>
-    <p class="info">What-if future improvements?</p>
-    <form id="scenario">
-        <input name="income" type="number" placeholder="Hypothetical Income" required>
-        <input name="education" type="number" placeholder="Hypothetical Education" required>
-        <select name="employment">
-            <option value="1">Employed</option>
-            <option value="0">Unemployed</option>
-        </select>
-        <button>Simulate</button>
-    </form>
-    <div id="scenario-result" class="info"></div>
-    <div class="bar"><div id="scenario-fill" class="fill"></div></div>
-</div>
+    <div id="result"></div>
 
-<!-- BOTTOM LEFT -->
-<div class="card" style="background: linear-gradient(135deg,#e0e7ff,#eef2ff);">
-    <h3>🕒 Session History</h3>
-    <div class="history-box" id="history">
-        <div class="info">No sessions yet</div>
+    <div class="bar">
+        <div id="fill" class="fill"></div>
     </div>
-</div>
 
-<!-- BOTTOM RIGHT -->
-<div class="card" style="background: linear-gradient(135deg,#dcfce7,#bbf7d0);">
-    <h3>🎯 SDG-1 Impact</h3>
-    <p class="info">• Identifies vulnerable households</p>
-    <p class="info">• Demonstrates education & employment leverage</p>
-    <p class="info">• Supports poverty-awareness modelling</p>
-</div>
-
-</div>
-
-<div class="footer">
-Academic AI Prototype • Sustainable Development Goal 1
-</div>
+    <div id="comparison" class="info"></div>
+    <div id="help" class="info"></div>
 </div>
 
 <script>
-async function predict(form) {
-    const res = await fetch("/predict", { method: "POST", body: new FormData(form) });
-    return await res.json();
-}
+document.getElementById("form").addEventListener("submit", async function(e) {
+    e.preventDefault(); // 🚫 HARD STOP REFRESH
 
-form.onsubmit = async e => {
-    e.preventDefault();
-    const d = await predict(form);
+    const res = await fetch("/predict", {
+        method: "POST",
+        body: new FormData(this)
+    });
 
-    result.innerText = `Risk: ${d.risk}% (${d.level})`;
-    fill.style.width = d.risk + "%";
-    fill.style.background = d.color;
-    comparison.innerText = "🌍 " + d.comparison;
-    why.innerText = "📌 Reason: " + d.help;
+    const data = await res.json();
 
-    const item = document.createElement("div");
-    item.className = "history-item";
-    item.innerText = `Income ${form.income.value} → ${d.risk}%`;
-    history.prepend(item);
-};
+    document.getElementById("result").innerText =
+        `Poverty Risk: ${data.risk}% (${data.level})`;
 
-scenario.onsubmit = async e => {
-    e.preventDefault();
-    const d = await predict(scenario);
+    const fill = document.getElementById("fill");
+    fill.style.width = data.risk + "%";
+    fill.style.background = data.color;
 
-    scenario-result.innerText = `Simulated Risk: ${d.risk}% (${d.level})`;
-    scenario-fill.style.width = d.risk + "%";
-    scenario-fill.style.background = d.color;
-};
+    document.getElementById("comparison").innerText =
+        "🌐 " + data.comparison;
+
+    document.getElementById("help").innerText =
+        "🤝 " + data.help;
+});
 </script>
 
 </body>
