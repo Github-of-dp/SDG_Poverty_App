@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDG-1 Aurora Predictor</title>
+    <title>BetterLife UAE | SDG-1 AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #1e1b4b);
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 40%, #b45309 100%);
             background-size: 400% 400%;
-            animation: aurora 15s ease infinite;
+            animation: aurora 12s ease infinite;
             min-height: 100vh;
-            overflow-x: hidden;
         }
         @keyframes aurora {
             0% { background-position: 0% 50%; }
@@ -20,168 +18,127 @@
             100% { background-position: 0% 50%; }
         }
         .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-        }
-        .slider-label {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #3b82f6;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            pointer-events: none;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 32px;
         }
     </style>
 </head>
-<body class="text-white">
+<body class="text-white p-6 md:p-12">
 
-    <nav class="p-6 flex justify-between items-center">
-        <h1 class="text-xl font-bold tracking-tighter text-blue-400">PROJECT_SDG1</h1>
-        <select id="country" class="bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm outline-none cursor-pointer hover:bg-white/20 transition" onchange="runInference()">
-            {% for code, info in countries.items() %}
-            <option value="{{ code }}" class="text-black">{{ code }}</option>
-            {% endfor %}
-        </select>
-    </nav>
+    <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-extrabold mb-3">BetterLife AI <span class="text-amber-400">🇦🇪</span></h1>
+            <p class="text-xl opacity-90 font-light">SDG-1: Mapping a path out of poverty.</p>
+        </header>
 
-    <div class="relative max-w-7xl mx-auto px-4 pt-10 pb-20">
-        
-        <div class="z-10 relative max-w-lg mx-auto glass p-8 shadow-2xl transition-all duration-500 hover:scale-[1.02]">
-            <h2 class="text-2xl font-semibold mb-8 text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Household Scenario
-            </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             
-            <div class="space-y-12">
-                <div class="relative">
-                    <div class="flex justify-between mb-2">
-                        <label class="text-xs uppercase tracking-widest text-slate-400">Education Level</label>
-                        <span id="edu_val" class="text-blue-400 font-bold text-lg">8 Years</span>
-                    </div>
-                    <input type="range" id="edu" min="0" max="22" value="8" class="w-full h-1 bg-white/20 rounded-lg appearance-none accent-blue-500" oninput="runInference()">
+            <div class="glass p-10 shadow-2xl space-y-8">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest mb-3 text-amber-300">Target Region</label>
+                    <select id="country" onchange="update()" class="w-full bg-white/10 p-4 rounded-2xl outline-none border border-white/20 cursor-pointer text-lg">
+                        {% for code, info in countries.items() %}
+                        <option value="{{ code }}" class="text-gray-900" {% if code == 'UAE' %}selected{% endif %}>{{ code }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
-                <div class="relative">
-                    <div class="flex justify-between mb-2">
-                        <label class="text-xs uppercase tracking-widest text-slate-400">Monthly Income</label>
-                        <span id="income_val" class="text-blue-400 font-bold text-lg">$500</span>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-semibold">Education Level</label>
+                            <span id="edu_label" class="text-amber-300 font-bold">12 Years</span>
+                        </div>
+                        <input type="range" id="edu" min="0" max="22" value="12" class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400" oninput="update()">
                     </div>
-                    <input type="range" id="income" min="0" max="10000" step="50" value="500" class="w-full h-1 bg-white/20 rounded-lg appearance-none accent-blue-500" oninput="runInference()">
+
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="font-semibold">Monthly Income (AED/USD)</label>
+                            <span id="inc_label" class="text-amber-300 font-bold">5000</span>
+                        </div>
+                        <input type="range" id="inc" min="0" max="20000" step="100" value="5000" class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400" oninput="update()">
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="glass p-4 text-center">
-                        <label class="text-[10px] uppercase text-slate-400 block mb-1">Family Size</label>
-                        <input type="number" id="family" value="4" class="bg-transparent text-xl font-bold text-center w-full outline-none" onchange="runInference()">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-white/5 p-5 rounded-3xl border border-white/10 text-center">
+                        <label class="text-[10px] uppercase font-black mb-2 block opacity-60">Family Size</label>
+                        <input type="number" id="fam" value="4" class="bg-transparent text-3xl font-bold w-full text-center outline-none" oninput="update()">
                     </div>
-                    <div class="glass p-4 text-center">
-                        <label class="text-[10px] uppercase text-slate-400 block mb-1">Tech Access</label>
-                        <select id="access" class="bg-transparent text-sm font-bold w-full outline-none text-center" onchange="runInference()">
-                            <option value="0" class="text-black">None</option>
-                            <option value="1" class="text-black" selected>Limited</option>
-                            <option value="2" class="text-black">Full</option>
+                    <div class="bg-white/5 p-5 rounded-3xl border border-white/10 text-center">
+                        <label class="text-[10px] uppercase font-black mb-2 block opacity-60">Digital Access</label>
+                        <select id="acc" class="bg-transparent text-sm font-bold w-full outline-none text-center" onchange="update()">
+                            <option value="0">None</option>
+                            <option value="1" selected>Basic</option>
+                            <option value="2">Advanced</option>
                         </select>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="hidden lg:block absolute top-20 left-0 w-64 glass p-6 text-center animate-bounce-slow">
-            <h3 class="text-xs text-slate-400 uppercase tracking-widest mb-2">Probability</h3>
-            <div id="prob-display" class="text-5xl font-black text-blue-500">--%</div>
-            <p id="risk-status" class="text-[10px] mt-2 text-slate-500">STABLE</p>
-        </div>
+            <div class="flex flex-col items-center">
+                <div class="glass w-full p-12 text-center shadow-2xl">
+                    <h2 class="text-2xl font-light mb-6">Risk Assessment</h2>
+                    <div class="relative inline-flex items-center justify-center">
+                        <svg class="w-56 h-56 transform -rotate-90">
+                            <circle cx="112" cy="112" r="95" stroke="rgba(255,255,255,0.1)" stroke-width="15" fill="transparent" />
+                            <circle id="meter" cx="112" cy="112" r="95" stroke="#fbbf24" stroke-width="15" fill="transparent" 
+                                    stroke-dasharray="597" stroke-dashoffset="597" stroke-linecap="round" class="transition-all duration-1000" />
+                        </svg>
+                        <div class="absolute flex flex-col items-center">
+                            <span id="prob_val" class="text-6xl font-black">0%</span>
+                            <span id="emoji" class="text-4xl mt-2">✨</span>
+                        </div>
+                    </div>
+                    <div id="status_box" class="mt-10 p-6 rounded-3xl bg-white/10 transition-all duration-500">
+                        <p id="advice_text" class="text-lg italic font-medium">Ready to predict...</p>
+                    </div>
+                </div>
+            </div>
 
-        <div class="hidden lg:block absolute top-20 right-0 w-80 glass p-6">
-            <h3 class="text-xs text-slate-400 uppercase tracking-widest mb-4">Risk Factors</h3>
-            <canvas id="impactChart"></canvas>
         </div>
-
-        <div class="mt-12 max-w-2xl mx-auto glass p-6 text-center italic text-slate-300 border-t-2 border-blue-500/30">
-            <span id="dynamic-insight">Adjust the sliders to see how your life choices affect poverty risk.</span>
-        </div>
-
     </div>
 
     <script>
-        let myChart;
-
-        async function runInference() {
+        async function update() {
             const edu = document.getElementById('edu').value;
-            const income = document.getElementById('income').value;
+            const inc = document.getElementById('inc').value;
+            const fam = document.getElementById('fam').value;
+            const acc = document.getElementById('acc').value;
+            const country = document.getElementById('country').value;
             
-            // Update the Value Labels instantly
-            document.getElementById('edu_val').innerText = edu + " Years";
-            document.getElementById('income_val').innerText = "$" + income;
+            document.getElementById('edu_label').innerText = edu + " Years";
+            document.getElementById('inc_label').innerText = inc;
 
-            const payload = {
-                education: edu,
-                income: income,
-                family: document.getElementById('family').value,
-                access: document.getElementById('access').value,
-                country: document.getElementById('country').value
-            };
-
-            const response = await fetch('/predict', {
+            const res = await fetch('/predict', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ country, edu, inc, family: fam, access: acc })
             });
 
-            const data = await response.json();
-
-            // Update UI
-            document.getElementById('prob-display').innerText = data.probability + "%";
+            const data = await res.json();
+            document.getElementById('prob_val').innerText = data.prob + "%";
             
-            const status = document.getElementById('risk-status');
-            if(data.probability > 50) {
-                status.innerText = "CRITICAL RISK";
-                status.className = "text-[10px] mt-2 text-red-400 font-bold";
-                document.getElementById('prob-display').className = "text-5xl font-black text-red-500";
+            const meter = document.getElementById('meter');
+            meter.style.strokeDashoffset = 597 - (597 * data.prob / 100);
+
+            const emoji = document.getElementById('emoji');
+            if(data.prob > 60) {
+                emoji.innerText = "⚠️";
+                meter.style.stroke = "#ef4444";
+            } else if(data.prob > 30) {
+                emoji.innerText = "⚖️";
+                meter.style.stroke = "#f59e0b";
             } else {
-                status.innerText = "ECONOMICALLY SECURE";
-                status.className = "text-[10px] mt-2 text-green-400 font-bold";
-                document.getElementById('prob-display').className = "text-5xl font-black text-blue-500";
+                emoji.innerText = "✅";
+                meter.style.stroke = "#10b981";
             }
-
-            updateChart(data.impacts);
-            updateInsight(data.probability);
+            document.getElementById('advice_text').innerText = data.advice;
         }
-
-        function updateChart(impacts) {
-            const ctx = document.getElementById('impactChart').getContext('2d');
-            if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Edu', 'Income', 'Size', 'Tech'],
-                    datasets: [{
-                        data: impacts,
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                        borderColor: '#3b82f6',
-                        pointBackgroundColor: '#fff'
-                    }]
-                },
-                options: {
-                    scales: { r: { display: false } },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        function updateInsight(prob) {
-            const msg = prob > 50 
-                ? "Warning: Your income-to-family ratio is below the SDG-1 threshold for this region."
-                : "Your household is currently within the 'Safety Zone' for poverty indicators.";
-            document.getElementById('dynamic-insight').innerText = msg;
-        }
-
-        window.onload = runInference;
+        window.onload = update;
     </script>
 </body>
 </html>
