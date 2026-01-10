@@ -1,54 +1,48 @@
 from flask import Flask, render_template, request, jsonify
 import numpy as np
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
 
 app = Flask(__name__)
 
-# Mock Data for different regions to make it dynamic
-country_stats = {
-    "Global": {"baseline": 1.0, "desc": "Global Average Statistics"},
-    "Nigeria": {"baseline": 1.8, "desc": "High dependency ratio region"},
-    "India": {"baseline": 1.4, "desc": "Rapidly urbanizing economy"},
-    "Brazil": {"baseline": 1.2, "desc": "Moderate income inequality focus"},
-    "USA": {"baseline": 0.5, "desc": "High-cost urban poverty context"}
+# Logic weights tailored for the UAE context
+# Weights: [Education, Income, Family, Access]
+country_data = {
+    "Global": {"weight": [-0.5, -0.002, 0.8, -1.2], "intercept": 2.0, "tips": "Focus on education and community resources."},
+    "UAE": {
+        "weight": [-0.9, -0.0003, 0.5, -2.0], 
+        "intercept": 1.5, 
+        "tips": "Explore the Nafis program for career growth and local entrepreneurship grants."
+    },
+    "India": {"weight": [-0.7, -0.008, 0.9, -1.5], "intercept": 2.5, "tips": "Explore digital literacy programs and urban job portals."},
+    "USA": {"weight": [-1.2, -0.0005, 0.4, -3.0], "intercept": 1.0, "tips": "Utilize community college paths and internet subsidy programs."}
 }
-
-def create_model():
-    # Training with slightly different weights for a more reactive feel
-    X = np.array([[0, 100, 8, 0], [12, 1000, 4, 1], [16, 3000, 2, 1], [2, 50, 10, 0]])
-    y = np.array([1, 1, 0, 1])
-    pipeline = Pipeline([('scaler', StandardScaler()), ('logreg', LogisticRegression())])
-    pipeline.fit(X, y)
-    return pipeline
-
-model = create_model()
 
 @app.route('/')
 def index():
-    return render_template('index.html', countries=country_stats)
+    return render_template('index.html', countries=country_data.keys())
 
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
-    country = data.get('country', 'Global')
-    multiplier = country_stats.get(country, country_stats['Global'])['baseline']
+    c_type = data.get('country', 'Global')
+    config = country_data.get(c_type, country_data['Global'])
     
-    user_input = np.array([[
-        float(data['education']),
-        float(data['income']),
-        float(data['family']),
-        float(data['access'])
-    ]])
+    # Inputs from sliders
+    inputs = np.array([float(data['edu']), float(data['income']), float(data['family']), float(data['access'])])
     
-    # Calculate base probability and adjust by country baseline
-    base_prob = model.predict_proba(user_input)[0][1]
-    adjusted_prob = min(0.99, base_prob * multiplier) 
+    # Logistic Regression Calculation (Sigmoid Function)
+    z = config['intercept'] + np.dot(inputs, config['weight'])
+    prob = 1 / (1 + np.exp(-z))
+    
+    # Personalized Advice based on UAE context
+    advice = config['tips']
+    if c_type == "UAE" and float(data['edu']) < 12:
+        advice = "💡 Tip: Higher education is a key driver for career stability in the UAE's private sector."
+    elif float(data['access']) == 0:
+        advice = "🌐 Tip: Digital inclusion is essential for accessing government e-services and remote work."
 
     return jsonify({
-        'probability': round(adjusted_prob * 100, 1),
-        'impacts': list(model.named_steps['logreg'].coef_[0])
+        'prob': round(prob * 100),
+        'advice': advice
     })
 
 if __name__ == '__main__':
