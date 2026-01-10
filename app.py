@@ -3,33 +3,36 @@ import numpy as np
 
 app = Flask(__name__)
 
-# Logic weights tailored for the UAE context
+# Regional Configs: Weights [Edu, Inc, Fam, Acc], Intercept, and Currency
 country_data = {
     "UAE": {
-        "weight": [-0.9, -0.0003, 0.5, -2.0], 
-        "intercept": 1.5, 
-        "tips": "Explore the Nafis program for career growth and local entrepreneurship grants."
+        "weight": [-0.2, -0.0005, 0.4, -0.5], 
+        "intercept": 2.5, # Higher intercept means higher base risk
+        "currency": "AED",
+        "tips": "Explore the Nafis program for career growth in the private sector."
     },
     "Global": {
-        "weight": [-0.5, -0.002, 0.8, -1.2], 
-        "intercept": 2.0, 
-        "tips": "Focus on education and community resources."
+        "weight": [-0.15, -0.001, 0.6, -0.4], 
+        "intercept": 3.0,
+        "currency": "USD",
+        "tips": "Focus on vocational training and community support networks."
     },
     "India": {
-        "weight": [-0.7, -0.008, 0.9, -1.5], 
-        "intercept": 2.5, 
-        "tips": "Explore digital literacy programs and urban job portals."
+        "weight": [-0.1, -0.002, 0.5, -0.3], 
+        "intercept": 3.5,
+        "currency": "INR",
+        "tips": "Look into digital literacy and urban livelihood missions."
     },
     "USA": {
-        "weight": [-1.2, -0.0005, 0.4, -3.0], 
-        "intercept": 1.0, 
-        "tips": "Utilize community college paths and internet subsidy programs."
+        "weight": [-0.3, -0.0002, 0.3, -0.8], 
+        "intercept": 1.5,
+        "currency": "USD",
+        "tips": "Utilize state-level social safety nets and educational grants."
     }
 }
 
 @app.route('/')
 def index():
-    # FIXED: Sending the whole dictionary, not just the keys
     return render_template('index.html', countries=country_data)
 
 @app.route('/predict', methods=['POST'])
@@ -38,18 +41,28 @@ def predict():
     c_type = data.get('country', 'Global')
     config = country_data.get(c_type, country_data['Global'])
     
-    inputs = np.array([float(data['edu']), float(data['inc']), float(data['family']), float(data['access'])])
+    # Inputs
+    edu = float(data['edu'])
+    inc = float(data['inc'])
+    fam = float(data['family'])
+    acc = float(data['access'])
     
-    z = config['intercept'] + np.dot(inputs, config['weight'])
+    # --- FIXED LOGIC ---
+    # z = intercept + (w1*edu) + (w2*inc) + (w3*fam) + (w4*acc)
+    w = config['weight']
+    z = config['intercept'] + (w[0]*edu) + (w[1]*inc) + (w[2]*fam) + (w[3]*acc)
+    
+    # Sigmoid Function
     prob = 1 / (1 + np.exp(-z))
     
-    advice = config['tips']
-    if c_type == "UAE" and float(data['edu']) < 12:
-        advice = "💡 Tip: Higher education is a key driver for career stability in the UAE."
+    # Safety Check: If income is 0, the risk cannot be low.
+    if inc < 100:
+        prob = max(prob, 0.85) # Minimum 85% risk if income is near zero
 
     return jsonify({
         'prob': int(round(prob * 100)),
-        'advice': advice
+        'advice': config['tips'],
+        'currency': config['currency']
     })
 
 if __name__ == '__main__':
