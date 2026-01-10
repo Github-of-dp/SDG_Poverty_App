@@ -1,91 +1,63 @@
 from flask import Flask, render_template, request, jsonify
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
 
 app = Flask(__name__)
 
-# ---------------- COUNTRY POVERTY LINES ----------------
-POVERTY_LINE = {
-    "India": 10000,    # Monthly income in local currency
-    "USA": 15000,
-    "UK": 14000,
-    "UAE": 16000,
-    "Nigeria": 1200
-}
+# --- STEP 1: MOCK MODEL (For development) ---
+# In production, you'd load your trained model: joblib.load('model.pkl')
+# Let's create a pipeline that mirrors real SDG-1 indicators
+def create_trained_model():
+    # Example features: [Education, Income, Household_Size, Access_to_Water]
+    X_train = np.array([
+        [0, 100, 8, 0], [12, 1000, 4, 1], [16, 3000, 2, 1], 
+        [4, 200, 6, 0], [20, 5000, 1, 1], [8, 400, 5, 0]
+    ])
+    y_train = np.array([1, 1, 0, 1, 0, 1]) # 1 = Risk, 0 = Secure
+    
+    pipeline = Pipeline([
+        ('scaler', StandardScaler()),
+        ('logreg', LogisticRegression())
+    ])
+    pipeline.fit(X_train, y_train)
+    return pipeline
 
-HELP_SUGGESTIONS = {
-    "India": "Explore government welfare schemes, skill development programs, and local NGOs.",
-    "USA": "Look into SNAP benefits, job reskilling programs, and community support services.",
-    "UK": "Check Universal Credit support and employment training programs.",
-    "UAE": "Explore workforce upskilling initiatives and social support entities.",
-    "Nigeria": "Seek NGO assistance, microfinance programs, and vocational training."
-}
+model = create_trained_model()
+feature_names = ['Education Level', 'Monthly Income', 'Family Size', 'Water/Tech Access']
 
-# ---------------- ROUTES ----------------
-@app.route("/")
-def home():
-    return render_template("index.html")
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-
-def calculate_risk(income, education, employment, household_size, working_members, country):
-    """Hybrid rule-based risk calculation"""
-    poverty_line = POVERTY_LINE.get(country, 10000)
-
-    # Basic poverty deficit ratio
-    deficit_ratio = max(0, (poverty_line - income) / poverty_line)
-
-    # Employment & household modifiers
-    employment_factor = 0.2 if employment else 0.5  # Less employed → higher risk
-    dependency_factor = 1 if household_size == 0 else household_size / max(1, working_members)
-
-    # Education factor reduces risk slightly
-    education_factor = max(0, (20 - education) / 20)
-
-    # Combine factors
-    raw_risk = deficit_ratio * 0.6 + employment_factor * 0.2 + education_factor * 0.2
-    risk_percent = min(100, max(0, raw_risk * 100 * dependency_factor))
-
-    # Risk labels
-    if risk_percent < 35:
-        level = "Low"
-        color = "green"
-    elif risk_percent < 65:
-        level = "Medium"
-        color = "orange"
-    else:
-        level = "High"
-        color = "red"
-
-    # Comparison
-    comparison = "Above global average" if income >= poverty_line else "Below global average"
-    help_text = HELP_SUGGESTIONS.get(country, "Seek local support programs.")
-
-    return risk_percent, level, color, comparison, help_text
-
-
-@app.route("/predict", methods=["POST"])
+@app.route('/predict', methods=['POST'])
 def predict():
     try:
-        income = float(request.form.get("income", 0))
-        education = float(request.form.get("education", 0))
-        employment = int(request.form.get("employment", 0))
-        household_size = int(request.form.get("household_size", 1))
-        working_members = int(request.form.get("working_members", 1))
-        country = request.form.get("country", "India")
-
-        risk, level, color, comparison, help_text = calculate_risk(
-            income, education, employment, household_size, working_members, country
-        )
-
+        data = request.json
+        # Extract features from JSON request
+        user_input = np.array([[
+            float(data['education']),
+            float(data['income']),
+            float(data['family']),
+            float(data['access'])
+        ]])
+        
+        # Get Probability
+        prob = model.predict_proba(user_input)[0][1]
+        
+        # Get Weights (Coefficients) to explain "WHY"
+        # We multiply user input by coefficients to see what contributed most
+        weights = model.named_steps['logreg'].coef_[0]
+        contributions = {feature_names[i]: float(weights[i]) for i in range(len(feature_names))}
+        
         return jsonify({
-            "risk": round(risk, 2),
-            "level": level,
-            "color": color,
-            "comparison": comparison,
-            "help": help_text
+            'probability': round(prob * 100, 1),
+            'risk_level': "High" if prob > 0.5 else "Low",
+            'contributions': contributions
         })
-
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({'error': str(e)}), 400
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
