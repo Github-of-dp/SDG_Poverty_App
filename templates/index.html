@@ -3,44 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BetterLife UAE | SDG-1 AI</title>
+    <title>SDG-1 | Poverty Risk AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 40%, #b45309 100%);
-            background-size: 400% 400%;
-            animation: aurora 12s ease infinite;
-            min-height: 100vh;
-        }
-        @keyframes aurora {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            /* UAE Desert Theme: Night sky to Sand dunes */
+            background: linear-gradient(180deg, #0f172a 0%, #1e3a8a 50%, #d97706 100%);
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
         }
         .glass {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
         }
     </style>
 </head>
-<body class="text-white p-6 md:p-12">
+<body class="text-white min-h-screen pb-20">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="text-center mb-12">
-            <h1 class="text-5xl font-extrabold mb-3">BetterLife AI <span class="text-amber-400">🇦🇪</span></h1>
-            <p class="text-xl opacity-90 font-light">SDG-1: Mapping a path out of poverty.</p>
+    <div class="max-w-6xl mx-auto px-6 pt-12">
+        <header class="text-center mb-16">
+            <h1 class="text-5xl font-black mb-4 tracking-tight text-amber-400">BetterLife AI <span class="text-white">✨</span></h1>
+            <p class="text-xl opacity-80 max-w-2xl mx-auto">An AI-driven simulation for <strong>SDG-1: No Poverty</strong>, analyzing household vulnerability through Logistic Regression.</p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
             
-            <div class="glass p-10 shadow-2xl space-y-8">
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-widest mb-3 text-amber-300">Target Region</label>
-                    <select id="country" onchange="update()" class="w-full bg-white/10 p-4 rounded-2xl outline-none border border-white/20 cursor-pointer text-lg">
+            <div class="glass p-8 shadow-2xl space-y-8 border-t-4 border-amber-500">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold uppercase tracking-widest text-amber-500">Inputs</h2>
+                    <select id="country" onchange="update()" class="bg-white/10 p-2 rounded-lg outline-none border border-white/20">
                         {% for code, info in countries.items() %}
-                        <option value="{{ code }}" class="text-gray-900" {% if code == 'UAE' %}selected{% endif %}>{{ code }}</option>
+                        <option value="{{ code }}" class="text-black" {% if code == 'UAE' %}selected{% endif %}>{{ code }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -48,29 +43,29 @@
                 <div class="space-y-6">
                     <div>
                         <div class="flex justify-between mb-2">
-                            <label class="font-semibold">Education Level</label>
-                            <span id="edu_label" class="text-amber-300 font-bold">12 Years</span>
+                            <label class="font-medium">Education (Years)</label>
+                            <span id="edu_label" class="text-amber-400 font-bold">12</span>
                         </div>
-                        <input type="range" id="edu" min="0" max="22" value="12" class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400" oninput="update()">
+                        <input type="range" id="edu" min="0" max="22" value="12" class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-500" oninput="update()">
                     </div>
 
                     <div>
                         <div class="flex justify-between mb-2">
-                            <label class="font-semibold">Monthly Income (AED/USD)</label>
-                            <span id="inc_label" class="text-amber-300 font-bold">5000</span>
+                            <label class="font-medium">Monthly Income (<span class="currency-label">AED</span>)</label>
+                            <span id="inc_label" class="text-amber-400 font-bold">5000</span>
                         </div>
-                        <input type="range" id="inc" min="0" max="20000" step="100" value="5000" class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400" oninput="update()">
+                        <input type="range" id="inc" min="0" max="25000" step="100" value="5000" class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-500" oninput="update()">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="bg-white/5 p-5 rounded-3xl border border-white/10 text-center">
-                        <label class="text-[10px] uppercase font-black mb-2 block opacity-60">Family Size</label>
-                        <input type="number" id="fam" value="4" class="bg-transparent text-3xl font-bold w-full text-center outline-none" oninput="update()">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                        <label class="text-[10px] block opacity-60 mb-1">FAMILY SIZE</label>
+                        <input type="number" id="fam" value="4" class="bg-transparent text-2xl font-bold w-full outline-none" oninput="update()">
                     </div>
-                    <div class="bg-white/5 p-5 rounded-3xl border border-white/10 text-center">
-                        <label class="text-[10px] uppercase font-black mb-2 block opacity-60">Digital Access</label>
-                        <select id="acc" class="bg-transparent text-sm font-bold w-full outline-none text-center" onchange="update()">
+                    <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                        <label class="text-[10px] block opacity-60 mb-1">TECH ACCESS</label>
+                        <select id="acc" class="bg-transparent text-sm font-bold w-full outline-none" onchange="update()">
                             <option value="0">None</option>
                             <option value="1" selected>Basic</option>
                             <option value="2">Advanced</option>
@@ -79,26 +74,46 @@
                 </div>
             </div>
 
-            <div class="flex flex-col items-center">
-                <div class="glass w-full p-12 text-center shadow-2xl">
-                    <h2 class="text-2xl font-light mb-6">Risk Assessment</h2>
-                    <div class="relative inline-flex items-center justify-center">
-                        <svg class="w-56 h-56 transform -rotate-90">
-                            <circle cx="112" cy="112" r="95" stroke="rgba(255,255,255,0.1)" stroke-width="15" fill="transparent" />
-                            <circle id="meter" cx="112" cy="112" r="95" stroke="#fbbf24" stroke-width="15" fill="transparent" 
-                                    stroke-dasharray="597" stroke-dashoffset="597" stroke-linecap="round" class="transition-all duration-1000" />
-                        </svg>
-                        <div class="absolute flex flex-col items-center">
-                            <span id="prob_val" class="text-6xl font-black">0%</span>
-                            <span id="emoji" class="text-4xl mt-2">✨</span>
-                        </div>
-                    </div>
-                    <div id="status_box" class="mt-10 p-6 rounded-3xl bg-white/10 transition-all duration-500">
-                        <p id="advice_text" class="text-lg italic font-medium">Ready to predict...</p>
+            <div class="glass p-8 flex flex-col items-center justify-center text-center border-t-4 border-white/20">
+                <h2 class="text-sm uppercase tracking-widest opacity-60 mb-8">Poverty Risk Analysis</h2>
+                
+                <div class="relative flex items-center justify-center">
+                    <svg class="w-64 h-64 transform -rotate-90">
+                        <circle cx="128" cy="128" r="110" stroke="rgba(255,255,255,0.05)" stroke-width="20" fill="transparent" />
+                        <circle id="meter" cx="128" cy="128" r="110" stroke="#f59e0b" stroke-width="20" fill="transparent" 
+                                stroke-dasharray="691" stroke-dashoffset="691" stroke-linecap="round" class="transition-all duration-1000" />
+                    </svg>
+                    <div class="absolute flex flex-col items-center">
+                        <span id="prob_val" class="text-7xl font-black">0%</span>
+                        <span id="emoji" class="text-4xl mt-2">--</span>
                     </div>
                 </div>
-            </div>
 
+                <div class="mt-8 bg-white/10 p-4 rounded-2xl w-full">
+                    <p id="advice_text" class="italic opacity-90">"Adjust parameters to see prediction..."</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-20 space-y-12 max-w-4xl mx-auto">
+            <section class="glass p-8">
+                <h3 class="text-2xl font-bold mb-4 text-amber-400">What is SDG-1?</h3>
+                <p class="leading-relaxed opacity-80">
+                    Sustainable Development Goal 1 aims to end poverty in all its forms everywhere. Poverty is not just a lack of income; it includes a lack of basic services, such as education, health, and digital access. This AI model simulates how these "Multidimensional" factors combine to determine a household's vulnerability.
+                </p>
+            </section>
+
+            <section class="glass p-8">
+                <h3 class="text-2xl font-bold mb-4 text-amber-400">How the Model Works</h3>
+                <p class="leading-relaxed opacity-80 mb-6">
+                    We use a <strong>Logistic Regression</strong> algorithm. It assigns a "weight" to each life factor. Income and Education act as "Protective Factors" (negative weights), while large Family Sizes in resource-scarce environments act as "Risk Factors" (positive weights).
+                </p>
+                
+                <p class="text-xs text-red-300 mt-6 uppercase tracking-widest font-bold">⚠️ Disclaimer</p>
+                <p class="text-xs opacity-60 italic mt-2">
+                    This application is a school project for educational purposes only. The predictions are based on simplified simulated data and do not reflect real-world financial or legal advice. Regional calculations are estimates inspired by the Multidimensional Poverty Index (MPI).
+                </p>
+            </section>
         </div>
     </div>
 
@@ -110,7 +125,7 @@
             const acc = document.getElementById('acc').value;
             const country = document.getElementById('country').value;
             
-            document.getElementById('edu_label').innerText = edu + " Years";
+            document.getElementById('edu_label').innerText = edu;
             document.getElementById('inc_label').innerText = inc;
 
             const res = await fetch('/predict', {
@@ -120,22 +135,19 @@
             });
 
             const data = await res.json();
+            
+            // Update UI
             document.getElementById('prob_val').innerText = data.prob + "%";
+            document.querySelectorAll('.currency-label').forEach(el => el.innerText = data.currency);
             
             const meter = document.getElementById('meter');
-            meter.style.strokeDashoffset = 597 - (597 * data.prob / 100);
+            meter.style.strokeDashoffset = 691 - (691 * data.prob / 100);
 
             const emoji = document.getElementById('emoji');
-            if(data.prob > 60) {
-                emoji.innerText = "⚠️";
-                meter.style.stroke = "#ef4444";
-            } else if(data.prob > 30) {
-                emoji.innerText = "⚖️";
-                meter.style.stroke = "#f59e0b";
-            } else {
-                emoji.innerText = "✅";
-                meter.style.stroke = "#10b981";
-            }
+            if(data.prob > 70) { emoji.innerText = "🆘"; meter.style.stroke = "#ef4444"; }
+            else if(data.prob > 40) { emoji.innerText = "⚠️"; meter.style.stroke = "#f59e0b"; }
+            else { emoji.innerText = "🛡️"; meter.style.stroke = "#10b981"; }
+            
             document.getElementById('advice_text').innerText = data.advice;
         }
         window.onload = update;
