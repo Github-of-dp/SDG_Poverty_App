@@ -3,88 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDG-1 | Poverty Risk Predictor</title>
+    <title>SDG-1 Aurora Predictor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #1e1b4b);
+            background-size: 400% 400%;
+            animation: aurora 15s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        @keyframes aurora {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+        .slider-label {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3b82f6;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            pointer-events: none;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans">
+<body class="text-white">
 
-    <header class="bg-blue-700 text-white py-10 px-6 text-center shadow-lg">
-        <h1 class="text-4xl font-extrabold">SDG-1: No Poverty Explorer</h1>
-        <p class="mt-2 text-blue-100 italic">Using Artificial Intelligence to understand household vulnerability.</p>
-    </header>
+    <nav class="p-6 flex justify-between items-center">
+        <h1 class="text-xl font-bold tracking-tighter text-blue-400">PROJECT_SDG1</h1>
+        <select id="country" class="bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm outline-none cursor-pointer hover:bg-white/20 transition" onchange="runInference()">
+            {% for code, info in countries.items() %}
+            <option value="{{ code }}" class="text-black">{{ code }}</option>
+            {% endfor %}
+        </select>
+    </nav>
 
-    <main class="max-w-6xl mx-auto py-12 px-4 grid grid-cols-1 lg:grid-cols-2 gap-12">
+    <div class="relative max-w-7xl mx-auto px-4 pt-10 pb-20">
         
-        <section class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-            <h2 class="text-2xl font-bold mb-6 flex items-center">
-                <span class="bg-blue-100 text-blue-700 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">1</span>
-                The Household Scenario
+        <div class="z-10 relative max-w-lg mx-auto glass p-8 shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+            <h2 class="text-2xl font-semibold mb-8 text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Household Scenario
             </h2>
             
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Years of Formal Education</label>
-                    <input type="range" id="edu" min="0" max="20" value="8" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="runInference()">
-                    <div class="flex justify-between text-xs text-slate-500 mt-1"><span>None</span><span>University (20yrs)</span></div>
+            <div class="space-y-12">
+                <div class="relative">
+                    <div class="flex justify-between mb-2">
+                        <label class="text-xs uppercase tracking-widest text-slate-400">Education Level</label>
+                        <span id="edu_val" class="text-blue-400 font-bold text-lg">8 Years</span>
+                    </div>
+                    <input type="range" id="edu" min="0" max="22" value="8" class="w-full h-1 bg-white/20 rounded-lg appearance-none accent-blue-500" oninput="runInference()">
                 </div>
 
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Monthly Household Income ($)</label>
-                    <input type="range" id="income" min="0" max="5000" value="500" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="runInference()">
-                    <div class="flex justify-between text-xs text-slate-500 mt-1"><span>$0</span><span>$5,000</span></div>
+                <div class="relative">
+                    <div class="flex justify-between mb-2">
+                        <label class="text-xs uppercase tracking-widest text-slate-400">Monthly Income</label>
+                        <span id="income_val" class="text-blue-400 font-bold text-lg">$500</span>
+                    </div>
+                    <input type="range" id="income" min="0" max="10000" step="50" value="500" class="w-full h-1 bg-white/20 rounded-lg appearance-none accent-blue-500" oninput="runInference()">
                 </div>
 
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Household Size (Dependents)</label>
-                    <input type="number" id="family" value="4" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" onchange="runInference()">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Access to Resources (Clean Water/Internet)</label>
-                    <select id="access" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl outline-none" onchange="runInference()">
-                        <option value="0">No Stable Access</option>
-                        <option value="1">Limited Access</option>
-                        <option value="2">Full Access</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass p-4 text-center">
+                        <label class="text-[10px] uppercase text-slate-400 block mb-1">Family Size</label>
+                        <input type="number" id="family" value="4" class="bg-transparent text-xl font-bold text-center w-full outline-none" onchange="runInference()">
+                    </div>
+                    <div class="glass p-4 text-center">
+                        <label class="text-[10px] uppercase text-slate-400 block mb-1">Tech Access</label>
+                        <select id="access" class="bg-transparent text-sm font-bold w-full outline-none text-center" onchange="runInference()">
+                            <option value="0" class="text-black">None</option>
+                            <option value="1" class="text-black" selected>Limited</option>
+                            <option value="2" class="text-black">Full</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-        </section>
-
-        <section class="space-y-8">
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 text-center">
-                <h2 class="text-xl font-bold mb-4">Risk Probability</h2>
-                <div id="prob-text" class="text-6xl font-black text-blue-600">0%</div>
-                <p id="risk-label" class="mt-2 font-medium uppercase tracking-widest text-slate-400">Analyzing...</p>
-            </div>
-
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                <h3 class="text-lg font-bold mb-4">Why this result? (Model Insights)</h3>
-                <canvas id="impactChart" height="200"></canvas>
-            </div>
-        </section>
-    </main>
-
-    <footer class="max-w-4xl mx-auto mb-20 px-4">
-        <div class="bg-slate-800 text-slate-300 p-8 rounded-3xl shadow-2xl">
-            <h3 class="text-white text-xl font-bold mb-4">How the AI Works</h3>
-            <p class="text-sm leading-relaxed mb-4">
-                This tool uses <strong>Logistic Regression</strong>. Think of it as a weighted scale. Each input (like income or education) is given a "weight" based on global poverty data.
-            </p>
-            
-            <p class="text-xs text-slate-500 mt-4 italic">Note: This is a school project simulation based on SDG-1 metrics.</p>
         </div>
-    </footer>
+
+        <div class="hidden lg:block absolute top-20 left-0 w-64 glass p-6 text-center animate-bounce-slow">
+            <h3 class="text-xs text-slate-400 uppercase tracking-widest mb-2">Probability</h3>
+            <div id="prob-display" class="text-5xl font-black text-blue-500">--%</div>
+            <p id="risk-status" class="text-[10px] mt-2 text-slate-500">STABLE</p>
+        </div>
+
+        <div class="hidden lg:block absolute top-20 right-0 w-80 glass p-6">
+            <h3 class="text-xs text-slate-400 uppercase tracking-widest mb-4">Risk Factors</h3>
+            <canvas id="impactChart"></canvas>
+        </div>
+
+        <div class="mt-12 max-w-2xl mx-auto glass p-6 text-center italic text-slate-300 border-t-2 border-blue-500/30">
+            <span id="dynamic-insight">Adjust the sliders to see how your life choices affect poverty risk.</span>
+        </div>
+
+    </div>
 
     <script>
         let myChart;
 
         async function runInference() {
+            const edu = document.getElementById('edu').value;
+            const income = document.getElementById('income').value;
+            
+            // Update the Value Labels instantly
+            document.getElementById('edu_val').innerText = edu + " Years";
+            document.getElementById('income_val').innerText = "$" + income;
+
             const payload = {
-                education: document.getElementById('edu').value,
-                income: document.getElementById('income').value,
+                education: edu,
+                income: income,
                 family: document.getElementById('family').value,
-                access: document.getElementById('access').value
+                access: document.getElementById('access').value,
+                country: document.getElementById('country').value
             };
 
             const response = await fetch('/predict', {
@@ -95,47 +135,52 @@
 
             const data = await response.json();
 
-            // Update Probability UI
-            const probEl = document.getElementById('prob-text');
-            const labelEl = document.getElementById('risk-label');
-            probEl.innerText = data.probability + "%";
+            // Update UI
+            document.getElementById('prob-display').innerText = data.probability + "%";
             
+            const status = document.getElementById('risk-status');
             if(data.probability > 50) {
-                probEl.className = "text-6xl font-black text-red-500 animate-pulse";
-                labelEl.innerText = "High Vulnerability";
+                status.innerText = "CRITICAL RISK";
+                status.className = "text-[10px] mt-2 text-red-400 font-bold";
+                document.getElementById('prob-display').className = "text-5xl font-black text-red-500";
             } else {
-                probEl.className = "text-6xl font-black text-green-500";
-                labelEl.innerText = "Stable Household";
+                status.innerText = "ECONOMICALLY SECURE";
+                status.className = "text-[10px] mt-2 text-green-400 font-bold";
+                document.getElementById('prob-display').className = "text-5xl font-black text-blue-500";
             }
 
-            updateChart(data.contributions);
+            updateChart(data.impacts);
+            updateInsight(data.probability);
         }
 
-        function updateChart(contributions) {
+        function updateChart(impacts) {
             const ctx = document.getElementById('impactChart').getContext('2d');
-            
             if (myChart) myChart.destroy();
-
             myChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'radar',
                 data: {
-                    labels: Object.keys(contributions),
+                    labels: ['Edu', 'Income', 'Size', 'Tech'],
                     datasets: [{
-                        label: 'Impact on Risk Score',
-                        data: Object.values(contributions),
-                        backgroundColor: Object.values(contributions).map(v => v > 0 ? '#ef4444' : '#10b981'),
-                        borderRadius: 8
+                        data: impacts,
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: '#3b82f6',
+                        pointBackgroundColor: '#fff'
                     }]
                 },
                 options: {
-                    indexAxis: 'y',
-                    plugins: { legend: { display: false } },
-                    scales: { x: { grid: { display: false } }, y: { grid: { display: false } } }
+                    scales: { r: { display: false } },
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
-        // Initialize on load
+        function updateInsight(prob) {
+            const msg = prob > 50 
+                ? "Warning: Your income-to-family ratio is below the SDG-1 threshold for this region."
+                : "Your household is currently within the 'Safety Zone' for poverty indicators.";
+            document.getElementById('dynamic-insight').innerText = msg;
+        }
+
         window.onload = runInference;
     </script>
 </body>
