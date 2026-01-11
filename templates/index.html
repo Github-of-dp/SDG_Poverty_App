@@ -3,134 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BetterLife AI | SDG-1 UAE</title>
+    <title>Global SDG-1 Predictor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: linear-gradient(180deg, #0f172a 0%, #1e3a8a 50%, #d97706 100%);
-            background-attachment: fixed;
-            animation: aurora 15s ease infinite;
-            background-size: 400% 400%;
-        }
-        @keyframes aurora {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
         }
         .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
+            transition: transform 0.3s ease;
         }
+        .glass:hover { transform: translateY(-5px); }
+        input, select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            color: white;
+            outline: none;
+        }
+        input:focus { border-color: #818cf8; background: rgba(255, 255, 255, 0.15); }
     </style>
 </head>
-<body class="text-white min-h-screen pb-10">
+<body class="text-white p-4 md:p-10">
 
-    <div class="max-w-6xl mx-auto px-6 pt-10">
+    <div class="max-w-5xl mx-auto">
         <header class="text-center mb-12">
-            <h1 class="text-5xl font-black mb-4 tracking-tight text-amber-400">BetterLife AI <span class="text-white">🇦🇪</span></h1>
-            <p class="text-lg opacity-80 max-w-2xl mx-auto">Analyzing Household Vulnerability for <strong>SDG-1: No Poverty</strong>.</p>
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">BetterLife AI 🌐</h1>
+            <p class="opacity-70">SDG-1: Sustainable Development Risk Mapping</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass p-8 space-y-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-amber-500 font-bold uppercase tracking-widest text-sm">Household Stats</h2>
-                    <select id="country" onchange="update()" class="bg-white/10 p-2 rounded-lg outline-none border border-white/20 text-sm">
-                        {% for code in countries %}
-                        <option value="{{ code }}" class="text-black" {% if code == 'UAE' %}selected{% endif %}>{{ code }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
+            <div class="glass p-8 rounded-3xl shadow-xl">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                    📋 Household Data
+                </h2>
+                
                 <div class="space-y-4">
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <label>Monthly Income (<span id="curr_label">AED</span>)</label>
-                            <span id="inc_val" class="text-amber-400 font-bold">5000</span>
-                        </div>
-                        <input type="range" id="income" min="0" max="30000" step="100" value="5000" class="w-full h-1 bg-white/20 rounded-lg appearance-none accent-amber-500" oninput="update()">
+                    <div class="flex flex-col">
+                        <label class="text-sm opacity-60 mb-1">Region</label>
+                        <select id="country" onchange="update()">
+                            {% for code in countries %}
+                            <option value="{{ code }}" class="text-black">{{ code }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
 
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <label>Education (Years)</label>
-                            <span id="edu_val" class="text-amber-400 font-bold">12</span>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <label class="text-sm opacity-60 mb-1">Monthly Income (<span id="curr">USD</span>)</label>
+                            <input type="number" id="income" value="2000" oninput="update()">
                         </div>
-                        <input type="range" id="education" min="0" max="22" value="12" class="w-full h-1 bg-white/20 rounded-lg appearance-none accent-amber-500" oninput="update()">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 pt-4">
-                        <div class="bg-white/5 p-4 rounded-xl">
-                            <label class="text-[10px] block opacity-60 mb-1">HOUSEHOLD SIZE</label>
-                            <input type="number" id="household_size" value="4" class="bg-transparent text-xl font-bold w-full outline-none" oninput="update()">
-                        </div>
-                        <div class="bg-white/5 p-4 rounded-xl">
-                            <label class="text-[10px] block opacity-60 mb-1">WORKING MEMBERS</label>
-                            <input type="number" id="working_members" value="2" class="bg-transparent text-xl font-bold w-full outline-none" oninput="update()">
+                        <div class="flex flex-col">
+                            <label class="text-sm opacity-60 mb-1">Edu (Years)</label>
+                            <input type="number" id="education" value="12" oninput="update()">
                         </div>
                     </div>
 
-                    <div class="bg-white/5 p-4 rounded-xl">
-                        <label class="text-[10px] block opacity-60 mb-1">EMPLOYMENT STATUS</label>
-                        <select id="employment" class="bg-transparent text-sm font-bold w-full outline-none" onchange="update()">
-                            <option value="1" class="text-black">Currently Employed</option>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <label class="text-sm opacity-60 mb-1">Household Size</label>
+                            <input type="number" id="h_size" value="4" oninput="update()">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-sm opacity-60 mb-1">Working Members</label>
+                            <input type="number" id="workers" value="2" oninput="update()">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label class="text-sm opacity-60 mb-1">Employment</label>
+                        <select id="employment" onchange="update()">
+                            <option value="1" class="text-black">Employed</option>
                             <option value="0" class="text-black">Unemployed</option>
                         </select>
                     </div>
                 </div>
             </div>
 
-            <div class="glass p-8 flex flex-col items-center justify-center text-center">
-                <div class="relative mb-6">
-                    <svg class="w-56 h-56 transform -rotate-90">
-                        <circle cx="112" cy="112" r="100" stroke="rgba(255,255,255,0.1)" stroke-width="12" fill="transparent" />
-                        <circle id="meter" cx="112" cy="112" r="100" stroke="#f59e0b" stroke-width="12" fill="transparent" 
-                                stroke-dasharray="628" stroke-dashoffset="628" stroke-linecap="round" class="transition-all duration-1000" />
+            <div class="glass p-8 rounded-3xl shadow-xl flex flex-col items-center justify-center text-center">
+                <div class="relative w-64 h-64 mb-6">
+                    <svg class="w-full h-full transform -rotate-90">
+                        <circle cx="128" cy="128" r="110" stroke="rgba(255,255,255,0.05)" stroke-width="16" fill="transparent" />
+                        <circle id="meter" cx="128" cy="128" r="110" stroke="#818cf8" stroke-width="16" fill="transparent" 
+                                stroke-dasharray="691" stroke-dashoffset="691" stroke-linecap="round" class="transition-all duration-700 ease-out" />
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span id="risk_score" class="text-6xl font-black">0%</span>
-                        <span id="risk_level" class="text-xs font-bold uppercase tracking-widest mt-1">Analyzing</span>
+                        <span id="risk_val" class="text-6xl font-black">0%</span>
+                        <span id="risk_lvl" class="text-sm font-bold uppercase tracking-widest opacity-60">Low Risk</span>
                     </div>
                 </div>
-                <div id="comparison_text" class="text-sm opacity-70 mb-4 tracking-wide">--</div>
-                <div class="bg-white/10 p-5 rounded-2xl w-full border border-white/10">
-                    <p id="help_text" class="text-sm italic">"Move sliders to begin risk assessment..."</p>
+                
+                <div class="bg-white/10 p-5 rounded-2xl w-full">
+                    <p id="help_txt" class="text-sm italic opacity-80 leading-relaxed">Adjust data to see analysis...</p>
                 </div>
             </div>
         </div>
 
-        <div class="mt-16 max-w-4xl mx-auto space-y-8">
-            <section class="glass p-8">
-                <h3 class="text-xl font-bold text-amber-400 mb-2">Sustainable Development Goal 1: No Poverty</h3>
-                <p class="text-sm opacity-80 leading-relaxed">
-                    Goal 1 calls for an end to poverty in all its manifestations by 2030. It aims to ensure social protection for the poor and vulnerable, increase access to basic services and support people harmed by climate-related extreme events and other economic, social and environmental shocks.
-                </p>
-            </section>
-            
-            <section class="glass p-8 border-l-4 border-red-500">
-                <h3 class="text-sm font-bold text-red-400 uppercase tracking-widest mb-2">⚠️ Scientific Disclaimer</h3>
-                <p class="text-[11px] opacity-60 leading-relaxed italic">
-                    This tool is a simulated AI model developed for a school project. The "Risk Percentage" is calculated using a hybrid mathematical formula including poverty deficit ratios and dependency factors. This does not constitute professional financial advice. All regional poverty lines are estimates for educational simulation.
-                </p>
-            </section>
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass p-6 rounded-2xl">
+                <h3 class="font-bold text-indigo-300 mb-2">Sustainable Development Goal 1</h3>
+                <p class="text-xs opacity-70 leading-relaxed">SDG 1 aims to eradicate extreme poverty for all people everywhere. This model analyzes multidimensional poverty—considering education and household stability alongside income.</p>
+            </div>
+            <div class="glass p-6 rounded-2xl border-l-4 border-red-500/50">
+                <h3 class="font-bold text-red-300 mb-2 underline uppercase text-[10px]">Disclaimer</h3>
+                <p class="text-[10px] opacity-60 italic">Educational simulation only. Predictions are based on simplified mathematical weights and do not constitute financial or legal advice.</p>
+            </div>
         </div>
     </div>
 
     <script>
         async function update() {
             const data = {
-                income: document.getElementById('income').value,
-                education: document.getElementById('education').value,
+                income: document.getElementById('income').value || 0,
+                education: document.getElementById('education').value || 0,
                 employment: document.getElementById('employment').value,
-                household_size: document.getElementById('household_size').value,
-                working_members: document.getElementById('working_members').value,
+                household_size: document.getElementById('h_size').value || 1,
+                working_members: document.getElementById('workers').value || 1,
                 country: document.getElementById('country').value
             };
-
-            document.getElementById('inc_val').innerText = data.income;
-            document.getElementById('edu_val').innerText = data.education;
 
             const res = await fetch('/predict', {
                 method: 'POST',
@@ -139,21 +134,19 @@
             });
             const result = await res.json();
 
-            // Update UI
-            document.getElementById('risk_score').innerText = result.risk + "%";
-            document.getElementById('risk_level').innerText = result.level + " Risk";
-            document.getElementById('curr_label').innerText = result.currency;
-            document.getElementById('comparison_text').innerText = result.comparison;
-            document.getElementById('help_text').innerText = result.help;
+            // Display
+            document.getElementById('risk_val').innerText = result.risk + "%";
+            document.getElementById('risk_lvl').innerText = result.level + " Risk";
+            document.getElementById('curr').innerText = result.currency;
+            document.getElementById('help_txt').innerText = result.help;
 
             const meter = document.getElementById('meter');
-            const offset = 628 - (628 * result.risk / 100);
-            meter.style.strokeDashoffset = offset;
-
-            // Color update
-            const colors = { Low: "#10b981", Medium: "#f59e0b", High: "#ef4444" };
-            meter.style.stroke = colors[result.level];
-            document.getElementById('risk_score').style.color = colors[result.level];
+            meter.style.strokeDashoffset = 691 - (691 * result.risk / 100);
+            
+            // Dynamic Colors
+            const color = result.level === 'High' ? '#f87171' : result.level === 'Medium' ? '#fbbf24' : '#34d399';
+            meter.style.stroke = color;
+            document.getElementById('risk_val').style.color = color;
         }
         window.onload = update;
     </script>
