@@ -3,91 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BetterLife AI | SDG-1</title>
+    <title>BetterLife AI | SDG-1 Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #0f172a; font-family: 'Inter', sans-serif; color: white; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        input, select { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px; color: white; width: 100%; outline: none; }
-        input:focus { border-color: #6366f1; }
+        body { background: #020617; font-family: 'Plus Jakarta Sans', sans-serif; color: #f8fafc; }
+        .glass-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; }
+        .neon-text { text-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
+        .input-box { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; transition: 0.3s; }
+        .input-box:focus { border-color: #6366f1; box-shadow: 0 0 10px rgba(99,102,241,0.2); outline: none; }
+        .progress-bg { background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; overflow: hidden; }
     </style>
 </head>
-<body class="p-4 md:p-10">
-    <div class="max-w-5xl mx-auto">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-bold text-indigo-400">BetterLife AI 🌐</h1>
-            <p class="opacity-60 mt-2">SDG-1: Multidimensional Poverty Risk Assessment</p>
-        </header>
+<body class="p-6 md:p-12 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900 to-slate-900">
+    
+    <div class="max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+            <div>
+                <h1 class="text-5xl font-extrabold neon-text tracking-tighter">BetterLife <span class="text-indigo-500">AI</span></h1>
+                <p class="text-slate-400 mt-2 font-light">Eradicating Poverty through Data Science & SDG-1</p>
+            </div>
+            <div class="glass-card px-6 py-3 flex items-center gap-4">
+                <span class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Region</span>
+                <select id="country" onchange="update()" class="bg-transparent font-bold outline-none cursor-pointer">
+                    {% for code in countries %}
+                    <option value="{{ code }}" class="bg-slate-900">{{ code }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass p-6 rounded-2xl">
-                <h2 class="text-lg font-bold mb-4 border-b border-white/10 pb-2">Step 1: Household Data</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs opacity-50 uppercase font-bold">Region</label>
-                        <select id="country" onchange="update()">
-                            {% for code in countries %}
-                            <option value="{{ code }}">{{ code }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-xs opacity-50 uppercase font-bold">Monthly Income (<span id="curr_sym">AED</span>)</label>
-                            <input type="number" id="income" value="5000" oninput="update()">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-5 space-y-6">
+                <div class="glass-card p-8">
+                    <h3 class="text-xl font-bold mb-6 text-indigo-300">Data Input</h3>
+                    <div class="space-y-5">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-[10px] uppercase font-bold text-slate-500">Income (<span id="curr_sym">AED</span>)</label>
+                                <input type="number" id="income" value="5000" oninput="update()" class="input-box w-full">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] uppercase font-bold text-slate-500">Education (Yrs)</label>
+                                <input type="number" id="edu" value="12" oninput="update()" class="input-box w-full">
+                            </div>
                         </div>
-                        <div>
-                            <label class="text-xs opacity-50 uppercase font-bold">Years of Education</label>
-                            <input type="number" id="edu" value="12" oninput="update()">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-[10px] uppercase font-bold text-slate-500">Family Size</label>
+                                <input type="number" id="h_size" value="4" oninput="update()" class="input-box w-full">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] uppercase font-bold text-slate-500">Workers</label>
+                                <input type="number" id="workers" value="1" oninput="update()" class="input-box w-full">
+                            </div>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-xs opacity-50 uppercase font-bold">Household Size</label>
-                            <input type="number" id="h_size" value="4" oninput="update()">
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase font-bold text-slate-500">Current Job Status</label>
+                            <select id="emp" onchange="update()" class="input-box w-full">
+                                <option value="1">Employed</option>
+                                <option value="0">Unemployed</option>
+                            </select>
                         </div>
-                        <div>
-                            <label class="text-xs opacity-50 uppercase font-bold">Working Members</label>
-                            <input type="number" id="workers" value="1" oninput="update()">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-xs opacity-50 uppercase font-bold">Employment Status</label>
-                        <select id="emp" onchange="update()">
-                            <option value="1">Employed</option>
-                            <option value="0">Unemployed</option>
-                        </select>
                     </div>
                 </div>
             </div>
 
-            <div class="glass p-6 rounded-2xl flex flex-col items-center">
-                <h2 class="text-lg font-bold mb-4 border-b border-white/10 pb-2 w-full">Step 2: Risk Analysis</h2>
-                
-                <div class="relative w-40 h-40 mb-6">
-                    <svg class="w-full h-full transform -rotate-90">
-                        <circle cx="80" cy="80" r="70" stroke="rgba(255,255,255,0.05)" stroke-width="10" fill="transparent" />
-                        <circle id="meter" cx="80" cy="80" r="70" stroke="#6366f1" stroke-width="10" fill="transparent" 
-                                stroke-dasharray="440" stroke-dashoffset="440" stroke-linecap="round" class="transition-all duration-700" />
-                    </svg>
-                    <div class="absolute inset-0 flex items-center justify-center font-black text-3xl" id="risk_text">0%</div>
+            <div class="lg:col-span-7 glass-card p-8 relative overflow-hidden">
+                <div class="flex justify-between items-start mb-10">
+                    <div>
+                        <h3 class="text-xl font-bold text-indigo-300">Risk Assessment</h3>
+                        <p id="risk_meaning" class="text-slate-400 text-sm mt-1">Calculating resilience...</p>
+                    </div>
+                    <div id="status_pill" class="px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter bg-indigo-500/20 text-indigo-400">Loading</div>
                 </div>
 
-                <div class="w-full space-y-4">
-                    <div id="breakdown_container" class="space-y-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                    <div class="flex justify-center">
+                        <div class="relative w-48 h-48">
+                            <svg class="w-full h-full transform -rotate-90">
+                                <circle cx="96" cy="96" r="88" stroke="rgba(255,255,255,0.03)" stroke-width="12" fill="transparent" />
+                                <circle id="meter" cx="96" cy="96" r="88" stroke="#6366f1" stroke-width="12" fill="transparent" 
+                                        stroke-dasharray="553" stroke-dashoffset="553" stroke-linecap="round" class="transition-all duration-1000" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="risk_val" class="text-5xl font-extrabold">0%</span>
+                                <span class="text-[10px] opacity-40 uppercase font-black">Poverty Risk</span>
+                            </div>
                         </div>
-                    <div class="bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20">
-                        <p id="meaning" class="text-sm font-bold text-indigo-300 italic mb-1">--</p>
-                        <p id="help" class="text-[11px] opacity-70">--</p>
                     </div>
+                    <div id="breakdown_list" class="space-y-4">
+                        </div>
                 </div>
             </div>
         </div>
 
-        <footer class="mt-10 opacity-40 text-[10px] flex flex-col gap-2">
-            <p><strong>What is SDG-1?</strong> Goal 1 is to end poverty. This AI helps visualize how factors like education and family size protect you or put you at risk.</p>
-            <p><strong>Disclaimer:</strong> This is a school project simulation. Not for official financial use.</p>
-        </footer>
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass-card p-6">
+                <h4 class="font-bold text-indigo-400 mb-2">Regional Context</h4>
+                <p id="reg_info" class="text-xs text-slate-400 leading-relaxed">Select a region to see local poverty insights.</p>
+            </div>
+            <div class="glass-card p-6">
+                <h4 class="font-bold text-emerald-400 mb-2">Actionable Advice</h4>
+                <p id="help_txt" class="text-xs text-slate-400 leading-relaxed">--</p>
+            </div>
+            <div class="glass-card p-6 border-l-2 border-red-500/40">
+                <h4 class="font-bold text-slate-200 mb-2">Scientific Disclaimer</h4>
+                <p class="text-[10px] text-slate-500 italic">This AI simulation uses Multidimensional Poverty Index (MPI) logic. It is for educational school projects only and not for real-world legal or financial use.</p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -108,26 +132,38 @@
             });
             const r = await res.json();
 
-            // Update UI
-            document.getElementById('risk_text').innerText = r.risk + "%";
+            // Main Display
+            document.getElementById('risk_val').innerText = r.risk + "%";
             document.getElementById('curr_sym').innerText = r.currency;
-            document.getElementById('meaning').innerText = r.meaning;
-            document.getElementById('help').innerText = r.help;
+            document.getElementById('risk_meaning').innerText = r.meaning;
+            document.getElementById('help_txt').innerText = r.help;
+            document.getElementById('reg_info').innerText = r.info;
+            
+            const pill = document.getElementById('status_pill');
+            pill.innerText = r.status;
+            pill.style.color = r.color;
+            pill.style.backgroundColor = r.color + '20';
 
+            // Meter Animation
             const meter = document.getElementById('meter');
-            meter.style.strokeDashoffset = 440 - (440 * r.risk / 100);
+            meter.style.strokeDashoffset = 553 - (553 * r.risk / 100);
+            meter.style.stroke = r.color;
 
-            // Update Breakdown Bars
-            const container = document.getElementById('breakdown_container');
-            container.innerHTML = '<p class="text-[10px] uppercase font-bold opacity-40 mb-2">Influence Degree</p>';
-            for (const [name, val] of Object.entries(r.breakdown)) {
-                container.innerHTML += `
-                    <div class="flex flex-col gap-1">
-                        <div class="flex justify-between text-[10px]"><span>${name}</span><span>${val}%</span></div>
-                        <div class="w-full bg-white/5 h-1 rounded-full"><div class="bg-indigo-500 h-full rounded-full transition-all duration-1000" style="width:${val * 2}%"></div></div>
+            // Breakdown List
+            const list = document.getElementById('breakdown_list');
+            list.innerHTML = '';
+            r.breakdown.forEach(item => {
+                list.innerHTML += `
+                    <div>
+                        <div class="flex justify-between text-[10px] mb-1">
+                            <span class="font-bold uppercase opacity-50">${item.label}</span>
+                            <span class="font-black" style="color:${r.color}">${item.value}%</span>
+                        </div>
+                        <div class="progress-bg"><div class="h-full transition-all duration-1000" style="width:${item.value * 2}%; background:${r.color}"></div></div>
+                        <p class="text-[9px] opacity-30 mt-1 italic">${item.desc}</p>
                     </div>
                 `;
-            }
+            });
         }
         window.onload = update;
     </script>
