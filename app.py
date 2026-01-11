@@ -1,69 +1,75 @@
 from flask import Flask, render_template, request, jsonify
-import numpy as np
 
 app = Flask(__name__)
 
-# Regional Configs: Weights [Edu, Inc, Fam, Acc], Intercept, and Currency
-country_data = {
-    "UAE": {
-        "weight": [-0.2, -0.0005, 0.4, -0.5], 
-        "intercept": 2.5, # Higher intercept means higher base risk
-        "currency": "AED",
-        "tips": "Explore the Nafis program for career growth in the private sector."
-    },
-    "Global": {
-        "weight": [-0.15, -0.001, 0.6, -0.4], 
-        "intercept": 3.0,
-        "currency": "USD",
-        "tips": "Focus on vocational training and community support networks."
-    },
-    "India": {
-        "weight": [-0.1, -0.002, 0.5, -0.3], 
-        "intercept": 3.5,
-        "currency": "INR",
-        "tips": "Look into digital literacy and urban livelihood missions."
-    },
-    "USA": {
-        "weight": [-0.3, -0.0002, 0.3, -0.8], 
-        "intercept": 1.5,
-        "currency": "USD",
-        "tips": "Utilize state-level social safety nets and educational grants."
-    }
+# ---------------- CONFIGURATION ----------------
+COUNTRY_CONFIG = {
+    "UAE": {"poverty_line": 16000, "currency": "AED", "help": "Explore workforce upskilling initiatives and Nafis program support."},
+    "India": {"poverty_line": 10000, "currency": "INR", "help": "Explore government welfare schemes, skill development programs, and local NGOs."},
+    "USA": {"poverty_line": 15000, "currency": "USD", "help": "Look into SNAP benefits, job reskilling programs, and community support services."},
+    "UK": {"poverty_line": 14000, "currency": "GBP", "help": "Check Universal Credit support and employment training programs."},
+    "Nigeria": {"poverty_line": 1200, "currency": "NGN", "help": "Seek NGO assistance, microfinance programs, and vocational training."}
 }
 
-@app.route('/')
-def index():
-    return render_template('index.html', countries=country_data)
+@app.route("/")
+def home():
+    return render_template("index.html", countries=COUNTRY_CONFIG)
 
-@app.route('/predict', methods=['POST'])
+def calculate_risk(income, education, employment, household_size, working_members, country):
+    config = COUNTRY_CONFIG.get(country, COUNTRY_CONFIG["India"])
+    poverty_line = config["poverty_line"]
+
+    # Basic poverty deficit ratio
+    deficit_ratio = max(0, (poverty_line - income) / poverty_line)
+
+    # Employment & household modifiers
+    employment_factor = 0.2 if employment else 0.5  
+    dependency_factor = 1 if household_size == 0 else household_size / max(1, working_members)
+
+    # Education factor reduces risk slightly
+    education_factor = max(0, (20 - education) / 20)
+
+    # Combine factors based on your provided logic
+    raw_risk = (deficit_ratio * 0.6) + (employment_factor * 0.2) + (education_factor * 0.2)
+    risk_percent = min(100, max(0, raw_risk * 100 * dependency_factor))
+
+    # Risk labels
+    if risk_percent < 35:
+        level, color = "Low", "green"
+    elif risk_percent < 65:
+        level, color = "Medium", "orange"
+    else:
+        level, color = "High", "red"
+
+    comparison = "Above regional average" if income >= poverty_line else "Below regional average"
+    
+    return risk_percent, level, color, comparison, config["help"], config["currency"]
+
+@app.route("/predict", methods=["POST"])
 def predict():
-    data = request.json
-    c_type = data.get('country', 'Global')
-    config = country_data.get(c_type, country_data['Global'])
-    
-    # Inputs
-    edu = float(data['edu'])
-    inc = float(data['inc'])
-    fam = float(data['family'])
-    acc = float(data['access'])
-    
-    # --- FIXED LOGIC ---
-    # z = intercept + (w1*edu) + (w2*inc) + (w3*fam) + (w4*acc)
-    w = config['weight']
-    z = config['intercept'] + (w[0]*edu) + (w[1]*inc) + (w[2]*fam) + (w[3]*acc)
-    
-    # Sigmoid Function
-    prob = 1 / (1 + np.exp(-z))
-    
-    # Safety Check: If income is 0, the risk cannot be low.
-    if inc < 100:
-        prob = max(prob, 0.85) # Minimum 85% risk if income is near zero
+    try:
+        data = request.json
+        income = float(data.get("income", 0))
+        education = float(data.get("education", 0))
+        employment = int(data.get("employment", 0))
+        household_size = int(data.get("household_size", 1))
+        working_members = int(data.get("working_members", 1))
+        country = data.get("country", "UAE")
 
-    return jsonify({
-        'prob': int(round(prob * 100)),
-        'advice': config['tips'],
-        'currency': config['currency']
-    })
+        risk, level, color, comp, help_text, currency = calculate_risk(
+            income, education, employment, household_size, working_members, country
+        )
 
-if __name__ == '__main__':
+        return jsonify({
+            "risk": round(risk, 2),
+            "level": level,
+            "color": color,
+            "comparison": comp,
+            "help": help_text,
+            "currency": currency
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+if __name__ == "__main__":
     app.run(debug=True)
