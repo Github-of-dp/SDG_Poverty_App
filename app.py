@@ -1,41 +1,60 @@
 from flask import Flask, render_template, request, jsonify
-import random
 
 app = Flask(__name__)
 
-# Real SDG 1.2 target thresholds
+# SDG 1.2 Regional Benchmarks
 REGIONS = {
-    "India": {"line": 10000, "target": 5000, "curr": "INR"},
-    "UAE": {"line": 16000, "target": 8000, "curr": "AED"},
-    "USA": {"line": 2500, "target": 1250, "curr": "USD"}
+    "UAE": {"line": 16000, "floor": 8000, "curr": "AED"},
+    "India": {"line": 10000, "floor": 5000, "curr": "INR"},
+    "USA": {"line": 2800, "floor": 1400, "curr": "USD"}
 }
 
 @app.route("/")
 def home():
     return render_template("index.html", regions=REGIONS)
 
-@app.route("/simulate", methods=["POST"])
-def simulate():
+@app.route("/analyze", methods=["POST"])
+def analyze():
     d = request.json
-    inc, edu = float(d['income']), float(d['education'])
-    h_size, workers = int(d['h_size']), max(1, int(d['workers']))
+    inc = float(d.get('income', 0))
+    edu = float(d.get('education', 0))
+    h_size = int(d.get('h_size', 4))
+    workers = max(1, int(d.get('workers', 1)))
+    region = d.get('region', 'UAE')
     
-    # Calculate Base Risk (SDG 1.2 Multidimensional)
-    meta = REGIONS[d['region']]
-    inc_risk = max(0, (meta['line'] - inc) / meta['line']) * 40
-    edu_risk = max(0, (12 - edu) / 12) * 30
-    struct_risk = min(30, ((h_size / workers) / 4) * 30)
+    meta = REGIONS[region]
     
-    total_risk = round(inc_risk + edu_risk + struct_risk, 1)
+    # 1. MONETARY RISK (Weight 40%)
+    m_risk = max(0, (meta['line'] - inc) / meta['line']) * 40
     
-    # AI Logic: Target 1.2 Progress
-    target_gap = round(((inc - meta['target']) / meta['target']) * 100, 1)
+    # 2. CAPABILITY RISK (Education Detailed - Weight 30%)
+    # Milestones: 16 (Degree), 12 (High School), 6 (Primary)
+    if edu >= 16: edu_factor = 0
+    elif edu >= 12: edu_factor = 0.2
+    elif edu >= 6: edu_factor = 0.6
+    else: edu_factor = 1.0
+    c_risk = edu_factor * 30
     
+    # 3. STRUCTURAL RISK (Dependency - Weight 30%)
+    dep_ratio = h_size / workers
+    s_risk = min(30, (dep_ratio / 5) * 30)
+    
+    total_risk = round(m_risk + c_risk + s_risk, 1)
+    
+    # Logic for "Risk Color"
+    color = "#ccff00" # Safe (Lime)
+    if total_risk > 60: color = "#ff0055" # Critical (Neon Red)
+    elif total_risk > 30: color = "#ffaa00" # Warning (Orange)
+
     return jsonify({
-        "risk": total_risk,
-        "sdg_msg": "Target 1.2 Achieved" if inc > meta['target'] else "Below SDG Target",
-        "gap": target_gap,
-        "breakdown": {"Financial": round(inc_risk), "Capability": round(edu_risk), "Structural": round(struct_risk)}
+        "total": total_risk,
+        "color": color,
+        "breakdown": [
+            {"name": "Monetary Gap", "val": round(m_risk, 1), "impact": "High" if m_risk > 20 else "Low"},
+            {"name": "Capability Gap", "val": round(c_risk, 1), "impact": "High" if c_risk > 15 else "Low"},
+            {"name": "Structural Load", "val": round(s_risk, 1), "impact": "High" if s_risk > 15 else "Low"}
+        ],
+        "sdg_status": "Meeting SDG 1.2" if inc > meta['floor'] else "Below SDG 1.2 Target"
     })
 
 if __name__ == "__main__":
