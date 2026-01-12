@@ -3,116 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BetterLife AI // SDG 1.2 Architect</title>
+    <title>BetterLife // Neural Architect</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #050505; color: #fff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; }
-        .neon-lime { color: #ccff00; }
-        .neon-bg { background: #ccff00; }
-        .card-hover { transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .card-hover:hover { border-color: #ccff00; transform: translateY(-5px); box-shadow: 0 10px 40px rgba(204,255,0,0.1); }
+        :root { --neon: #ccff00; --red: #ff0055; }
+        body { background: #080808; color: #fff; font-family: 'Space Grotesk', sans-serif; }
         
-        /* Modal Style */
-        #disclaimer-modal { display: flex; animation: fadeIn 0.5s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .glow-card { 
+            background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(10px); 
+            border: 1px solid #222; border-radius: 20px; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.5); transition: 0.4s;
+        }
+        .glow-card:hover { border-color: var(--neon); box-shadow: 0 0 25px rgba(204, 255, 0, 0.15); }
+        
+        input, select { 
+            background: #111; border: 1px solid #333; color: var(--neon); 
+            padding: 12px; border-radius: 10px; width: 100%; outline: none;
+        }
+        input:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(204, 255, 0, 0.3); }
+
+        .risk-bar-container { background: #1a1a1a; height: 12px; border-radius: 20px; overflow: hidden; }
+        .risk-bar-fill { height: 100%; transition: width 0.8s ease, background-color 0.5s; }
+
+        .terminal-text { font-family: 'Courier New', monospace; font-size: 11px; }
+        
+        /* Modal Disclaimer */
+        #disclaimer { display: flex; z-index: 1000; }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
-    <div id="disclaimer-modal" class="fixed inset-0 z-[100] items-center justify-center bg-black/90 backdrop-blur-xl p-6">
-        <div class="glass max-w-lg p-10 text-center border-[#ccff00]/30">
-            <div class="w-16 h-16 bg-[#ccff00]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span class="neon-lime text-2xl font-bold">!</span>
-            </div>
-            <h2 class="text-2xl font-bold mb-4 uppercase tracking-tighter">Educational Project <span class="neon-lime">Notice</span></h2>
-            <p class="text-gray-400 text-sm leading-relaxed mb-8">
-                This app is a <span class="text-white font-bold">mini-educational simulation</span> for SDG 1.2. The AI-generated data, poverty risks, and financial projections are for <span class="text-white">demonstration purposes only</span> and should not be used for real-world financial planning or policy decisions.
+    <div id="disclaimer" class="fixed inset-0 items-center justify-center bg-black/90 backdrop-blur-2xl p-6">
+        <div class="glow-card max-w-lg p-10 text-center border-[#ccff00]/40">
+            <h2 class="text-3xl font-bold mb-4 tracking-tighter italic">NEURAL <span style="color:var(--neon)">ARCHITECT</span></h2>
+            <p class="text-gray-400 text-sm mb-8 leading-relaxed">
+                This simulation uses <span class="text-white">SDG 1.2 Multidimensional Frameworks</span> to analyze poverty vulnerability. This is a <b>mini educational project</b>. Results are for demo purposes only.
             </p>
-            <button onclick="document.getElementById('disclaimer-modal').style.display='none'" class="neon-bg text-black font-black px-10 py-4 rounded-xl hover:scale-105 transition-transform w-full">
-                INITIALIZE ARCHITECT
-            </button>
+            <button onclick="document.getElementById('disclaimer').remove()" class="w-full py-4 bg-[#ccff00] text-black font-black rounded-xl hover:scale-105 transition">ENTER SYSTEM</button>
         </div>
     </div>
 
     <div class="max-w-6xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+        <header class="flex justify-between items-end mb-12 border-b border-white/5 pb-8">
             <div>
-                <span class="text-[10px] bg-white/10 px-2 py-1 rounded text-gray-400 font-bold tracking-widest uppercase">Target 1.2: Multidimensional Poverty</span>
-                <h1 class="text-5xl font-black uppercase tracking-tighter mt-4">BetterLife <span class="neon-lime">AI</span></h1>
+                <h1 class="text-5xl font-black uppercase tracking-tighter">BetterLife <span style="color:var(--neon)">AI</span></h1>
+                <p class="text-gray-500 text-xs mt-2 uppercase font-bold tracking-widest">Global Resilience Node // SDG-1.2</p>
             </div>
-            <select id="region" onchange="run()" class="bg-transparent border-b-2 border-[#ccff00] text-[#ccff00] font-bold py-2 outline-none">
+            <select id="region" onchange="run()" class="w-32 bg-transparent border-none font-bold text-right" style="color:var(--neon)">
                 {% for r in regions %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
             </select>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-4 space-y-6">
-                <div class="glass p-8 card-hover">
-                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-8 tracking-widest">Profile Parameters</h3>
-                    <div class="space-y-6">
+                <div class="glow-card p-6">
+                    <h3 class="text-[10px] font-black text-gray-500 uppercase mb-6 tracking-widest">Input Matrix</h3>
+                    <div class="space-y-4">
                         <div>
-                            <label class="text-[10px] text-gray-500 font-bold uppercase block mb-2">Monthly Income</label>
-                            <input type="range" id="income" min="1000" max="25000" value="8000" oninput="run()" class="w-full accent-[#ccff00]">
-                            <div class="text-right neon-lime font-bold mt-1" id="inc_val">8000</div>
+                            <label class="text-[10px] text-gray-500 uppercase font-bold mb-2 block">Monthly Income</label>
+                            <input type="number" id="income" value="10000" oninput="run()">
                         </div>
                         <div>
-                            <label class="text-[10px] text-gray-500 font-bold uppercase block mb-2">Education Years</label>
-                            <input type="number" id="edu" value="10" oninput="run()" class="bg-white/5 border border-white/10 rounded-lg p-3 w-full outline-none focus:border-[#ccff00]">
+                            <label class="text-[10px] text-gray-500 uppercase font-bold mb-2 block">Total Schooling (Years)</label>
+                            <input type="number" id="edu" value="12" oninput="run()">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-[10px] text-gray-500 font-bold uppercase block mb-2">Household</label>
-                                <input type="number" id="h_size" value="4" oninput="run()" class="bg-white/5 border border-white/10 rounded-lg p-3 w-full outline-none">
+                                <label class="text-[10px] text-gray-500 uppercase font-bold mb-2 block">Household Size</label>
+                                <input type="number" id="h_size" value="4" oninput="run()">
                             </div>
                             <div>
-                                <label class="text-[10px] text-gray-500 font-bold uppercase block mb-2">Workers</label>
-                                <input type="number" id="workers" value="1" oninput="run()" class="bg-white/5 border border-white/10 rounded-lg p-3 w-full outline-none">
+                                <label class="text-[10px] text-gray-500 uppercase font-bold mb-2 block">No. of Workers</label>
+                                <input type="number" id="workers" value="1" oninput="run()">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass p-6 border-l-4 border-[#ccff00]">
-                    <h4 class="text-xs font-bold neon-lime mb-2">SDG INSIGHT</h4>
-                    <p class="text-[11px] text-gray-400 italic leading-relaxed">
-                        SDG 1.2 looks beyond cash. It analyzes "deprivation bundles"—the intersection of poor schooling, high dependency, and low income.
-                    </p>
+                <div class="glow-card p-5 bg-black border-dashed h-40 overflow-y-auto">
+                    <h4 class="text-[10px] font-bold text-gray-600 uppercase mb-2">System Events</h4>
+                    <div id="event-log" class="terminal-text text-gray-400 space-y-1">
+                        <div>> System Ready...</div>
+                    </div>
                 </div>
+                <button onclick="triggerShock()" class="w-full py-4 bg-white text-black font-black rounded-xl hover:bg-[#ccff00] transition-colors">
+                    SIMULATE LIFE EVENT
+                </button>
             </div>
 
-            <div class="lg:col-span-8 space-y-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass p-10 flex flex-col items-center justify-center text-center card-hover relative overflow-hidden">
-                        <div class="text-[10px] font-bold text-gray-500 uppercase absolute top-6">Vulnerability Index</div>
-                        <div class="text-8xl font-black neon-lime" id="risk_score">0%</div>
-                        <div class="text-[11px] font-bold mt-4 tracking-widest text-gray-400" id="sdg_msg">ANALYZING...</div>
+            <div class="lg:col-span-8 space-y-6">
+                <div class="glow-card p-8 text-center relative overflow-hidden">
+                    <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-2">Poverty Vulnerability Index</h2>
+                    <div class="text-9xl font-black mb-4 transition-all duration-500" id="risk-val" style="color:var(--neon)">0%</div>
+                    
+                    <div class="risk-bar-container mt-8">
+                        <div id="risk-bar" class="risk-bar-fill" style="width: 0%; background: var(--neon);"></div>
                     </div>
-
-                    <div class="glass p-8 card-hover">
-                        <h4 class="text-xs font-bold text-gray-500 uppercase mb-6">Deprivation Vectors</h4>
-                        <div id="vector_box" class="space-y-6">
-                            </div>
-                    </div>
+                    <p class="mt-4 text-[10px] font-bold text-gray-500 uppercase" id="sdg-status">Analyzing Buffer...</p>
                 </div>
 
-                <div class="glass p-8 bg-[#ccff00]/5 border-[#ccff00]/20 flex flex-col md:flex-row items-center gap-6">
-                    <div class="flex-1">
-                        <h4 class="text-lg font-bold mb-1">Trigger <span class="neon-lime">Life Shock</span></h4>
-                        <p class="text-xs text-gray-400">Randomly simulate a socio-economic event to test your resilience.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="factors">
                     </div>
-                    <button onclick="triggerShock()" class="px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-[#ccff00] transition-colors">
-                        SIMULATE EVENT
-                    </button>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
         async function run() {
-            document.getElementById('inc_val').innerText = document.getElementById('income').value;
             const data = {
                 income: document.getElementById('income').value,
                 education: document.getElementById('edu').value,
@@ -121,46 +119,51 @@
                 region: document.getElementById('region').value
             };
 
-            const res = await fetch('/simulate', {
+            const res = await fetch('/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
             });
             const r = await res.json();
 
-            document.getElementById('risk_score').innerText = r.risk + "%";
-            document.getElementById('sdg_msg').innerText = r.sdg_msg;
+            // Update UI
+            document.getElementById('risk-val').innerText = r.total + "%";
+            document.getElementById('risk-val').style.color = r.color;
+            document.getElementById('risk-bar').style.width = r.total + "%";
+            document.getElementById('risk-bar').style.backgroundColor = r.color;
+            document.getElementById('sdg-status').innerText = r.sdg_status;
 
-            const vBox = document.getElementById('vector_box');
-            vBox.innerHTML = '';
-            for (const [key, val] of Object.entries(r.breakdown)) {
-                vBox.innerHTML += `
-                    <div>
-                        <div class="flex justify-between text-[10px] font-bold uppercase mb-2">
-                            <span>${key} Gap</span>
-                            <span class="neon-lime">${val}%</span>
-                        </div>
-                        <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                            <div class="h-full neon-bg transition-all duration-1000" style="width: ${val}%"></div>
-                        </div>
+            // Factors Injection
+            const fbox = document.getElementById('factors');
+            fbox.innerHTML = '';
+            r.breakdown.forEach(f => {
+                fbox.innerHTML += `
+                    <div class="glow-card p-6">
+                        <div class="text-[10px] font-bold text-gray-500 uppercase mb-2">${f.name}</div>
+                        <div class="text-2xl font-bold" style="color:${r.color}">${f.val}%</div>
+                        <div class="text-[9px] mt-2 font-bold p-1 bg-white/5 inline-block rounded">IMPACT: ${f.impact}</div>
                     </div>
                 `;
-            }
+            });
         }
 
         function triggerShock() {
             const events = [
-                {name: "Medical Emergency", inc: -2000, msg: "Sudden cost! Monthly disposable income dropped."},
-                {name: "Skill Certification", edu: +2, msg: "New certificate earned! Capability gap reduced."},
-                {name: "New Family Dependent", h: +1, msg: "Family size increased. Structural load rising."}
+                {n: "Medical Bill", i: -3000, e: 0, msg: "[-] Unexpected Medical Cost. Income Liquidity reduced."},
+                {n: "Skill Upgrade", i: 0, e: 4, msg: "[+] Tertiary Education completed. Resilience increased."},
+                {n: "Job Promotion", i: 4000, e: 0, msg: "[+] Career advancement. Monetary risk lowered."},
+                {n: "Family Expansion", i: 0, e: 0, h: 1, msg: "[!] Family size increased. Structural load peak."}
             ];
             const evt = events[Math.floor(Math.random() * events.length)];
             
-            if(evt.inc) document.getElementById('income').value = parseInt(document.getElementById('income').value) + evt.inc;
-            if(evt.edu) document.getElementById('edu').value = parseInt(document.getElementById('edu').value) + evt.edu;
+            if(evt.i) document.getElementById('income').value = parseInt(document.getElementById('income').value) + evt.i;
+            if(evt.e) document.getElementById('edu').value = parseInt(document.getElementById('edu').value) + evt.e;
             if(evt.h) document.getElementById('h_size').value = parseInt(document.getElementById('h_size').value) + evt.h;
+
+            const log = document.getElementById('event-log');
+            log.innerHTML = `<div style="color:var(--neon)">> EVENT: ${evt.n}</div>` + log.innerHTML;
+            log.innerHTML = `<div>${evt.msg}</div>` + log.innerHTML;
             
-            alert(`EVENT TRIGGERED: ${evt.name}\n${evt.msg}`);
             run();
         }
 
