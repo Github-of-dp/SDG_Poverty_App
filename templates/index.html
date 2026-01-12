@@ -3,102 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BetterLife AI | SDG 1.2 Analysis</title>
+    <title>BetterLife Architect v2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #0a0c10; font-family: 'Inter', sans-serif; color: #f0f0f0; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; }
-        .btn-action { background: #10b981; transition: 0.3s; }
-        .btn-action:hover { background: #059669; transform: translateY(-2px); }
-        input, select { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 12px; width: 100%; color: white; outline: none; }
-        .sdg-badge { background: #e5243b; color: white; padding: 4px 12px; border-radius: 4px; font-size: 10px; font-weight: 800; }
+        body { background: #050505; color: #e5e5e5; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .dashboard-card { 
+            background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 20px; padding: 24px; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dashboard-card:hover { border-color: #ccff00; transform: translateY(-4px); box-shadow: 0 10px 30px rgba(204, 255, 0, 0.05); }
+        .accent-text { color: #ccff00; }
+        .accent-bg { background: #ccff00; }
+        input, select { background: #151515; border: 1px solid #222; color: white; padding: 12px; border-radius: 12px; width: 100%; outline: none; transition: 0.3s; }
+        input:focus { border-color: #ccff00; }
+        .progress-bg { background: #1a1a1a; height: 6px; border-radius: 10px; overflow: hidden; }
+        .disclaimer-bar { background: #ccff00; color: black; font-weight: 800; font-size: 10px; letter-spacing: 1px; }
     </style>
 </head>
-<body class="p-6 md:p-12">
+<body class="p-6 md:p-10">
 
-    <div id="disclaimer" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="glass max-w-md p-8 text-center border-emerald-500/30">
-            <h2 class="text-xl font-bold mb-4 text-emerald-400">Educational Project Notice</h2>
-            <p class="text-sm text-gray-400 leading-relaxed mb-6">
-                This is a <b>mini educational project</b> simulating SDG-1 metrics. The data generated is based on simplified algorithms and <b>cannot be used for official financial or legal purposes</b>. All calculations are for demonstration only.
-            </p>
-            <button onclick="document.getElementById('disclaimer').remove()" class="btn-action w-full py-3 rounded-lg font-bold text-black">I UNDERSTAND</button>
+    <div class="max-w-7xl mx-auto">
+        <div class="disclaimer-bar py-1 px-4 mb-8 rounded flex justify-between items-center">
+            <span>EXPERIMENTAL SDG-1.2 SIMULATOR // MINI EDUCATIONAL PROJECT</span>
+            <span>DATA FOR PROTOTYPING ONLY</span>
         </div>
-    </div>
 
-    <div class="max-w-6xl mx-auto">
-        <header class="flex justify-between items-center mb-12">
+        <header class="flex flex-col md:flex-row justify-between items-start mb-12 gap-6">
             <div>
-                <span class="sdg-badge">GOAL 1: NO POVERTY</span>
-                <h1 class="text-3xl font-bold mt-2">BetterLife <span class="text-emerald-500">Intelligence</span></h1>
-                <p class="text-gray-500 text-xs mt-1">Focus Segment: <b>Target 1.2 (Multidimensional Poverty)</b></p>
+                <h1 class="text-5xl font-extrabold tracking-tighter uppercase">BetterLife <span class="accent-text">Architect</span></h1>
+                <p class="text-gray-500 mt-2 font-medium">Socio-Economic Intelligence Interface</p>
             </div>
-            <div class="text-right">
-                <p class="text-[10px] text-gray-500 uppercase font-bold">Current Region</p>
-                <select id="region" onchange="run()" class="mt-1 bg-transparent border-none text-emerald-400 font-bold p-0 w-auto">
-                    {% for r in data %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+            <div class="dashboard-card py-2 px-6 flex items-center gap-4">
+                <span class="text-[10px] font-black text-gray-500 uppercase">Region Context</span>
+                <select id="region" onchange="run()" class="border-none p-0 w-32 font-bold accent-text bg-transparent">
+                    {% for r in regions %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
                 </select>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-4 space-y-6">
-                <div class="glass p-6">
-                    <h3 class="text-sm font-bold mb-6 text-emerald-500/80">HOUSEHOLD METRICS</h3>
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-1 gap-4">
-                            <div>
-                                <label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Monthly Income</label>
-                                <input type="number" id="income" value="5000" oninput="run()">
-                            </div>
-                            <div>
-                                <label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Education Years</label>
-                                <input type="number" id="edu" value="12" oninput="run()">
-                            </div>
+                <div class="dashboard-card">
+                    <h3 class="text-xs font-black text-gray-500 uppercase mb-6 tracking-widest">Core Variables</h3>
+                    <div class="space-y-5">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase mb-2 block">Monthly Income</label>
+                            <input type="number" id="income" value="10000" oninput="run()">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase mb-2 block">Education Years</label>
+                            <input type="number" id="edu" value="12" oninput="run()">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Family Size</label>
+                                <label class="text-[10px] font-bold text-gray-400 uppercase mb-2 block">Family Size</label>
                                 <input type="number" id="h_size" value="4" oninput="run()">
                             </div>
                             <div>
-                                <label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Working Adults</label>
+                                <label class="text-[10px] font-bold text-gray-400 uppercase mb-2 block">Workers</label>
                                 <input type="number" id="workers" value="1" oninput="run()">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass p-6 border-l-2 border-emerald-500/50">
-                    <h4 class="text-xs font-bold text-white mb-2 tracking-widest">ABOUT SDG 1.2</h4>
-                    <p class="text-[11px] text-gray-400 leading-relaxed italic">
-                        "Reduce at least by half the proportion of people living in poverty in all its dimensions." 
-                        Our AI monitors three dimensions: <b>Monetary, Educational, and Structural.</b>
+                <div class="dashboard-card border-l-4 border-[#ccff00]">
+                    <h3 class="text-xs font-black accent-text uppercase mb-2 tracking-widest">Target 1.2 Analysis</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed italic">
+                        "Reduce by half the proportion of people living in poverty in all its dimensions." Our AI maps deprivations in health, education, and living standards.
                     </p>
+                    <div class="mt-4 p-2 bg-[#ccff00]/5 rounded text-[10px] font-bold accent-text" id="target_label">SDG 1.2.1 Tracking</div>
                 </div>
             </div>
 
             <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="glass p-8 flex flex-col items-center justify-center text-center">
-                    <p class="text-xs text-gray-500 uppercase font-bold mb-2">Composite Vulnerability</p>
-                    <div class="text-7xl font-bold text-white" id="risk_val">0%</div>
-                    <p class="text-[10px] mt-4 text-emerald-500 font-bold" id="sdg_status">Analyzing...</p>
+                <div class="dashboard-card md:col-span-2 flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
+                    <div class="z-10 text-center md:text-left">
+                        <h4 class="text-sm font-bold text-gray-500 uppercase mb-1">Vulnerability Index</h4>
+                        <div class="text-8xl font-black accent-text" id="risk_val">0%</div>
+                        <div class="mt-2 inline-block px-4 py-1 rounded-full bg-white/5 text-[10px] font-black uppercase tracking-widest" id="status">Loading</div>
+                    </div>
+                    <div class="w-full md:w-1/2 mt-8 md:mt-0 space-y-4 z-10" id="breakdown_box">
+                        </div>
+                    <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#ccff00 1px, transparent 1px); background-size: 20px 20px;"></div>
                 </div>
 
-                <div class="glass p-8">
-                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-6">AI Resilience Plan</h4>
-                    <ul id="plan_list" class="space-y-4">
-                        </ul>
-                </div>
-
-                <div class="lg:col-span-2 glass p-6">
-                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-4">Dimensional Depth</h4>
-                    <div id="bar_container" class="space-y-4">
+                <div class="dashboard-card md:col-span-2">
+                    <h4 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Architectural Recommendations</h4>
+                    <div id="recs" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         </div>
                 </div>
             </div>
         </div>
+
+        <footer class="mt-12 pt-8 border-t border-white/5 text-[9px] text-gray-600 text-center leading-relaxed">
+            DISCLAIMER: This tool is for educational purposes as part of a school/mini project. It utilizes simplified socio-economic weighting logic and does not constitute financial, legal, or social welfare advice. Data reflects simulated SDG-1.2 monitoring frameworks.
+        </footer>
     </div>
 
     <script>
@@ -118,36 +119,40 @@
             });
             const r = await res.json();
 
-            // Risk Update
+            // Main Display
             document.getElementById('risk_val').innerText = r.risk + "%";
-            document.getElementById('sdg_status').innerText = r.sdg_status;
-            document.getElementById('sdg_status').style.color = r.risk > 50 ? '#ef4444' : '#10b981';
+            document.getElementById('status').innerText = r.status;
+            document.getElementById('target_label').innerText = r.target_info;
 
-            // Plan Update
-            const plan = document.getElementById('plan_list');
-            plan.innerHTML = '';
-            r.plan.forEach(step => {
-                plan.innerHTML += `<li class="text-[11px] text-gray-300 flex items-start gap-2">
-                    <span class="text-emerald-500">▹</span> ${step}
-                </li>`;
-            });
-
-            // Bars Update
-            const bars = document.getElementById('bar_container');
-            bars.innerHTML = '';
-            for (const [key, val] of Object.entries(r.breakdown)) {
-                bars.innerHTML += `
+            // Breakdown Bars
+            const bbox = document.getElementById('breakdown_box');
+            bbox.innerHTML = '';
+            r.breakdown.forEach(item => {
+                bbox.innerHTML += `
                     <div>
-                        <div class="flex justify-between text-[10px] mb-1 uppercase font-bold text-gray-400">
-                            <span>${key} Gap</span>
-                            <span>${val}%</span>
+                        <div class="flex justify-between text-[10px] font-black uppercase mb-1">
+                            <span>${item.label}</span>
+                            <span class="accent-text">${item.val}%</span>
                         </div>
-                        <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
-                            <div class="bg-emerald-500 h-full transition-all duration-1000" style="width:${val}%"></div>
-                        </div>
+                        <div class="progress-bg"><div class="h-full accent-bg transition-all duration-1000" style="width:${item.val}%"></div></div>
+                        <p class="text-[9px] text-gray-600 mt-1 italic">${item.desc}</p>
                     </div>
                 `;
-            }
+            });
+
+            // Recs
+            const rbox = document.getElementById('recs');
+            rbox.innerHTML = '';
+            r.breakdown.forEach(item => {
+                if(item.val > 15) {
+                    rbox.innerHTML += `
+                        <div class="p-4 bg-white/5 rounded-xl border border-white/5">
+                            <div class="text-[10px] font-black accent-text uppercase mb-1">Fix: ${item.label}</div>
+                            <p class="text-xs text-gray-400">System detected high variance. Focus on reducing this specific deprivation to meet SDG 1.2 goals.</p>
+                        </div>
+                    `;
+                }
+            });
         }
         window.onload = run;
     </script>
