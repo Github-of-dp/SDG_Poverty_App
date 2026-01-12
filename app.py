@@ -2,11 +2,10 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# SDG 1.2 Regional Benchmarks
 REGIONS = {
-    "UAE": {"line": 16000, "floor": 8000, "curr": "AED"},
-    "India": {"line": 10000, "floor": 5000, "curr": "INR"},
-    "USA": {"line": 2800, "floor": 1400, "curr": "USD"}
+    "UAE": {"line": 16000, "floor": 8000},
+    "India": {"line": 10000, "floor": 5000},
+    "USA": {"line": 2800, "floor": 1400}
 }
 
 @app.route("/")
@@ -16,45 +15,31 @@ def home():
 @app.route("/analyze", methods=["POST"])
 def analyze():
     d = request.json
-    inc = float(d.get('income', 0))
-    edu = float(d.get('education', 0))
-    h_size = int(d.get('h_size', 4))
-    workers = max(1, int(d.get('workers', 1)))
-    region = d.get('region', 'UAE')
+    inc, edu = float(d['income']), float(d['education'])
+    h_size, workers = int(d['h_size']), max(1, int(d['workers']))
+    meta = REGIONS[d['region']]
     
-    meta = REGIONS[region]
+    # Logic: Factor Contributions
+    monetary_risk = round(max(0, (meta['line'] - inc) / meta['line']) * 40, 1)
+    # Education logic: Each year below 16 adds 2.5% risk
+    edu_risk = round(max(0, (16 - edu) * 2.5), 1)
+    # Structural logic: Dependency ratio (People per worker)
+    struct_risk = round(min(30, (h_size / workers) * 5), 1)
     
-    # 1. MONETARY RISK (Weight 40%)
-    m_risk = max(0, (meta['line'] - inc) / meta['line']) * 40
+    total_risk = round(monetary_risk + edu_risk + struct_risk, 1)
     
-    # 2. CAPABILITY RISK (Education Detailed - Weight 30%)
-    # Milestones: 16 (Degree), 12 (High School), 6 (Primary)
-    if edu >= 16: edu_factor = 0
-    elif edu >= 12: edu_factor = 0.2
-    elif edu >= 6: edu_factor = 0.6
-    else: edu_factor = 1.0
-    c_risk = edu_factor * 30
+    # 5-Year Forecast (Economic Drift)
+    # 5% annual inflation vs 2% wage growth = ~3% net decay per year
+    future_risk = round(total_risk * (1.03 ** 5), 1)
     
-    # 3. STRUCTURAL RISK (Dependency - Weight 30%)
-    dep_ratio = h_size / workers
-    s_risk = min(30, (dep_ratio / 5) * 30)
-    
-    total_risk = round(m_risk + c_risk + s_risk, 1)
-    
-    # Logic for "Risk Color"
-    color = "#ccff00" # Safe (Lime)
-    if total_risk > 60: color = "#ff0055" # Critical (Neon Red)
-    elif total_risk > 30: color = "#ffaa00" # Warning (Orange)
-
     return jsonify({
         "total": total_risk,
-        "color": color,
-        "breakdown": [
-            {"name": "Monetary Gap", "val": round(m_risk, 1), "impact": "High" if m_risk > 20 else "Low"},
-            {"name": "Capability Gap", "val": round(c_risk, 1), "impact": "High" if c_risk > 15 else "Low"},
-            {"name": "Structural Load", "val": round(s_risk, 1), "impact": "High" if s_risk > 15 else "Low"}
-        ],
-        "sdg_status": "Meeting SDG 1.2" if inc > meta['floor'] else "Below SDG 1.2 Target"
+        "future": min(100, future_risk),
+        "factors": [
+            {"name": "Low Income", "val": monetary_risk, "color": "#ff0055" if monetary_risk > 20 else "#ccff00"},
+            {"name": "Edu Gap", "val": edu_risk, "color": "#ff0055" if edu_risk > 15 else "#ccff00"},
+            {"name": "Dependency", "val": struct_risk, "color": "#ff0055" if struct_risk > 15 else "#ccff00"}
+        ]
     })
 
 if __name__ == "__main__":
