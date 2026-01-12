@@ -3,209 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BetterLife Architect</title>
+    <title>SDG-1 // NEURAL TERMINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #050505; color: #e5e5e5; font-family: 'Space Grotesk', sans-serif; }
-        .dashboard-card { background: #0f0f0f; border: 1px solid #222; border-radius: 16px; padding: 24px; }
-        .accent-text { color: #ccff00; } /* Neon Lime for "Cyberpunk/Pro" feel */
-        .accent-bg { background: #ccff00; color: black; }
-        input, select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; width: 100%; outline: none; }
-        input:focus { border-color: #ccff00; }
-        .bar-container { background: #222; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 8px; }
-        .bar-fill { height: 100%; background: #ccff00; transition: width 1s ease; }
+        :root { --neon: #ccff00; --dark: #050505; --panel: #111; }
+        body { background: var(--dark); color: #ccc; font-family: 'JetBrains Mono', monospace; overflow-x: hidden; }
+        
+        /* Cyberpunk FX */
+        .scanline {
+            width: 100%; height: 2px; background: rgba(204, 255, 0, 0.1);
+            position: fixed; top: 0; left: 0; pointer-events: none; z-index: 50;
+            animation: scan 6s linear infinite;
+        }
+        @keyframes scan { 0% {top: -10%;} 100% {top: 110%;} }
+        
+        .panel { 
+            background: var(--panel); border: 1px solid #333; padding: 20px; 
+            position: relative; overflow: hidden;
+        }
+        .panel::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: #333; transition: 0.3s;
+        }
+        .panel:hover::before { background: var(--neon); }
+        
+        input, select { 
+            background: #000; border: 1px solid #444; color: var(--neon); 
+            padding: 10px; width: 100%; font-family: inherit; outline: none;
+        }
+        input:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(204, 255, 0, 0.2); }
+        
+        .typing-cursor::after { content: "█"; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% {opacity: 1;} 50% {opacity: 0;} }
     </style>
 </head>
 <body class="p-4 md:p-8">
+    <div class="scanline"></div>
 
     <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <div class="lg:col-span-12 flex justify-between items-center mb-4">
+        <div class="lg:col-span-12 flex justify-between items-end border-b border-[#333] pb-4 mb-4">
             <div>
-                <h1 class="text-4xl font-bold uppercase tracking-tighter">BetterLife <span class="accent-text">Architect</span></h1>
-                <p class="text-gray-500 text-sm">SDG-1 Socio-Economic Simulator v2.0</p>
+                <h1 class="text-3xl text-white font-bold tracking-tighter">SDG-1 // <span style="color:var(--neon)">NEURAL_NET</span></h1>
+                <p class="text-xs text-gray-500 uppercase">System Status: Online | Node: Abu Dhabi</p>
             </div>
-            <div class="flex gap-4">
-                <select id="country" onchange="runAnalysis()" class="w-40 font-bold text-accent-text">
-                    {% for code in countries %}
-                    <option value="{{ code }}">{{ code }}</option>
+            <div class="text-right">
+                <div class="text-xs text-gray-500">TARGET REGION</div>
+                <select id="region" onchange="runAI()" class="w-32 text-right bg-transparent border-none text-white font-bold p-0">
+                    {% for r in regions %}
+                    <option value="{{ r }}">{{ r }}</option>
                     {% endfor %}
                 </select>
             </div>
         </div>
 
-        <div class="lg:col-span-3 space-y-4">
-            <div class="dashboard-card">
-                <h3 class="text-xs font-bold text-gray-500 uppercase mb-4">Core Variables</h3>
+        <div class="lg:col-span-4 space-y-4">
+            <div class="panel">
+                <h3 class="text-xs text-gray-400 mb-4">>> INPUT_PARAMETERS</h3>
                 <div class="space-y-4">
                     <div>
-                        <label class="text-xs">Monthly Income</label>
-                        <input type="number" id="income" value="5000" oninput="runAnalysis()">
+                        <label class="text-xs uppercase">Monthly Income (<span id="curr_sym">UNIT</span>)</label>
+                        <input type="number" id="income" value="5000" oninput="runAI()">
                     </div>
                     <div>
-                        <label class="text-xs">Education Years</label>
-                        <input type="number" id="edu" value="12" oninput="runAnalysis()">
+                        <label class="text-xs uppercase">Education Level (Years)</label>
+                        <input type="number" id="edu" value="12" oninput="runAI()">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-xs">Family Size</label>
-                            <input type="number" id="h_size" value="4" oninput="runAnalysis()">
+                            <label class="text-xs uppercase">Household Size</label>
+                            <input type="number" id="h_size" value="4" oninput="runAI()">
                         </div>
                         <div>
-                            <label class="text-xs">Workers</label>
-                            <input type="number" id="workers" value="1" oninput="runAnalysis()">
+                            <label class="text-xs uppercase">Workers</label>
+                            <input type="number" id="workers" value="1" oninput="runAI()">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="dashboard-card border-l-4 border-[#ccff00]">
-                <h3 class="text-xs font-bold text-[#ccff00] uppercase mb-4">⚡ Simulation Events</h3>
-                <div class="space-y-3">
-                    <button onclick="applyScenario('upskill')" class="w-full text-left text-xs p-2 hover:bg-[#222] rounded flex justify-between">
-                        <span>+ Upskill (2 Years)</span> <span class="text-gray-500">+Edu</span>
-                    </button>
-                    <button onclick="applyScenario('bonus')" class="w-full text-left text-xs p-2 hover:bg-[#222] rounded flex justify-between">
-                        <span>+ New Job Offer</span> <span class="text-gray-500">+Income</span>
-                    </button>
-                    <button onclick="applyScenario('baby')" class="w-full text-left text-xs p-2 hover:bg-[#222] rounded flex justify-between">
-                        <span>+ New Child</span> <span class="text-gray-500">+Dep</span>
-                    </button>
-                    <button onclick="resetSim()" class="w-full text-center text-xs p-2 bg-red-900/30 text-red-400 rounded mt-2">Reset Simulation</button>
-                </div>
+            <div class="panel">
+                <h3 class="text-xs text-gray-400 mb-2">>> FACTOR_IMPACT_ANALYSIS</h3>
+                <canvas id="impactChart" height="200"></canvas>
             </div>
         </div>
 
-        <div class="lg:col-span-6 space-y-6">
-            <div class="dashboard-card h-64 flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-50 text-[100px] font-bold text-[#222] leading-none" id="risk_bg">0%</div>
-                <div>
-                    <h3 class="text-lg font-bold">Vulnerability Index</h3>
-                    <p class="text-xs text-gray-400">Real-time poverty probability assessment</p>
-                </div>
-                <div class="flex items-end gap-4 z-10">
-                    <span id="risk_display" class="text-6xl font-bold accent-text">0%</span>
-                    <div class="mb-2">
-                        <div class="text-xs uppercase font-bold text-gray-500">Status</div>
-                        <div id="status_text" class="text-white font-bold">Safe</div>
-                    </div>
-                </div>
-                <div class="w-full bg-[#222] h-2 mt-4 rounded-full">
-                    <div id="risk_bar" class="h-full bg-[#ccff00] transition-all duration-500" style="width: 0%"></div>
+        <div class="lg:col-span-5 flex flex-col gap-6">
+            <div class="panel flex-1 flex flex-col justify-center items-center text-center relative">
+                <div class="absolute top-2 left-2 text-[10px] text-gray-600">ID: RISK_CALC_V4</div>
+                
+                <h2 class="text-gray-400 text-sm uppercase tracking-widest mb-2">Calculated Vulnerability</h2>
+                <div class="text-7xl font-bold text-white mb-2" id="risk_val">0%</div>
+                <div id="risk_bar_container" class="w-full h-1 bg-[#222] mt-4 relative">
+                    <div id="risk_bar" class="h-full bg-[#ccff00] absolute top-0 left-0 transition-all duration-300" style="width:0%"></div>
                 </div>
             </div>
 
-            <div class="dashboard-card">
-                <h3 class="text-xs font-bold text-gray-500 uppercase mb-6">📉 National Benchmark (You vs. Average)</h3>
-                
-                <div class="mb-4">
-                    <div class="flex justify-between text-xs mb-1">
-                        <span>Your Income</span>
-                        <span class="text-gray-400">National Avg: <span id="avg_inc_display">--</span></span>
+            <div class="panel bg-black border-dashed h-64 overflow-y-auto font-mono text-xs p-4">
+                <div class="text-[#ccff00] mb-2">root@ai-system:~$ initiate_scan</div>
+                <div id="terminal_output" class="text-gray-300 space-y-2 typing-cursor">
                     </div>
-                    <div class="relative h-6 bg-[#222] rounded overflow-hidden">
-                        <div class="absolute top-0 bottom-0 w-1 bg-white/20 z-10" style="left: 50%" title="National Average"></div>
-                        <div id="inc_bar" class="h-full bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
-                    </div>
-                    <div class="text-[10px] text-center mt-1 text-gray-500">50% Line = National Average</div>
-                </div>
             </div>
         </div>
 
         <div class="lg:col-span-3">
-            <div class="dashboard-card h-full border border-[#ccff00]/30 bg-[#ccff00]/5">
-                <div class="flex items-center gap-2 mb-6">
-                    <div class="w-2 h-2 bg-[#ccff00] rounded-full animate-pulse"></div>
-                    <h3 class="text-sm font-bold text-[#ccff00] uppercase">AI Policy Advisor</h3>
-                </div>
+            <div class="panel h-full flex flex-col">
+                <h3 class="text-xs text-gray-400 mb-6">>> OPTIMIZATION_STRATEGY</h3>
                 
-                <div id="ai_suggestions" class="space-y-4 text-sm text-gray-300">
-                    <p class="opacity-50 italic">Analyzing data...</p>
-                </div>
+                <div class="flex-1 flex flex-col gap-4">
+                    <div class="p-4 bg-[#ccff00]/10 border border-[#ccff00]/30 rounded">
+                        <div class="text-[10px] text-[#ccff00] uppercase mb-1">Recommended Action</div>
+                        <div id="strat_title" class="text-lg font-bold text-white">--</div>
+                    </div>
 
-                <div class="mt-8 pt-8 border-t border-white/10">
-                    <h4 class="text-xs font-bold text-gray-500 mb-2">PROJECTED SECTORS</h4>
-                    <div id="job_tags" class="flex flex-wrap gap-2">
-                        </div>
+                    <div class="p-4 bg-[#222] border border-[#333] rounded">
+                        <div class="text-[10px] text-gray-500 uppercase mb-1">Projected Leverage</div>
+                        <div class="text-2xl font-bold text-white"><span id="leverage_val">0</span>%</div>
+                        <div class="text-[10px] text-gray-400">Risk reduction potential</div>
+                    </div>
+                    
+                    <div class="mt-auto text-[10px] text-gray-600 leading-tight">
+                        *AI uses sensitivity coefficients to determine the highest yield variable for your specific case.
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
-        // Simulation Logic
-        function applyScenario(type) {
-            if(type === 'upskill') document.getElementById('edu').value = parseInt(document.getElementById('edu').value) + 2;
-            if(type === 'bonus') document.getElementById('income').value = parseFloat(document.getElementById('income').value) * 1.2;
-            if(type === 'baby') document.getElementById('h_size').value = parseInt(document.getElementById('h_size').value) + 1;
-            runAnalysis();
+        let impactChart;
+
+        function initChart() {
+            const ctx = document.getElementById('impactChart').getContext('2d');
+            impactChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Income', 'Family', 'Edu Buff'],
+                    datasets: [{
+                        label: 'Risk Contribution',
+                        data: [0, 0, 0],
+                        backgroundColor: ['#ef4444', '#ef4444', '#10b981'],
+                        barThickness: 20
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: { legend: {display: false} },
+                    scales: {
+                        x: { grid: {color: '#222'}, ticks: {display: false} },
+                        y: { grid: {display: false}, ticks: {color: '#666', font: {family:'JetBrains Mono'}} }
+                    }
+                }
+            });
         }
 
-        function resetSim() {
-            document.getElementById('income').value = 5000;
-            document.getElementById('edu').value = 12;
-            document.getElementById('h_size').value = 4;
-            runAnalysis();
-        }
-
-        async function runAnalysis() {
+        async function runAI() {
             const data = {
                 income: document.getElementById('income').value || 0,
                 education: document.getElementById('edu').value || 0,
                 household_size: document.getElementById('h_size').value || 1,
                 working_members: document.getElementById('workers').value || 1,
-                country: document.getElementById('country').value
+                region: document.getElementById('region').value
             };
 
-            const res = await fetch('/analyze', {
+            const res = await fetch('/process', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
             });
             const r = await res.json();
 
-            // 1. Update Risk UI
-            document.getElementById('risk_display').innerText = r.risk + "%";
-            document.getElementById('risk_bg').innerText = r.risk + "%";
+            // 1. Update Main Display
+            document.getElementById('risk_val').innerText = r.risk + "%";
             document.getElementById('risk_bar').style.width = r.risk + "%";
+            document.getElementById('curr_sym').innerText = r.currency;
             
-            // Color Logic (Green to Red)
+            // Color Logic
             const color = r.risk > 50 ? '#ef4444' : r.risk > 30 ? '#f59e0b' : '#ccff00';
-            document.getElementById('risk_display').style.color = color;
+            document.getElementById('risk_val').style.color = color;
             document.getElementById('risk_bar').style.backgroundColor = color;
-            document.getElementById('status_text').innerText = r.risk > 50 ? "Critical Vulnerability" : "Resilient";
 
-            // 2. Update Benchmark (You vs Avg)
-            // We scale it so 50% width = National Average. 
-            // If user has 2x national average, bar is 100%.
-            const barWidth = Math.min(100, (r.comparison.income_pct / 2)); 
-            document.getElementById('inc_bar').style.width = barWidth + "%";
-            document.getElementById('inc_bar').style.backgroundColor = r.comparison.income_pct >= 100 ? '#10b981' : '#ef4444';
-            document.getElementById('avg_inc_display').innerText = r.stats.avg_inc + " " + r.stats.curr;
+            // 2. Update Chart (The Why)
+            impactChart.data.datasets[0].data = [
+                r.breakdown["Income Stress"], 
+                r.breakdown["Family Load"], 
+                -r.breakdown["Edu Protection"] // Negative because it helps
+            ];
+            impactChart.update();
 
-            // 3. AI Suggestions
-            const aiBox = document.getElementById('ai_suggestions');
-            aiBox.innerHTML = '';
-            if (r.recommendations.length > 0) {
-                r.recommendations.forEach(rec => {
-                    aiBox.innerHTML += `<div class="p-3 bg-black/40 rounded border-l-2 border-[#ccff00]">${rec}</div>`;
-                });
-            } else {
-                aiBox.innerHTML = `<div class="text-[#ccff00]">✅ optimal Configuration. No major risks detected.</div>`;
+            // 3. Update Strategy (The Value)
+            document.getElementById('strat_title').innerText = r.ai_insight.strategy;
+            document.getElementById('leverage_val').innerText = r.ai_insight.leverage_score;
+
+            // 4. Typewriter Terminal Effect
+            const term = document.getElementById('terminal_output');
+            term.innerHTML = '';
+            const msg = `> Analyzing vector [Income: ${data.income}, Edu: ${data.education}]... \n> Calculation Complete. \n> ${r.ai_insight.message}`;
+            
+            let i = 0;
+            function typeWriter() {
+                if (i < msg.length) {
+                    term.innerHTML += msg.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 20); // Typing speed
+                }
             }
-
-            // 4. Job Tags
-            const jobBox = document.getElementById('job_tags');
-            jobBox.innerHTML = '';
-            r.stats.jobs.forEach(job => {
-                jobBox.innerHTML += `<span class="px-2 py-1 bg-white/10 text-[10px] rounded uppercase font-bold">${job}</span>`;
-            });
+            typeWriter();
         }
 
-        window.onload = runAnalysis;
+        window.onload = function() {
+            initChart();
+            runAI();
+        };
     </script>
 </body>
 </html>
