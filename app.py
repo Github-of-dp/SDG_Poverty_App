@@ -2,55 +2,52 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# Real data mappings for SDG 1.2 Monitoring
-DATA_MAP = {
-    "UAE": {"line": 16000, "sdg_target": 8000, "avg_inc": 21000, "curr": "AED"},
-    "India": {"line": 10000, "sdg_target": 5000, "avg_inc": 18000, "curr": "INR"},
-    "USA": {"line": 2500, "sdg_target": 1250, "avg_inc": 5200, "curr": "USD"},
-    "UK": {"line": 2000, "sdg_target": 1000, "avg_inc": 3300, "curr": "GBP"}
+# Data based on SDG-1.2 monitoring standards
+REGIONS = {
+    "India": {"line": 10000, "avg": 18000, "curr": "INR", "target": "SDG 1.2.1: Income Poverty"},
+    "UAE": {"line": 16000, "avg": 22000, "curr": "AED", "target": "SDG 1.2.2: Multidimensional Poverty"},
+    "USA": {"line": 2500, "avg": 5200, "curr": "USD", "target": "SDG 1.2.1: Relative Poverty"},
+    "UK": {"line": 2000, "avg": 3300, "curr": "GBP", "target": "SDG 1.2.2: Capability Deprivation"}
 }
 
 @app.route("/")
 def home():
-    return render_template("index.html", data=DATA_MAP)
+    return render_template("index.html", regions=REGIONS)
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    d = request.json
-    inc = float(d.get("income", 0))
-    edu = float(d.get("education", 0))
-    h_size = int(d.get("h_size", 1))
-    workers = max(1, int(d.get("workers", 1)))
-    region = d.get("region", "UAE")
+    data = request.json
+    inc = float(data.get("income", 0))
+    edu = float(data.get("education", 0))
+    h_size = int(data.get("h_size", 1))
+    workers = max(1, int(data.get("workers", 1)))
+    region = data.get("region", "India")
     
-    meta = DATA_MAP[region]
+    meta = REGIONS[region]
     
-    # SDG 1.2 Multidimensional Math
-    # 1. Income Dimension (Weight 1/3)
-    inc_score = max(0, (meta["line"] - inc) / meta["line"]) * 100
+    # --- The "Why" Logic (SDG-1 Dimensions) ---
+    # Dimension 1: Monetary (Weight 40%)
+    monetary_risk = max(0, (meta["line"] - inc) / meta["line"]) * 40
     
-    # 2. Education Dimension (Weight 1/3)
-    edu_score = max(0, (12 - edu) / 12) * 100
+    # Dimension 2: Capability/Education (Weight 30%)
+    # Research shows 12 years of schooling is the "stability threshold"
+    edu_risk = max(0, (12 - edu) / 12) * 30
     
-    # 3. Living Standard/Dependency (Weight 1/3)
+    # Dimension 3: Structural/Family (Weight 30%)
     dep_ratio = h_size / workers
-    dep_score = min(100, (dep_ratio / 4) * 100)
+    structural_risk = min(30, (dep_ratio / 3) * 30)
     
-    # Final Composite Risk
-    total_risk = round((inc_score + edu_score + dep_score) / 3, 1)
-    
-    # SDG 1.2 Target Status
-    # SDG 1.2 aims to reduce the "proportion" by half.
-    is_below_target = inc < meta["sdg_target"]
-    
+    total_risk = round(monetary_risk + edu_risk + structural_risk, 1)
+
     return jsonify({
         "risk": total_risk,
-        "sdg_status": "Failing Target 1.2" if is_below_target else "Meeting SDG Threshold",
-        "breakdown": {"Financial": round(inc_score, 1), "Educational": round(edu_score, 1), "Structural": round(dep_score, 1)},
-        "plan": [
-            "Increase income by " + str(round(meta["line"] - inc)) + " to exit poverty line." if inc < meta["line"] else "Income is stable.",
-            "Upskill to 12+ years of education to maximize structural resilience." if edu < 12 else "Educational buffer is strong.",
-            "Improve worker-to-dependent ratio to reduce structural load." if dep_ratio > 2 else "Household structure is efficient."
+        "status": "Resilient" if total_risk < 30 else "At Risk" if total_risk < 70 else "Vulnerable",
+        "currency": meta["curr"],
+        "target_info": meta["target"],
+        "breakdown": [
+            {"label": "Monetary Gap", "val": round(monetary_risk, 1), "desc": "Distance from local poverty line."},
+            {"label": "Capability Gap", "val": round(edu_risk, 1), "desc": "Lack of educational buffer."},
+            {"label": "Structural Load", "val": round(structural_risk, 1), "desc": "High dependency ratio."}
         ]
     })
 
