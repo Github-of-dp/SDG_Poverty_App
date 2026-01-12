@@ -3,100 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BETTERLIFE AI // SDG ARCHITECT</title>
+    <title>BetterLife AI // SDG 1.2 Architect</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #000; color: #fff; font-family: 'Space Grotesk', sans-serif; }
-        .glass-card { 
-            background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(10px); 
-            border: 1px solid #222; border-radius: 24px; transition: 0.4s ease;
-        }
-        .glass-card:hover { border-color: #ccff00; transform: scale(1.01); }
-        .neon-text { color: #ccff00; text-shadow: 0 0 10px rgba(204, 255, 0, 0.3); }
-        .neon-bg { background: #ccff00; box-shadow: 0 0 15px rgba(204, 255, 0, 0.4); }
-        input, select { background: #111; border: 1px solid #333; color: #ccff00; padding: 14px; border-radius: 12px; width: 100%; outline: none; }
-        input:focus { border-color: #ccff00; }
-        .scanline { width: 100%; height: 1px; background: rgba(204, 255, 0, 0.05); position: absolute; animation: move 8s linear infinite; }
-        @keyframes move { from { top: 0; } to { top: 100%; } }
+        body { background: #050505; color: #fff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; }
+        .neon-lime { color: #ccff00; }
+        .neon-bg { background: #ccff00; }
+        .card-hover { transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .card-hover:hover { border-color: #ccff00; transform: translateY(-5px); box-shadow: 0 10px 40px rgba(204,255,0,0.1); }
+        
+        /* Modal Style */
+        #disclaimer-modal { display: flex; animation: fadeIn 0.5s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body class="p-6">
-    <div class="scanline"></div>
+<body class="p-4 md:p-10">
+
+    <div id="disclaimer-modal" class="fixed inset-0 z-[100] items-center justify-center bg-black/90 backdrop-blur-xl p-6">
+        <div class="glass max-w-lg p-10 text-center border-[#ccff00]/30">
+            <div class="w-16 h-16 bg-[#ccff00]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="neon-lime text-2xl font-bold">!</span>
+            </div>
+            <h2 class="text-2xl font-bold mb-4 uppercase tracking-tighter">Educational Project <span class="neon-lime">Notice</span></h2>
+            <p class="text-gray-400 text-sm leading-relaxed mb-8">
+                This app is a <span class="text-white font-bold">mini-educational simulation</span> for SDG 1.2. The AI-generated data, poverty risks, and financial projections are for <span class="text-white">demonstration purposes only</span> and should not be used for real-world financial planning or policy decisions.
+            </p>
+            <button onclick="document.getElementById('disclaimer-modal').style.display='none'" class="neon-bg text-black font-black px-10 py-4 rounded-xl hover:scale-105 transition-transform w-full">
+                INITIALIZE ARCHITECT
+            </button>
+        </div>
+    </div>
 
     <div class="max-w-6xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-end mb-10 border-b border-white/10 pb-6">
+        <header class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
             <div>
-                <div class="bg-[#ccff00] text-black text-[10px] font-bold px-2 py-0.5 rounded inline-block mb-2">SDG 1.2 TERMINAL</div>
-                <h1 class="text-4xl font-light tracking-tighter uppercase">BetterLife <span class="font-bold neon-text">AI</span></h1>
+                <span class="text-[10px] bg-white/10 px-2 py-1 rounded text-gray-400 font-bold tracking-widest uppercase">Target 1.2: Multidimensional Poverty</span>
+                <h1 class="text-5xl font-black uppercase tracking-tighter mt-4">BetterLife <span class="neon-lime">AI</span></h1>
             </div>
-            <div class="text-right">
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Active Simulation</p>
-                <select id="region" onchange="processAI()" class="bg-transparent border-none p-0 text-xl font-bold neon-text text-right cursor-pointer">
-                    {% for r in regions %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
-                </select>
-            </div>
+            <select id="region" onchange="run()" class="bg-transparent border-b-2 border-[#ccff00] text-[#ccff00] font-bold py-2 outline-none">
+                {% for r in regions %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+            </select>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-4 space-y-6">
-                <div class="glass-card p-6">
-                    <h3 class="text-xs font-bold text-gray-400 mb-6 uppercase tracking-widest">Data Input Matrix</h3>
-                    <div class="space-y-4">
-                        <div><label class="text-[10px] text-gray-500 uppercase">Monthly Household Income</label><input type="number" id="income" value="8000" oninput="processAI()"></div>
-                        <div><label class="text-[10px] text-gray-500 uppercase">Education Buffer (Years)</label><input type="number" id="edu" value="10" oninput="processAI()"></div>
+                <div class="glass p-8 card-hover">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-8 tracking-widest">Profile Parameters</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] text-gray-500 font-bold uppercase block mb-2">Monthly Income</label>
+                            <input type="range" id="income" min="1000" max="25000" value="8000" oninput="run()" class="w-full accent-[#ccff00]">
+                            <div class="text-right neon-lime font-bold mt-1" id="inc_val">8000</div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-500 font-bold uppercase block mb-2">Education Years</label>
+                            <input type="number" id="edu" value="10" oninput="run()" class="bg-white/5 border border-white/10 rounded-lg p-3 w-full outline-none focus:border-[#ccff00]">
+                        </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="text-[10px] text-gray-500 uppercase">Members</label><input type="number" id="h_size" value="5" oninput="processAI()"></div>
-                            <div><label class="text-[10px] text-gray-500 uppercase">Workers</label><input type="number" id="workers" value="1" oninput="processAI()"></div>
+                            <div>
+                                <label class="text-[10px] text-gray-500 font-bold uppercase block mb-2">Household</label>
+                                <input type="number" id="h_size" value="4" oninput="run()" class="bg-white/5 border border-white/10 rounded-lg p-3 w-full outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-500 font-bold uppercase block mb-2">Workers</label>
+                                <input type="number" id="workers" value="1" oninput="run()" class="bg-white/5 border border-white/10 rounded-lg p-3 w-full outline-none">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass-card p-6 bg-[#ccff00]/5 border-[#ccff00]/20">
-                    <h4 class="text-xs font-bold neon-text mb-2 uppercase">AI Logic Notice</h4>
-                    <p class="text-[11px] text-gray-400 leading-relaxed italic">
-                        This is a <b>Mini Educational Project</b>. Predictions are based on Alkire-Foster Multidimensional Poverty calculations and simplified economic shocks. <b>Not for official use.</b>
+                <div class="glass p-6 border-l-4 border-[#ccff00]">
+                    <h4 class="text-xs font-bold neon-lime mb-2">SDG INSIGHT</h4>
+                    <p class="text-[11px] text-gray-400 italic leading-relaxed">
+                        SDG 1.2 looks beyond cash. It analyzes "deprivation bundles"—the intersection of poor schooling, high dependency, and low income.
                     </p>
                 </div>
             </div>
 
             <div class="lg:col-span-8 space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass-card p-8 flex flex-col items-center justify-center text-center relative">
-                        <span class="text-[10px] text-gray-500 absolute top-4 left-6 font-bold uppercase">Vulnerability Index</span>
-                        <div class="text-8xl font-bold neon-text" id="risk_val">0%</div>
-                        <div class="mt-4 px-4 py-1 bg-white/5 rounded-full text-[10px] font-bold" id="status">INITIATING...</div>
+                    <div class="glass p-10 flex flex-col items-center justify-center text-center card-hover relative overflow-hidden">
+                        <div class="text-[10px] font-bold text-gray-500 uppercase absolute top-6">Vulnerability Index</div>
+                        <div class="text-8xl font-black neon-lime" id="risk_score">0%</div>
+                        <div class="text-[11px] font-bold mt-4 tracking-widest text-gray-400" id="sdg_msg">ANALYZING...</div>
                     </div>
 
-                    <div class="glass-card p-8 flex flex-col justify-center">
-                        <h4 class="text-xs text-gray-500 uppercase mb-4 font-bold">Resilience Buffer (Shock Test)</h4>
-                        <div class="text-4xl font-bold text-white mb-2"><span id="res_val">0</span>%</div>
-                        <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                            <div id="res_bar" class="h-full neon-bg transition-all duration-700" style="width: 0%;"></div>
-                        </div>
-                        <p class="text-[10px] text-gray-400 mt-4 leading-tight">Chance of remaining above poverty line after a 3-month income shock.</p>
+                    <div class="glass p-8 card-hover">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase mb-6">Deprivation Vectors</h4>
+                        <div id="vector_box" class="space-y-6">
+                            </div>
                     </div>
                 </div>
 
-                <div class="glass-card p-8">
-                    <div class="flex justify-between items-center mb-8">
-                        <h4 class="text-xs text-gray-500 uppercase font-bold">Multi-Dimensional Deprivation</h4>
-                        <div class="text-[10px] font-bold px-3 py-1 border border-[#ccff00] neon-text rounded-lg" id="pathway_label">--</div>
+                <div class="glass p-8 bg-[#ccff00]/5 border-[#ccff00]/20 flex flex-col md:flex-row items-center gap-6">
+                    <div class="flex-1">
+                        <h4 class="text-lg font-bold mb-1">Trigger <span class="neon-lime">Life Shock</span></h4>
+                        <p class="text-xs text-gray-400">Randomly simulate a socio-economic event to test your resilience.</p>
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="dim_box">
-                        </div>
-
-                    <div class="mt-10 p-4 border-t border-white/5 font-mono text-xs">
-                        <span class="neon-text font-bold">AI_LOG:</span> <span id="ai_msg" class="text-gray-400">Waiting for data stream...</span>
-                    </div>
+                    <button onclick="triggerShock()" class="px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-[#ccff00] transition-colors">
+                        SIMULATE EVENT
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        async function processAI() {
+        async function run() {
+            document.getElementById('inc_val').innerText = document.getElementById('income').value;
             const data = {
                 income: document.getElementById('income').value,
                 education: document.getElementById('edu').value,
@@ -105,39 +121,50 @@
                 region: document.getElementById('region').value
             };
 
-            const res = await fetch('/ai_engine', {
+            const res = await fetch('/simulate', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
             });
             const r = await res.json();
 
-            // Display Logic
-            document.getElementById('risk_val').innerText = r.risk + "%";
-            document.getElementById('res_val').innerText = r.resilience;
-            document.getElementById('res_bar').style.width = r.resilience + "%";
-            document.getElementById('status').innerText = r.risk > 50 ? "CRITICAL DEPRAVATION" : "SDG TARGET STABLE";
-            document.getElementById('pathway_label').innerText = r.pathway;
-            document.getElementById('ai_msg').innerText = r.ai_analysis;
+            document.getElementById('risk_score').innerText = r.risk + "%";
+            document.getElementById('sdg_msg').innerText = r.sdg_msg;
 
-            // Dimensions Injection
-            const dbox = document.getElementById('dim_box');
-            dbox.innerHTML = '';
-            r.breakdown.forEach(dim => {
-                dbox.innerHTML += `
+            const vBox = document.getElementById('vector_box');
+            vBox.innerHTML = '';
+            for (const [key, val] of Object.entries(r.breakdown)) {
+                vBox.innerHTML += `
                     <div>
                         <div class="flex justify-between text-[10px] font-bold uppercase mb-2">
-                            <span>${dim.label} Gap</span>
-                            <span class="neon-text">${dim.val}%</span>
+                            <span>${key} Gap</span>
+                            <span class="neon-lime">${val}%</span>
                         </div>
                         <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                            <div class="h-full neon-bg transition-all duration-1000" style="width: ${dim.val}%"></div>
+                            <div class="h-full neon-bg transition-all duration-1000" style="width: ${val}%"></div>
                         </div>
                     </div>
                 `;
-            });
+            }
         }
-        window.onload = processAI;
+
+        function triggerShock() {
+            const events = [
+                {name: "Medical Emergency", inc: -2000, msg: "Sudden cost! Monthly disposable income dropped."},
+                {name: "Skill Certification", edu: +2, msg: "New certificate earned! Capability gap reduced."},
+                {name: "New Family Dependent", h: +1, msg: "Family size increased. Structural load rising."}
+            ];
+            const evt = events[Math.floor(Math.random() * events.length)];
+            
+            if(evt.inc) document.getElementById('income').value = parseInt(document.getElementById('income').value) + evt.inc;
+            if(evt.edu) document.getElementById('edu').value = parseInt(document.getElementById('edu').value) + evt.edu;
+            if(evt.h) document.getElementById('h_size').value = parseInt(document.getElementById('h_size').value) + evt.h;
+            
+            alert(`EVENT TRIGGERED: ${evt.name}\n${evt.msg}`);
+            run();
+        }
+
+        window.onload = run;
     </script>
 </body>
 </html>
