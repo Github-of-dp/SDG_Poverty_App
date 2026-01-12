@@ -3,223 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BetterLife AI | SDG-1 Resilience</title>
+    <title>BetterLife Architect</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #6366f1; }
-        body { 
-            background: #020617; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: #f8fafc;
-            transition: background 0.8s ease;
-        }
-        /* Smooth Glow Effect */
-        .glass-card { 
-            background: rgba(15, 23, 42, 0.6); 
-            backdrop-filter: blur(16px); 
-            border: 1px solid rgba(255,255,255,0.08); 
-            border-radius: 28px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        }
-        .neon-glow {
-            filter: drop-shadow(0 0 10px var(--accent));
-            transition: filter 0.5s ease;
-        }
-        .input-box {
-            background: rgba(30, 41, 59, 0.5);
-            border: 2px solid transparent;
-            border-radius: 14px;
-            padding: 14px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .input-box:focus {
-            border-color: var(--accent);
-            background: rgba(30, 41, 59, 0.8);
-            outline: none;
-            transform: scale(1.02);
-        }
-        /* Animated Progress Bars */
-        .bar-fill {
-            transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+        body { background: #050505; color: #e5e5e5; font-family: 'Space Grotesk', sans-serif; }
+        .dashboard-card { background: #0f0f0f; border: 1px solid #222; border-radius: 16px; padding: 24px; }
+        .accent-text { color: #ccff00; } /* Neon Lime for "Cyberpunk/Pro" feel */
+        .accent-bg { background: #ccff00; color: black; }
+        input, select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; width: 100%; outline: none; }
+        input:focus { border-color: #ccff00; }
+        .bar-container { background: #222; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 8px; }
+        .bar-fill { height: 100%; background: #ccff00; transition: width 1s ease; }
     </style>
 </head>
-<body class="p-6 md:p-12">
-    
-    <div class="max-w-6xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-            <div class="animate-fade-in">
-                <div class="flex items-center gap-3 mb-2">
-                    <span class="bg-indigo-500 w-3 h-3 rounded-full animate-pulse"></span>
-                    <span class="text-xs font-black uppercase tracking-[0.3em] text-indigo-400">AI Risk Intelligence</span>
-                </div>
-                <h1 class="text-6xl font-extrabold tracking-tighter">BetterLife <span class="text-indigo-500">AI</span></h1>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-12 flex justify-between items-center mb-4">
+            <div>
+                <h1 class="text-4xl font-bold uppercase tracking-tighter">BetterLife <span class="accent-text">Architect</span></h1>
+                <p class="text-gray-500 text-sm">SDG-1 Socio-Economic Simulator v2.0</p>
             </div>
-            
-            <div class="glass-card px-8 py-4 flex flex-col items-end">
-                <span class="text-[10px] uppercase font-bold text-slate-500 mb-1">Target Region</span>
-                <select id="country" onchange="update()" class="bg-transparent font-bold text-xl outline-none cursor-pointer text-indigo-400">
+            <div class="flex gap-4">
+                <select id="country" onchange="runAnalysis()" class="w-40 font-bold text-accent-text">
                     {% for code in countries %}
-                    <option value="{{ code }}" class="bg-slate-900 text-white">{{ code }}</option>
+                    <option value="{{ code }}">{{ code }}</option>
                     {% endfor %}
                 </select>
             </div>
-        </header>
+        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            <div class="lg:col-span-5 space-y-8">
-                <div class="glass-card p-10 space-y-8">
-                    <h3 class="text-xl font-bold flex items-center gap-3">
-                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                        Household Metrics
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 gap-6">
-                        <div class="group">
-                            <label class="text-xs font-bold text-slate-500 mb-2 block transition-colors group-focus-within:text-indigo-400">Monthly Income (<span id="curr_sym">AED</span>)</label>
-                            <input type="number" id="income" value="5000" oninput="update()" class="input-box w-full text-lg font-bold">
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-6">
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 mb-2 block">Education (Years)</label>
-                                <input type="number" id="edu" value="12" oninput="update()" class="input-box w-full text-lg font-bold">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 mb-2 block">Job Status</label>
-                                <select id="emp" onchange="update()" class="input-box w-full font-bold">
-                                    <option value="1">Employed</option>
-                                    <option value="0">Unemployed</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-6">
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 mb-2 block">Family Size</label>
-                                <input type="number" id="h_size" value="4" oninput="update()" class="input-box w-full text-lg font-bold">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-500 mb-2 block">Working Members</label>
-                                <input type="number" id="workers" value="1" oninput="update()" class="input-box w-full text-lg font-bold">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-7 glass-card p-10 flex flex-col justify-between relative overflow-hidden">
-                <div id="dynamic-glow" class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full"></div>
-                
-                <div class="flex justify-between items-start z-10">
+        <div class="lg:col-span-3 space-y-4">
+            <div class="dashboard-card">
+                <h3 class="text-xs font-bold text-gray-500 uppercase mb-4">Core Variables</h3>
+                <div class="space-y-4">
                     <div>
-                        <h3 class="text-2xl font-bold tracking-tight">Vulnerability Index</h3>
-                        <p id="risk_meaning" class="text-slate-400 text-sm mt-1 max-w-xs">Data-driven resilience mapping.</p>
+                        <label class="text-xs">Monthly Income</label>
+                        <input type="number" id="income" value="5000" oninput="runAnalysis()">
                     </div>
-                    <div id="status_pill" class="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 shadow-xl transition-all duration-500">
-                        Analyzing
+                    <div>
+                        <label class="text-xs">Education Years</label>
+                        <input type="number" id="edu" value="12" oninput="runAnalysis()">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs">Family Size</label>
+                            <input type="number" id="h_size" value="4" oninput="runAnalysis()">
+                        </div>
+                        <div>
+                            <label class="text-xs">Workers</label>
+                            <input type="number" id="workers" value="1" oninput="runAnalysis()">
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center z-10 mt-8">
-                    <div class="flex justify-center relative">
-                        <svg class="w-56 h-56 transform -rotate-90 neon-glow" id="svg-meter">
-                            <circle cx="112" cy="112" r="100" stroke="rgba(255,255,255,0.03)" stroke-width="14" fill="transparent" />
-                            <circle id="meter" cx="112" cy="112" r="100" stroke="currentColor" stroke-width="14" fill="transparent" 
-                                    stroke-dasharray="628" stroke-dashoffset="628" stroke-linecap="round" class="transition-all duration-1000 ease-out" />
-                        </svg>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span id="risk_val" class="text-6xl font-black transition-all">0%</span>
-                        </div>
-                    </div>
-                    
-                    <div id="breakdown_list" class="space-y-6">
-                        </div>
+            <div class="dashboard-card border-l-4 border-[#ccff00]">
+                <h3 class="text-xs font-bold text-[#ccff00] uppercase mb-4">⚡ Simulation Events</h3>
+                <div class="space-y-3">
+                    <button onclick="applyScenario('upskill')" class="w-full text-left text-xs p-2 hover:bg-[#222] rounded flex justify-between">
+                        <span>+ Upskill (2 Years)</span> <span class="text-gray-500">+Edu</span>
+                    </button>
+                    <button onclick="applyScenario('bonus')" class="w-full text-left text-xs p-2 hover:bg-[#222] rounded flex justify-between">
+                        <span>+ New Job Offer</span> <span class="text-gray-500">+Income</span>
+                    </button>
+                    <button onclick="applyScenario('baby')" class="w-full text-left text-xs p-2 hover:bg-[#222] rounded flex justify-between">
+                        <span>+ New Child</span> <span class="text-gray-500">+Dep</span>
+                    </button>
+                    <button onclick="resetSim()" class="w-full text-center text-xs p-2 bg-red-900/30 text-red-400 rounded mt-2">Reset Simulation</button>
                 </div>
             </div>
         </div>
 
-        <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="glass-card p-8 group">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="p-3 bg-indigo-500/20 rounded-2xl text-indigo-400">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <h4 class="text-xl font-bold">Why this matters?</h4>
+        <div class="lg:col-span-6 space-y-6">
+            <div class="dashboard-card h-64 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-50 text-[100px] font-bold text-[#222] leading-none" id="risk_bg">0%</div>
+                <div>
+                    <h3 class="text-lg font-bold">Vulnerability Index</h3>
+                    <p class="text-xs text-gray-400">Real-time poverty probability assessment</p>
                 </div>
-                <p id="reg_info" class="text-slate-400 text-sm leading-relaxed mb-4">Select a country above to understand local poverty dynamics and how they align with SDG-1 goals.</p>
+                <div class="flex items-end gap-4 z-10">
+                    <span id="risk_display" class="text-6xl font-bold accent-text">0%</span>
+                    <div class="mb-2">
+                        <div class="text-xs uppercase font-bold text-gray-500">Status</div>
+                        <div id="status_text" class="text-white font-bold">Safe</div>
+                    </div>
+                </div>
+                <div class="w-full bg-[#222] h-2 mt-4 rounded-full">
+                    <div id="risk_bar" class="h-full bg-[#ccff00] transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <h3 class="text-xs font-bold text-gray-500 uppercase mb-6">📉 National Benchmark (You vs. Average)</h3>
                 
-                <p class="text-xs text-indigo-300 italic opacity-0 group-hover:opacity-100 transition-opacity">SDG-1: "End poverty in all its forms everywhere."</p>
-            </div>
-            
-            <div class="glass-card p-8 border-l-4 border-indigo-500">
-                <h4 class="text-xl font-bold mb-4">Household Recommendation</h4>
-                <div id="help_txt" class="text-slate-300 text-sm p-4 bg-white/5 rounded-2xl italic">--</div>
-                <div class="mt-6 text-[10px] text-slate-500 uppercase font-black tracking-widest">Scientific Disclaimer</div>
-                <p class="text-[9px] text-slate-600 mt-1">This tool uses a weighted logistic simulation to estimate household resilience. It is an educational prototype and not a financial certification.</p>
+                <div class="mb-4">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span>Your Income</span>
+                        <span class="text-gray-400">National Avg: <span id="avg_inc_display">--</span></span>
+                    </div>
+                    <div class="relative h-6 bg-[#222] rounded overflow-hidden">
+                        <div class="absolute top-0 bottom-0 w-1 bg-white/20 z-10" style="left: 50%" title="National Average"></div>
+                        <div id="inc_bar" class="h-full bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                    <div class="text-[10px] text-center mt-1 text-gray-500">50% Line = National Average</div>
+                </div>
             </div>
         </div>
+
+        <div class="lg:col-span-3">
+            <div class="dashboard-card h-full border border-[#ccff00]/30 bg-[#ccff00]/5">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="w-2 h-2 bg-[#ccff00] rounded-full animate-pulse"></div>
+                    <h3 class="text-sm font-bold text-[#ccff00] uppercase">AI Policy Advisor</h3>
+                </div>
+                
+                <div id="ai_suggestions" class="space-y-4 text-sm text-gray-300">
+                    <p class="opacity-50 italic">Analyzing data...</p>
+                </div>
+
+                <div class="mt-8 pt-8 border-t border-white/10">
+                    <h4 class="text-xs font-bold text-gray-500 mb-2">PROJECTED SECTORS</h4>
+                    <div id="job_tags" class="flex flex-wrap gap-2">
+                        </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        async function update() {
+        // Simulation Logic
+        function applyScenario(type) {
+            if(type === 'upskill') document.getElementById('edu').value = parseInt(document.getElementById('edu').value) + 2;
+            if(type === 'bonus') document.getElementById('income').value = parseFloat(document.getElementById('income').value) * 1.2;
+            if(type === 'baby') document.getElementById('h_size').value = parseInt(document.getElementById('h_size').value) + 1;
+            runAnalysis();
+        }
+
+        function resetSim() {
+            document.getElementById('income').value = 5000;
+            document.getElementById('edu').value = 12;
+            document.getElementById('h_size').value = 4;
+            runAnalysis();
+        }
+
+        async function runAnalysis() {
             const data = {
                 income: document.getElementById('income').value || 0,
                 education: document.getElementById('edu').value || 0,
-                employment: document.getElementById('emp').value,
                 household_size: document.getElementById('h_size').value || 1,
                 working_members: document.getElementById('workers').value || 1,
                 country: document.getElementById('country').value
             };
 
-            const res = await fetch('/predict', {
+            const res = await fetch('/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
             });
             const r = await res.json();
 
-            // Root Variables for Smooth Color Transition
-            document.documentElement.style.setProperty('--accent', r.color);
-
-            // Text Updates
-            document.getElementById('risk_val').innerText = r.risk + "%";
-            document.getElementById('risk_val').style.color = r.color;
-            document.getElementById('curr_sym').innerText = r.currency;
-            document.getElementById('risk_meaning').innerText = r.meaning;
-            document.getElementById('help_txt').innerText = r.help;
-            document.getElementById('reg_info').innerText = r.info;
+            // 1. Update Risk UI
+            document.getElementById('risk_display').innerText = r.risk + "%";
+            document.getElementById('risk_bg').innerText = r.risk + "%";
+            document.getElementById('risk_bar').style.width = r.risk + "%";
             
-            const pill = document.getElementById('status_pill');
-            pill.innerText = r.status;
-            pill.style.color = r.color;
-            pill.style.borderColor = r.color + '40';
-            pill.style.backgroundColor = r.color + '10';
+            // Color Logic (Green to Red)
+            const color = r.risk > 50 ? '#ef4444' : r.risk > 30 ? '#f59e0b' : '#ccff00';
+            document.getElementById('risk_display').style.color = color;
+            document.getElementById('risk_bar').style.backgroundColor = color;
+            document.getElementById('status_text').innerText = r.risk > 50 ? "Critical Vulnerability" : "Resilient";
 
-            // Meter Animation
-            const meter = document.getElementById('meter');
-            meter.style.strokeDashoffset = 628 - (628 * r.risk / 100);
-            meter.style.color = r.color;
+            // 2. Update Benchmark (You vs Avg)
+            // We scale it so 50% width = National Average. 
+            // If user has 2x national average, bar is 100%.
+            const barWidth = Math.min(100, (r.comparison.income_pct / 2)); 
+            document.getElementById('inc_bar').style.width = barWidth + "%";
+            document.getElementById('inc_bar').style.backgroundColor = r.comparison.income_pct >= 100 ? '#10b981' : '#ef4444';
+            document.getElementById('avg_inc_display').innerText = r.stats.avg_inc + " " + r.stats.curr;
 
-            // Breakdown Animation
-            const list = document.getElementById('breakdown_list');
-            list.innerHTML = '';
-            r.breakdown.forEach((item, index) => {
-                list.innerHTML += `
-                    <div class="animate-fade-in-up" style="animation-delay: ${index * 0.1}s">
-                        <div class="flex justify-between text-[10px] mb-2 font-black uppercase tracking-widest opacity-60">
-                            <span>${item.label}</span>
-                            <span>${item.value}%</span>
-                        </div>
-                        <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                            <div class="bar-fill h-full rounded-full" style="width: ${item.value * 2}%; background: ${r.color}"></div>
-                        </div>
-                    </div>
-                `;
+            // 3. AI Suggestions
+            const aiBox = document.getElementById('ai_suggestions');
+            aiBox.innerHTML = '';
+            if (r.recommendations.length > 0) {
+                r.recommendations.forEach(rec => {
+                    aiBox.innerHTML += `<div class="p-3 bg-black/40 rounded border-l-2 border-[#ccff00]">${rec}</div>`;
+                });
+            } else {
+                aiBox.innerHTML = `<div class="text-[#ccff00]">✅ optimal Configuration. No major risks detected.</div>`;
+            }
+
+            // 4. Job Tags
+            const jobBox = document.getElementById('job_tags');
+            jobBox.innerHTML = '';
+            r.stats.jobs.forEach(job => {
+                jobBox.innerHTML += `<span class="px-2 py-1 bg-white/10 text-[10px] rounded uppercase font-bold">${job}</span>`;
             });
         }
-        window.onload = update;
+
+        window.onload = runAnalysis;
     </script>
 </body>
 </html>
