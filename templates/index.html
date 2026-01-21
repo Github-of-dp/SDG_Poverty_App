@@ -2,173 +2,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>BetterLife // SDG Resilience Architect</title>
+    <title>BetterLife AI // Neural Architect</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #ccff00; --red: #ff0055; --bg: #050505; }
+        :root { --neon: #ccff00; --bg: #050505; --red: #ff0055; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; }
         
         .glow-card { 
-            background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(12px); 
-            border: 1px solid rgba(255,255,255,0.05); border-radius: 20px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); transition: 0.3s;
+            background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.4s;
         }
-        .glow-card:hover { border-color: var(--neon); box-shadow: 0 0 20px rgba(204, 255, 0, 0.1); }
+        .glow-card:hover { border-color: var(--neon); box-shadow: 0 0 40px rgba(204, 255, 0, 0.15); }
         
-        .neon-text { color: var(--neon); text-shadow: 0 0 10px rgba(204, 255, 0, 0.5); }
-        .neon-border { border-color: var(--neon); box-shadow: 0 0 15px rgba(204, 255, 0, 0.2); }
-        
-        input { background: #111; border: 1px solid #333; color: var(--neon); padding: 12px; border-radius: 12px; width: 100%; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--neon); box-shadow: 0 0 15px rgba(204, 255, 0, 0.3); }
+        input { background: #111; border: 1px solid #222; color: var(--neon); padding: 14px; border-radius: 12px; width: 100%; outline: none; }
+        input:focus { border-color: var(--neon); box-shadow: 0 0 15px rgba(204, 255, 0, 0.2); }
 
-        .btn-action { background: #fff; color: #000; font-weight: 800; padding: 12px; border-radius: 12px; transition: 0.3s; }
-        .btn-action:hover { background: var(--neon); transform: translateY(-2px); }
-
-        .terminal-box { font-family: monospace; font-size: 12px; background: #000; border: 1px dashed #333; height: 120px; overflow-y: auto; padding: 10px; }
+        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
+        .risk-bar { height: 8px; background: #1a1a1a; border-radius: 10px; overflow: hidden; }
+        .risk-fill { height: 100%; background: var(--neon); transition: 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
     </style>
 </head>
-<body class="p-6 md:p-12">
+<body class="p-8 md:p-16">
 
-    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl">
-        <div class="glow-card max-w-md p-10 text-center border-white/10">
-            <h2 class="text-3xl font-bold mb-4 italic neon-text">ARCHITECT // 1.2</h2>
-            <p class="text-gray-400 text-sm mb-8 leading-relaxed">Educational simulation of Sustainable Development Goal 1.2. Not for real-world financial advice.</p>
-            <button onclick="document.getElementById('modal').remove()" class="btn-action w-full">INITIALIZE SYSTEM</button>
-        </div>
-    </div>
-
-    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
-        
-        <div class="lg:col-span-4 space-y-6">
-            <header class="mb-10">
-                <h1 class="text-4xl font-black tracking-tighter uppercase">BetterLife <span class="neon-text">AI</span></h1>
-                <select id="region" onchange="run()" class="bg-transparent neon-text font-bold mt-2 outline-none">
-                    {% for r in regions %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
-                </select>
-            </header>
-
-            <div class="glow-card p-6 space-y-4">
-                <h3 class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Household Data</h3>
-                <input type="number" id="income" placeholder="Monthly Income" value="10000" oninput="run()">
-                <input type="number" id="edu" placeholder="Years of Schooling" value="12" oninput="run()">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="h_size" value="4" oninput="run()">
-                    <input type="number" id="workers" value="1" oninput="run()">
-                </div>
+    <div class="max-w-6xl mx-auto">
+        <header class="flex justify-between items-center mb-16">
+            <div>
+                <h1 class="text-5xl font-black uppercase tracking-tighter italic">Neural <span style="color:var(--neon)">Architect</span></h1>
+                <p class="text-gray-500 text-[10px] font-bold tracking-[0.3em] uppercase mt-2">SDG 1.2 Logistic Regression Engine</p>
             </div>
+            <div id="status-pill" class="status-pill bg-white/5 text-gray-500">System Ready</div>
+        </header>
 
-            <div class="glow-card p-6">
-                <h3 class="text-[10px] text-gray-500 font-bold uppercase mb-4 tracking-widest">Active Interventions</h3>
-                <div class="grid grid-cols-1 gap-2">
-                    <button onclick="invest('edu')" class="text-[11px] border border-white/10 p-3 rounded-lg hover:border-[#ccff00] text-left">
-                        🎓 Vocational Training (+2 yrs Edu)
-                    </button>
-                    <button onclick="invest('health')" class="text-[11px] border border-white/10 p-3 rounded-lg hover:border-[#ccff00] text-left">
-                        🏥 Health Insurance (Resilience Block)
-                    </button>
-                </div>
-            </div>
-
-            <button onclick="triggerEvent()" class="btn-action w-full uppercase tracking-tighter">Simulate Life Event</button>
-            <div id="terminal" class="terminal-box text-gray-500">> System Ready...</div>
-        </div>
-
-        <div class="lg:col-span-8 space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="glow-card p-10 flex flex-col items-center justify-center text-center">
-                    <span class="text-[10px] text-gray-500 font-bold uppercase mb-4">Current Vulnerability</span>
-                    <div id="risk-display" class="text-8xl font-black neon-text">0%</div>
-                    <div class="w-full h-1.5 bg-white/5 rounded-full mt-8 overflow-hidden">
-                        <div id="risk-bar" class="h-full bg-[#ccff00] transition-all duration-700" style="width: 0%"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div class="lg:col-span-4 space-y-6">
+                <div class="glow-card">
+                    <h3 class="text-[10px] text-gray-400 font-bold uppercase mb-6 tracking-widest">Input Parameters</h3>
+                    <div class="space-y-4">
+                        <input type="number" id="income" value="10000" oninput="runPredict()" placeholder="Income">
+                        <input type="number" id="edu" value="12" oninput="runPredict()" placeholder="Education (Yrs)">
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="number" id="h_size" value="4" oninput="runPredict()">
+                            <input type="number" id="workers" value="1" oninput="runPredict()">
+                        </div>
                     </div>
                 </div>
 
-                <div class="glow-card p-10 flex flex-col items-center justify-center text-center border-white/10">
-                    <span class="text-[10px] text-gray-400 font-bold uppercase mb-4">2030 Horizon Prediction</span>
-                    <div id="future-display" class="text-6xl font-black text-white/40 italic">0%</div>
-                    <p class="text-[10px] text-gray-500 mt-6 leading-tight">Adjusted for 3% net economic drift.</p>
+                <div class="glow-card border-dashed bg-transparent">
+                    <h3 class="text-[10px] text-gray-500 font-bold uppercase mb-4">Model Coefficients</h3>
+                    <div id="coef-log" class="font-mono text-[9px] text-gray-400 space-y-1"></div>
                 </div>
             </div>
 
-            <div class="glow-card p-8">
-                <h3 class="text-[10px] text-gray-500 font-bold uppercase mb-6 tracking-widest">Impact Breakdown</h3>
-                <div id="factor-list" class="space-y-6">
+            <div class="lg:col-span-8 space-y-8">
+                <div class="glow-card p-12 text-center relative overflow-hidden">
+                    <div id="risk-val" class="text-[150px] font-black leading-none" style="color:var(--neon)">0%</div>
+                    <div id="class-msg" class="text-xl font-bold uppercase tracking-widest mt-4">Analyzing Node...</div>
+                    
+                    <div class="risk-bar mt-12">
+                        <div id="risk-fill" class="risk-fill"></div>
                     </div>
+                </div>
+
+                <div id="insight-box" class="glow-card border-[#ccff00]/20 bg-[#ccff00]/5">
+                    <p class="text-gray-300 italic text-sm" id="ai-insight">Awaiting input data for classification...</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        async function run() {
+        async function runPredict() {
             const data = {
                 income: document.getElementById('income').value,
                 education: document.getElementById('edu').value,
                 h_size: document.getElementById('h_size').value,
-                workers: document.getElementById('workers').value,
-                region: document.getElementById('region').value
+                workers: document.getElementById('workers').value
             };
 
-            const res = await fetch('/analyze', {
+            const response = await fetch('/predict', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
             });
-            const r = await res.json();
+            const r = await response.json();
 
-            // UI Updates
-            document.getElementById('risk-display').innerText = r.total + "%";
-            document.getElementById('risk-bar').style.width = r.total + "%";
-            document.getElementById('future-display').innerText = r.future + "%";
+            // Update Interface
+            const color = r.risk > 50 ? "#ff0055" : "#ccff00";
+            document.getElementById('risk-val').innerText = r.risk + "%";
+            document.getElementById('risk-val').style.color = color;
+            document.getElementById('risk-fill').style.width = r.risk + "%";
+            document.getElementById('risk-fill').style.backgroundColor = color;
+            
+            document.getElementById('class-msg').innerText = r.class;
+            document.getElementById('ai-insight').innerText = r.insight;
 
-            // Color shift logic for risk bar
-            document.getElementById('risk-bar').style.backgroundColor = r.total > 50 ? "#ff0055" : "#ccff00";
-            document.getElementById('risk-display').style.color = r.total > 50 ? "#ff0055" : "#ccff00";
+            // Update Pill
+            const pill = document.getElementById('status-pill');
+            pill.innerText = r.class;
+            pill.style.background = color + "22";
+            pill.style.color = color;
 
-            const flist = document.getElementById('factor-list');
-            flist.innerHTML = '';
-            r.factors.forEach(f => {
-                flist.innerHTML += `
-                    <div class="flex items-center gap-6">
-                        <div class="w-24 text-[10px] font-bold text-gray-400 uppercase">${f.name}</div>
-                        <div class="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
-                            <div class="h-full transition-all duration-1000" style="width:${f.val * 2}%; background:${f.color}"></div>
-                        </div>
-                        <div class="w-12 text-right font-bold text-xs" style="color:${f.color}">${f.val}%</div>
-                    </div>
-                `;
-            });
+            // Update Model Log
+            document.getElementById('coef-log').innerHTML = `
+                <div>W1 (Income): ${r.weights.Income}</div>
+                <div>W2 (Edu): ${r.weights.Edu}</div>
+                <div>W3 (Dep): ${r.weights.Dep}</div>
+            `;
         }
-
-        function log(msg) {
-            const t = document.getElementById('terminal');
-            t.innerHTML = `<div>> ${msg}</div>` + t.innerHTML;
-        }
-
-        function invest(type) {
-            if(type === 'edu') {
-                document.getElementById('edu').value = parseInt(document.getElementById('edu').value) + 2;
-                log("Investment: Vocational Training complete. Education +2 yrs.");
-            } else {
-                log("Investment: Health Insurance active. Protection +10%.");
-            }
-            run();
-        }
-
-        function triggerEvent() {
-            const events = [
-                {n: "Inflation Spike", i: -1500, msg: "Economic Shift: Market prices rose by 12%."},
-                {n: "Local Job Loss", w: -1, msg: "Structural Shock: Household earner lost employment."},
-                {n: "Community Grant", i: 2000, msg: "External Support: Local NGO provided social grant."}
-            ];
-            const e = events[Math.floor(Math.random()*events.length)];
-            if(e.i) document.getElementById('income').value = parseInt(document.getElementById('income').value) + e.i;
-            if(e.w) document.getElementById('workers').value = Math.max(0, parseInt(document.getElementById('workers').value) + e.w);
-            log(`EVENT: ${e.n}. ${e.msg}`);
-            run();
-        }
-
-        window.onload = run;
+        window.onload = runPredict;
     </script>
 </body>
 </html>
