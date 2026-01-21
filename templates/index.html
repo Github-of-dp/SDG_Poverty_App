@@ -2,108 +2,120 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Architect v4 // Midnight Aurora</title>
+    <title>BetterLife Architect // Dynamic Fluid</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     <style>
         body {
-            /* Deep Navy Background with Orange glow from bottom-right */
-            background: radial-gradient(circle at bottom right, rgba(255, 120, 0, 0.15), transparent 40%),
-                        linear-gradient(135deg, #020617 0%, #0f172a 100%);
-            color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif;
+            /* Light Aurora Background with strong Orange Glow in bottom-right */
+            background: radial-gradient(circle at bottom right, rgba(255, 140, 0, 0.3), transparent 50%),
+                        linear-gradient(135deg, #74abd1 0%, #a4cbd0 50%, #d6e4e5 100%);
+            font-family: 'Plus Jakarta Sans', sans-serif;
             min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            color: #1e293b;
         }
+
         .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 32px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 40px;
+            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.1);
         }
+
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        input, select {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fbbf24; /* Amber text */
-            padding: 12px; border-radius: 12px; width: 100%; outline: none;
+        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+
+        .sidebar-item {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px; padding: 12px;
+            width: 100%; outline: none; font-weight: 600; color: #0f172a;
         }
-        input:focus { border-color: #f59e0b; box-shadow: 0 0 15px rgba(245, 158, 11, 0.2); }
-        
-        .progress-ring {
-            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .risk-ring {
+            transition: stroke-dashoffset 1s ease-in-out;
             transform: rotate(-90deg); transform-origin: 50% 50%;
         }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div id="disclaimer" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl">
-        <div class="glass-panel p-10 max-w-md text-center border-amber-500/20">
-            <h2 class="text-2xl font-bold mb-4 uppercase tracking-tighter text-amber-500">System Disclaimer</h2>
-            <p class="text-slate-400 text-sm mb-8 leading-relaxed italic">
-                This simulation represents **Multidimensional Poverty (SDG 1.2)**. It is intended for **educational research** and should not be used as official financial advice.
+    <div id="disclaimer" class="fixed inset-0 z-50 flex items-center justify-center bg-white/20 backdrop-blur-xl">
+        <div class="glass-panel p-12 max-w-md text-center border-white/60">
+            <h2 class="text-3xl font-extrabold mb-4 text-slate-800 tracking-tight">SDG 1.2 <span class="text-orange-500">Notice</span></h2>
+            <p class="text-slate-600 text-sm mb-8 leading-relaxed">
+                This simulation provides an educational overview of <b>Multidimensional Poverty</b>. It is not an official financial reporting tool.
             </p>
-            <button onclick="document.getElementById('disclaimer').remove()" class="w-full py-4 bg-amber-600 text-white font-bold rounded-2xl hover:bg-amber-500 transition shadow-lg shadow-amber-900/20">
-                INITIALIZE ARCHITECT
+            <button onclick="document.getElementById('disclaimer').remove()" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-orange-500 transition-all duration-300">
+                INITIALIZE SIMULATION
             </button>
         </div>
     </div>
 
-    <div class="glass-panel max-w-6xl w-full p-8 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-10">
+    <div class="glass-panel max-w-7xl w-full p-8 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-10">
         
-        <div class="lg:col-span-4 border-r border-white/5 pr-8 space-y-8">
+        <div class="lg:col-span-3 space-y-8 pr-4 border-r border-white/20">
             <div>
-                <h1 class="text-3xl font-black italic tracking-tighter">BetterLife <br><span class="text-amber-500">Architect</span></h1>
-                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-[0.3em] mt-2">Vulnerability Node v4.0</p>
+                <h1 class="text-2xl font-extrabold tracking-tighter text-slate-800">Architect <span class="text-orange-600">v4.1</span></h1>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Global Resilience Engine</p>
             </div>
 
             <div class="space-y-4">
-                <select id="region" onchange="run()">
-                    {% for r in regions %}<option value="{{r}}" class="bg-slate-900">{{r}}</option>{% endfor %}
+                <select id="region" onchange="run()" class="sidebar-item">
+                    {% for r in regions %}<option value="{{r}}">{{r}}</option>{% endfor %}
                 </select>
-                <input type="number" id="income" placeholder="Monthly Income" value="9000" oninput="run()">
-                <input type="number" id="edu" placeholder="Education Years" value="12" oninput="run()">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="h_size" value="4" oninput="run()" title="Household Size">
-                    <input type="number" id="workers" value="1" oninput="run()" title="Active Workers">
+                <input type="number" id="income" value="9000" oninput="run()" class="sidebar-item" placeholder="Monthly Income">
+                <input type="number" id="edu" value="12" oninput="run()" class="sidebar-item" placeholder="Schooling Yrs">
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" id="h_size" value="4" oninput="run()" class="sidebar-item text-center">
+                    <input type="number" id="workers" value="1" oninput="run()" class="sidebar-item text-center">
                 </div>
             </div>
 
-            <div class="p-6 glass-card bg-amber-500/5 border-amber-500/10">
-                <h4 class="text-[10px] font-bold text-amber-500 uppercase mb-2">SDG 1.2 Info</h4>
-                <p class="text-[11px] text-slate-400 leading-relaxed italic">
-                    The Global MPI identifies overlapping deprivations at the household level across health, education, and living standards.
-                </p>
+            <div class="glass-card p-6 bg-orange-500/10 border-orange-500/20">
+                <h4 class="text-[10px] font-extrabold text-orange-700 uppercase mb-2">Live Status</h4>
+                <p id="status-text" class="text-[11px] text-slate-600 italic">Calculating node stability...</p>
             </div>
         </div>
 
-        <div class="lg:col-span-8 space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="glass-card p-10 text-center relative overflow-hidden">
-                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Current Index</span>
-                    <div id="risk-display" class="text-8xl font-black my-4 text-white">0%</div>
-                    <div class="w-full h-1 bg-white/5 rounded-full mt-6 overflow-hidden">
-                        <div id="risk-bar" class="h-full bg-amber-500 transition-all duration-1000" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <div class="glass-card p-10 flex flex-col items-center justify-center border-white/5">
-                    <svg width="120" height="120">
-                        <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="transparent"/>
-                        <circle id="ring-progress" class="progress-ring" cx="60" cy="60" r="50" stroke="#f59e0b" stroke-width="8" fill="transparent" stroke-dasharray="314" stroke-dashoffset="314"/>
-                    </svg>
-                    <div class="mt-4 text-[10px] font-bold text-slate-500 uppercase">2030 Resilience</div>
-                    <div id="future-display" class="text-2xl font-bold text-white mt-1">0%</div>
+        <div class="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <div class="glass-card p-10 lg:col-span-2 flex flex-col justify-center relative overflow-hidden">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Aggregated Vulnerability</span>
+                <div id="risk-display" class="text-9xl font-extrabold text-slate-800 my-4 tracking-tighter">0%</div>
+                <div class="w-full h-1 bg-black/5 rounded-full mt-6">
+                    <div id="risk-bar" class="h-full bg-orange-500 transition-all duration-1000" style="width: 0%"></div>
                 </div>
             </div>
 
-            <div class="glass-card p-8">
-                <h3 class="text-[10px] font-bold text-slate-500 uppercase mb-8 tracking-widest">Dimension Impact Breakdown</h3>
-                <div id="breakdown-list" class="space-y-6">
+            <div class="glass-card p-8 flex flex-col items-center justify-center text-center">
+                <svg width="140" height="140">
+                    <circle cx="70" cy="70" r="60" stroke="rgba(0,0,0,0.05)" stroke-width="12" fill="transparent"/>
+                    <circle id="ring-progress" class="risk-ring" cx="70" cy="70" r="60" stroke="#f97316" stroke-width="12" fill="transparent" stroke-dasharray="377" stroke-dashoffset="377"/>
+                </svg>
+                <div class="mt-4">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">2030 Horizon</span>
+                    <div id="future-display" class="text-2xl font-black text-slate-800">0%</div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 glass-card p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div id="breakdown-container" class="contents">
                     </div>
+            </div>
+
+            <div class="lg:col-span-3 glass-card p-8 flex items-center justify-between border-orange-500/20">
+                <div class="max-w-md">
+                    <h5 class="text-xs font-extrabold uppercase text-orange-600 mb-2">SDG Target 1.2.2</h5>
+                    <p class="text-xs text-slate-600">This node evaluates non-monetary deprivations, showing how access to education and household dependency ratios influence overall systemic stability.</p>
+                </div>
+                <div class="text-4xl">📊</div>
             </div>
         </div>
     </div>
@@ -125,27 +137,30 @@
             });
             const r = await res.json();
 
-            // Current Stats
+            // Text Updates
             document.getElementById('risk-display').innerText = r.current + "%";
-            document.getElementById('risk-bar').style.width = r.current + "%";
-            
-            // Forecast Stats
             document.getElementById('future-display').innerText = r.future + "%";
+            document.getElementById('status-text').innerText = r.current > 40 ? "Node alert: High vulnerability detected." : "Node stable: Resource levels adequate.";
+
+            // Bar and Ring Updates
+            document.getElementById('risk-bar').style.width = r.current + "%";
             const ring = document.getElementById('ring-progress');
-            const offset = 314 - (314 * (100 - r.future) / 100);
+            const offset = 377 - (377 * (100 - r.future) / 100);
             ring.style.strokeDashoffset = offset;
 
-            // Detail List
-            const list = document.getElementById('breakdown-list');
-            list.innerHTML = '';
+            // Breakdown Injection
+            const container = document.getElementById('breakdown-container');
+            container.innerHTML = '';
             r.breakdown.forEach(item => {
-                list.innerHTML += `
-                    <div class="flex items-center gap-6">
-                        <div class="w-24 text-[10px] font-bold text-slate-400 uppercase">${item.label}</div>
-                        <div class="flex-1 h-px bg-white/10 relative">
-                            <div class="absolute h-px bg-amber-500" style="width:${item.val * 3}%"></div>
+                container.innerHTML += `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${item.label}</span>
+                            <span class="text-xs font-bold text-orange-600">${item.val}%</span>
                         </div>
-                        <div class="text-xs font-bold text-amber-500">${item.val}%</div>
+                        <div class="h-[2px] bg-black/5 w-full">
+                            <div class="h-full bg-slate-800 transition-all duration-1000" style="width:${item.val * 3}%"></div>
+                        </div>
                     </div>
                 `;
             });
