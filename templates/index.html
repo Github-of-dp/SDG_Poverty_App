@@ -2,110 +2,109 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>BetterLife Architect // Aurora</title>
+    <title>Architect v4 // Midnight Aurora</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;700&display=swap" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #74abd1 0%, #a4cbd0 50%, #d6e4e5 100%);
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            /* Deep Navy Background with Orange glow from bottom-right */
+            background: radial-gradient(circle at bottom right, rgba(255, 120, 0, 0.15), transparent 40%),
+                        linear-gradient(135deg, #020617 0%, #0f172a 100%);
+            color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif;
             min-height: 100vh; display: flex; align-items: center; justify-content: center;
         }
-        .glass-main {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 30px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 32px;
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            transition: 0.3s ease;
         }
         input, select {
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 10px; width: 100%; outline: none;
-            color: #2c5061; font-weight: 600;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fbbf24; /* Amber text */
+            padding: 12px; border-radius: 12px; width: 100%; outline: none;
         }
-        .progress-circle {
-            transition: stroke-dashoffset 0.8s ease-in-out;
+        input:focus { border-color: #f59e0b; box-shadow: 0 0 15px rgba(245, 158, 11, 0.2); }
+        
+        .progress-ring {
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             transform: rotate(-90deg); transform-origin: 50% 50%;
         }
     </style>
 </head>
-<body class="p-6">
+<body class="p-4 md:p-8">
 
-    <div id="disclaimer" class="fixed inset-0 z-50 flex items-center justify-center bg-sky-900/40 backdrop-blur-md">
-        <div class="bg-white/90 p-10 rounded-[40px] max-w-md text-center shadow-2xl">
-            <h2 class="text-2xl font-bold text-sky-900 mb-4 tracking-tight uppercase">Simulation Notice</h2>
-            <p class="text-sky-700/70 text-sm mb-8 leading-relaxed italic">
-                This tool is for **educational purposes only**. The vulnerability data provided is a simulation of SDG 1.2 and cannot be used for official financial or government reporting.
+    <div id="disclaimer" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl">
+        <div class="glass-panel p-10 max-w-md text-center border-amber-500/20">
+            <h2 class="text-2xl font-bold mb-4 uppercase tracking-tighter text-amber-500">System Disclaimer</h2>
+            <p class="text-slate-400 text-sm mb-8 leading-relaxed italic">
+                This simulation represents **Multidimensional Poverty (SDG 1.2)**. It is intended for **educational research** and should not be used as official financial advice.
             </p>
-            <button onclick="document.getElementById('disclaimer').remove()" class="w-full py-4 bg-sky-600 text-white font-bold rounded-2xl hover:bg-sky-700 transition">INITIALIZE</button>
+            <button onclick="document.getElementById('disclaimer').remove()" class="w-full py-4 bg-amber-600 text-white font-bold rounded-2xl hover:bg-amber-500 transition shadow-lg shadow-amber-900/20">
+                INITIALIZE ARCHITECT
+            </button>
         </div>
     </div>
 
-    <div class="glass-main max-w-6xl w-full p-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+    <div class="glass-panel max-w-6xl w-full p-8 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-10">
         
-        <div class="lg:col-span-3 border-r border-white/20 pr-8">
-            <h1 class="text-2xl font-bold text-sky-900 mb-8 tracking-tighter">BetterLife <br><span class="text-white">Architect</span></h1>
-            <div class="space-y-6">
-                <div>
-                    <label class="text-[10px] font-bold text-sky-800/60 uppercase">Region</label>
-                    <select id="region" onchange="run()">
-                        {% for r in regions %}<option value="{{r}}">{{r}}</option>{% endfor %}
-                    </select>
-                </div>
-                <input type="number" id="income" placeholder="Monthly Income" value="8000" oninput="run()">
+        <div class="lg:col-span-4 border-r border-white/5 pr-8 space-y-8">
+            <div>
+                <h1 class="text-3xl font-black italic tracking-tighter">BetterLife <br><span class="text-amber-500">Architect</span></h1>
+                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-[0.3em] mt-2">Vulnerability Node v4.0</p>
+            </div>
+
+            <div class="space-y-4">
+                <select id="region" onchange="run()">
+                    {% for r in regions %}<option value="{{r}}" class="bg-slate-900">{{r}}</option>{% endfor %}
+                </select>
+                <input type="number" id="income" placeholder="Monthly Income" value="9000" oninput="run()">
                 <input type="number" id="edu" placeholder="Education Years" value="12" oninput="run()">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="h_size" placeholder="Family" value="4" oninput="run()">
-                    <input type="number" id="workers" placeholder="Workers" value="1" oninput="run()">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="h_size" value="4" oninput="run()" title="Household Size">
+                    <input type="number" id="workers" value="1" oninput="run()" title="Active Workers">
                 </div>
+            </div>
+
+            <div class="p-6 glass-card bg-amber-500/5 border-amber-500/10">
+                <h4 class="text-[10px] font-bold text-amber-500 uppercase mb-2">SDG 1.2 Info</h4>
+                <p class="text-[11px] text-slate-400 leading-relaxed italic">
+                    The Global MPI identifies overlapping deprivations at the household level across health, education, and living standards.
+                </p>
             </div>
         </div>
 
-        <div class="lg:col-span-9 grid grid-cols-2 gap-6">
-            
-            <div class="glass-card p-8 flex flex-col justify-center">
-                <span class="text-sky-800/60 text-[10px] font-bold uppercase">Aggregated Index</span>
-                <div class="text-6xl font-light text-sky-900 my-2" id="total-val">0%</div>
-                <p class="text-[11px] text-sky-700/60 italic leading-tight">Combined vulnerability based on multi-factor analysis.</p>
-            </div>
-
-            <div class="glass-card p-8 flex flex-col items-center justify-center">
-                <svg width="120" height="120">
-                    <circle cx="60" cy="60" r="50" stroke="white" stroke-width="8" fill="transparent" opacity="0.2"/>
-                    <circle id="circle-progress" class="progress-circle" cx="60" cy="60" r="50" stroke="#2c5061" stroke-width="8" fill="transparent" stroke-dasharray="314" stroke-dashoffset="314"/>
-                </svg>
-                <div class="mt-4 text-[10px] font-bold text-sky-800/60 uppercase">Reliability Index</div>
-            </div>
-
-            <div class="glass-card p-6 col-span-2 space-y-6">
-                <h3 class="text-[10px] font-bold text-sky-800/60 uppercase tracking-widest">Dimension Breakdown</h3>
-                <div class="grid grid-cols-3 gap-10">
-                    <div>
-                        <div class="text-xl font-bold text-sky-900" id="fin-val">0%</div>
-                        <div class="text-[9px] text-sky-700 uppercase">Financial</div>
-                    </div>
-                    <div>
-                        <div class="text-xl font-bold text-sky-900" id="edu-val">0%</div>
-                        <div class="text-[9px] text-sky-700 uppercase">Education</div>
-                    </div>
-                    <div>
-                        <div class="text-xl font-bold text-sky-900" id="str-val">0%</div>
-                        <div class="text-[9px] text-sky-700 uppercase">Structural</div>
+        <div class="lg:col-span-8 space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-10 text-center relative overflow-hidden">
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Current Index</span>
+                    <div id="risk-display" class="text-8xl font-black my-4 text-white">0%</div>
+                    <div class="w-full h-1 bg-white/5 rounded-full mt-6 overflow-hidden">
+                        <div id="risk-bar" class="h-full bg-amber-500 transition-all duration-1000" style="width: 0%"></div>
                     </div>
                 </div>
-                <div class="w-full h-1 bg-white/20 rounded-full overflow-hidden">
-                    <div id="main-bar" class="h-full bg-sky-900 transition-all duration-1000" style="width: 0%"></div>
+
+                <div class="glass-card p-10 flex flex-col items-center justify-center border-white/5">
+                    <svg width="120" height="120">
+                        <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="transparent"/>
+                        <circle id="ring-progress" class="progress-ring" cx="60" cy="60" r="50" stroke="#f59e0b" stroke-width="8" fill="transparent" stroke-dasharray="314" stroke-dashoffset="314"/>
+                    </svg>
+                    <div class="mt-4 text-[10px] font-bold text-slate-500 uppercase">2030 Resilience</div>
+                    <div id="future-display" class="text-2xl font-bold text-white mt-1">0%</div>
                 </div>
             </div>
 
+            <div class="glass-card p-8">
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase mb-8 tracking-widest">Dimension Impact Breakdown</h3>
+                <div id="breakdown-list" class="space-y-6">
+                    </div>
+            </div>
         </div>
     </div>
 
@@ -126,19 +125,30 @@
             });
             const r = await res.json();
 
-            // Update Text
-            document.getElementById('total-val').innerText = r.total + "%";
-            document.getElementById('fin-val').innerText = r.financial + "%";
-            document.getElementById('edu-val').innerText = r.education + "%";
-            document.getElementById('str-val').innerText = r.structural + "%";
+            // Current Stats
+            document.getElementById('risk-display').innerText = r.current + "%";
+            document.getElementById('risk-bar').style.width = r.current + "%";
+            
+            // Forecast Stats
+            document.getElementById('future-display').innerText = r.future + "%";
+            const ring = document.getElementById('ring-progress');
+            const offset = 314 - (314 * (100 - r.future) / 100);
+            ring.style.strokeDashoffset = offset;
 
-            // Update Progress Bar
-            document.getElementById('main-bar').style.width = r.total + "%";
-
-            // Update Circle
-            const circle = document.getElementById('circle-progress');
-            const offset = 314 - (314 * (100 - r.total) / 100);
-            circle.style.strokeDashoffset = offset;
+            // Detail List
+            const list = document.getElementById('breakdown-list');
+            list.innerHTML = '';
+            r.breakdown.forEach(item => {
+                list.innerHTML += `
+                    <div class="flex items-center gap-6">
+                        <div class="w-24 text-[10px] font-bold text-slate-400 uppercase">${item.label}</div>
+                        <div class="flex-1 h-px bg-white/10 relative">
+                            <div class="absolute h-px bg-amber-500" style="width:${item.val * 3}%"></div>
+                        </div>
+                        <div class="text-xs font-bold text-amber-500">${item.val}%</div>
+                    </div>
+                `;
+            });
         }
         window.onload = run;
     </script>
