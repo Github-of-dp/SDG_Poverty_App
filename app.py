@@ -4,9 +4,14 @@ app = Flask(__name__)
 
 # Regional benchmarks for SDG 1.2
 REGIONS = {
-    "UAE": {"line": 16000, "edu": 16},
-    "India": {"line": 8000, "edu": 12},
-    "USA": {"line": 2800, "edu": 16}
+    "UAE": {"line": 16000, "edu": 16, "currency": "AED"},
+    "India": {"line": 15000, "edu": 12, "currency": "INR"},
+    "USA": {"line": 3200, "edu": 16, "currency": "USD"},
+    "UK": {"line": 2500, "edu": 15, "currency": "GBP"},
+    "Nigeria": {"line": 150000, "edu": 10, "currency": "NGN"},
+    "Brazil": {"line": 3500, "edu": 12, "currency": "BRL"},
+    "Singapore": {"line": 4500, "edu": 16, "currency": "SGD"},
+    "Kenya": {"line": 25000, "edu": 11, "currency": "KES"}
 }
 
 @app.route("/")
@@ -36,9 +41,9 @@ def analyze():
         "current": current_total,
         "future": future_total,
         "breakdown": [
-            {"label": "Financial", "val": round(f_risk, 1)},
-            {"label": "Capability", "val": round(e_risk, 1)},
-            {"label": "Structural", "val": round(s_risk, 1)}
+            {"label": "Money & Income", "val": round(f_risk, 1)},
+            {"label": "Skills & Education", "val": round(e_risk, 1)},
+            {"label": "Living Standards", "val": round(s_risk, 1)}
         ]
     })
 
