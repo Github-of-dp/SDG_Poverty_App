@@ -1,51 +1,46 @@
 from flask import Flask, render_template, request, jsonify
-import numpy as np
 
 app = Flask(__name__)
 
-# --- AI MODEL CONFIGURATION ---
-# These are the "Weights" (W) and "Bias" (B) for our Logistic Regression.
-# In a real app, these come from training on a dataset like the World Bank MPI.
-W = np.array([-0.0004, -0.35, 0.75]) # [Income, Education, Dependency]
-B = 2.0 
-
-def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
+# Real-world inspired thresholds for SDG 1.2 analysis
+COUNTRY_DATA = {
+    "UAE": {"line": 16000, "edu_target": 16, "weight": 1.2},
+    "India": {"line": 8000, "edu_target": 12, "weight": 0.8},
+    "USA": {"line": 2800, "edu_target": 16, "weight": 1.5},
+    "Kenya": {"line": 4000, "edu_target": 10, "weight": 0.6}
+}
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html", countries=COUNTRY_DATA.keys())
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    data = request.json
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    d = request.json
+    country = d.get('country', 'India')
+    meta = COUNTRY_DATA[country]
     
-    # 1. Feature Extraction (X)
-    income = float(data['income'])
-    edu = float(data['education'])
-    # Structural load = Household members per worker
-    dep = float(data['h_size']) / max(1, float(data['workers']))
+    inc = float(d['income'])
+    edu = float(d['education'])
+    h_size = int(d['h_size'])
+    workers = max(1, int(d['workers']))
     
-    X = np.array([income, edu, dep])
+    # 1. Calculation Logic
+    m_risk = max(0, (meta['line'] - inc) / (meta['line'] / 40)) 
+    e_risk = max(0, (meta['edu_target'] - edu) * 5)
+    s_risk = (h_size / workers) * 7 * meta['weight']
     
-    # 2. Logistic Regression Calculation: z = (W * X) + B
-    z = np.dot(W, X) + B
-    probability = sigmoid(z)
-    risk_percent = round(probability * 100, 1)
+    total_risk = round(min(100, m_risk + e_risk + s_risk), 1)
+    future_risk = round(min(100, total_risk * (1.04 ** 5)), 1)
     
-    # 3. Decision Logic
-    classification = "Vulnerable" if probability > 0.5 else "Resilient"
-    
-    # AI Analysis: Find the highest risk contributor
-    impacts = W * X
-    factors = ["Income Gap", "Education Gap", "Structural Load"]
-    primary_driver = factors[np.argmax(impacts)]
-
     return jsonify({
-        "risk": risk_percent,
-        "class": classification,
-        "insight": f"AI Diagnostic: {primary_driver} is the strongest predictor of vulnerability in this profile.",
-        "weights": {"Income": W[0], "Edu": W[1], "Dep": W[2]}
+        "current": total_risk,
+        "future": future_risk,
+        "details": [
+            {"label": "Monetary Gap", "score": round(m_risk, 1)},
+            {"label": "Education Lag", "score": round(e_risk, 1)},
+            {"label": "Dependency Load", "score": round(s_risk, 1)}
+        ]
     })
 
 if __name__ == "__main__":

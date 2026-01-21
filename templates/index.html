@@ -2,116 +2,161 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>BetterLife AI // Neural Architect</title>
+    <title>BetterLife v3 // Dynamic Architect</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #ccff00; --bg: #050505; --red: #ff0055; }
-        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; }
-        
-        .glow-card { 
-            background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 30px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.4s;
+        :root { --neon: #ccff00; --bg: #080808; }
+        body { 
+            background: radial-gradient(circle at top right, #1a1a1a, var(--bg)); 
+            color: #fff; font-family: 'Space Grotesk', sans-serif; min-height: 100vh;
         }
-        .glow-card:hover { border-color: var(--neon); box-shadow: 0 0 40px rgba(204, 255, 0, 0.15); }
         
-        input { background: #111; border: 1px solid #222; color: var(--neon); padding: 14px; border-radius: 12px; width: 100%; outline: none; }
-        input:focus { border-color: var(--neon); box-shadow: 0 0 15px rgba(204, 255, 0, 0.2); }
+        /* Glassmorphism Effect */
+        .glass { 
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 24px;
+        }
 
-        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
-        .risk-bar { height: 8px; background: #1a1a1a; border-radius: 10px; overflow: hidden; }
-        .risk-fill { height: 100%; background: var(--neon); transition: 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .neo-input {
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--neon); padding: 12px; border-radius: 12px; transition: 0.3s;
+        }
+        .neo-input:focus { border-color: var(--neon); box-shadow: 0 0 15px rgba(204,255,0,0.2); outline: none; }
+
+        .risk-text { transition: color 0.8s ease; }
+        .bar-fill { transition: width 1s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
     </style>
 </head>
-<body class="p-8 md:p-16">
+<body class="p-4 md:p-12">
 
     <div class="max-w-6xl mx-auto">
-        <header class="flex justify-between items-center mb-16">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
             <div>
-                <h1 class="text-5xl font-black uppercase tracking-tighter italic">Neural <span style="color:var(--neon)">Architect</span></h1>
-                <p class="text-gray-500 text-[10px] font-bold tracking-[0.3em] uppercase mt-2">SDG 1.2 Logistic Regression Engine</p>
+                <h1 class="text-4xl font-black italic tracking-tighter uppercase">Architect <span class="text-[#ccff00]">v3</span></h1>
+                <p class="text-gray-500 text-xs font-bold tracking-widest mt-1">SDG 1.2 MULTIDIMENSIONAL SIMULATOR</p>
             </div>
-            <div id="status-pill" class="status-pill bg-white/5 text-gray-500">System Ready</div>
+            
+            <div class="glass p-2 flex items-center gap-4">
+                <span class="text-[10px] font-bold text-gray-500 ml-3 uppercase">Target Region</span>
+                <select id="country" onchange="update()" class="bg-transparent text-[#ccff00] font-bold outline-none cursor-pointer">
+                    {% for c in countries %}<option value="{{c}}" class="bg-black">{{c}}</option>{% endfor %}
+                </select>
+            </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-4 space-y-6">
-                <div class="glow-card">
-                    <h3 class="text-[10px] text-gray-400 font-bold uppercase mb-6 tracking-widest">Input Parameters</h3>
+                <div class="glass p-8 space-y-6">
+                    <h3 class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">Live Data Feed</h3>
                     <div class="space-y-4">
-                        <input type="number" id="income" value="10000" oninput="runPredict()" placeholder="Income">
-                        <input type="number" id="edu" value="12" oninput="runPredict()" placeholder="Education (Yrs)">
+                        <div class="group">
+                            <label class="text-[10px] text-gray-500 block mb-1">MONTHLY INCOME</label>
+                            <input type="number" id="income" value="8000" oninput="update()" class="neo-input w-full">
+                        </div>
+                        <div class="group">
+                            <label class="text-[10px] text-gray-500 block mb-1">SCHOOLING (YRS)</label>
+                            <input type="number" id="edu" value="12" oninput="update()" class="neo-input w-full">
+                        </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <input type="number" id="h_size" value="4" oninput="runPredict()">
-                            <input type="number" id="workers" value="1" oninput="runPredict()">
+                            <div>
+                                <label class="text-[10px] text-gray-500 block mb-1">FAMILY SIZE</label>
+                                <input type="number" id="h_size" value="4" oninput="update()" class="neo-input w-full text-center">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-500 block mb-1">EARNERS</label>
+                                <input type="number" id="workers" value="1" oninput="update()" class="neo-input w-full text-center">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="glow-card border-dashed bg-transparent">
-                    <h3 class="text-[10px] text-gray-500 font-bold uppercase mb-4">Model Coefficients</h3>
-                    <div id="coef-log" class="font-mono text-[9px] text-gray-400 space-y-1"></div>
+                <div class="glass p-6 text-center">
+                    <p class="text-[10px] text-gray-500 uppercase font-bold mb-4">Quick Strategy</p>
+                    <button onclick="boost()" class="w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-[#ccff00] transition active:scale-95">
+                        APPLY EDUCATION SUBSIDY
+                    </button>
                 </div>
             </div>
 
             <div class="lg:col-span-8 space-y-8">
-                <div class="glow-card p-12 text-center relative overflow-hidden">
-                    <div id="risk-val" class="text-[150px] font-black leading-none" style="color:var(--neon)">0%</div>
-                    <div id="class-msg" class="text-xl font-bold uppercase tracking-widest mt-4">Analyzing Node...</div>
-                    
-                    <div class="risk-bar mt-12">
-                        <div id="risk-fill" class="risk-fill"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass p-12 text-center">
+                        <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Current Status</span>
+                        <div id="risk-display" class="risk-text text-8xl font-black my-4" style="color:var(--neon)">0%</div>
+                        <div class="h-1 bg-white/5 w-full rounded-full overflow-hidden mt-6">
+                            <div id="risk-bar" class="bar-fill h-full bg-[#ccff00]" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass p-12 text-center opacity-60">
+                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">2030 Horizon</span>
+                        <div id="future-display" class="text-6xl font-black mt-4 italic">0%</div>
+                        <p class="text-[9px] text-gray-600 mt-6 leading-tight uppercase">Adjusted for 4% economic drift</p>
                     </div>
                 </div>
 
-                <div id="insight-box" class="glow-card border-[#ccff00]/20 bg-[#ccff00]/5">
-                    <p class="text-gray-300 italic text-sm" id="ai-insight">Awaiting input data for classification...</p>
+                <div class="glass p-8">
+                    <h3 class="text-[10px] text-gray-400 font-bold uppercase mb-8 tracking-[0.2em]">Deprivation Intensity Breakdown</h3>
+                    <div id="detail-list" class="space-y-8">
+                        </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        async function runPredict() {
+        async function update() {
             const data = {
+                country: document.getElementById('country').value,
                 income: document.getElementById('income').value,
                 education: document.getElementById('edu').value,
                 h_size: document.getElementById('h_size').value,
                 workers: document.getElementById('workers').value
             };
 
-            const response = await fetch('/predict', {
+            const res = await fetch('/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
             });
-            const r = await response.json();
+            const r = await res.json();
 
-            // Update Interface
-            const color = r.risk > 50 ? "#ff0055" : "#ccff00";
-            document.getElementById('risk-val').innerText = r.risk + "%";
-            document.getElementById('risk-val').style.color = color;
-            document.getElementById('risk-fill').style.width = r.risk + "%";
-            document.getElementById('risk-fill').style.backgroundColor = color;
+            // Dynamic Styling based on Risk
+            const color = r.current > 45 ? "#ff0055" : "#ccff00";
             
-            document.getElementById('class-msg').innerText = r.class;
-            document.getElementById('ai-insight').innerText = r.insight;
+            document.getElementById('risk-display').innerText = r.current + "%";
+            document.getElementById('risk-display').style.color = color;
+            document.getElementById('risk-bar').style.width = r.current + "%";
+            document.getElementById('risk-bar').style.backgroundColor = color;
+            document.getElementById('future-display').innerText = r.future + "%";
 
-            // Update Pill
-            const pill = document.getElementById('status-pill');
-            pill.innerText = r.class;
-            pill.style.background = color + "22";
-            pill.style.color = color;
-
-            // Update Model Log
-            document.getElementById('coef-log').innerHTML = `
-                <div>W1 (Income): ${r.weights.Income}</div>
-                <div>W2 (Edu): ${r.weights.Edu}</div>
-                <div>W3 (Dep): ${r.weights.Dep}</div>
-            `;
+            const list = document.getElementById('detail-list');
+            list.innerHTML = '';
+            r.details.forEach(d => {
+                list.innerHTML += `
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-[10px] font-bold uppercase">
+                            <span class="text-gray-400 tracking-widest">${d.label}</span>
+                            <span style="color:${color}">${d.score}%</span>
+                        </div>
+                        <div class="h-[2px] bg-white/5 w-full overflow-hidden">
+                            <div class="bar-fill h-full" style="width:${d.score}%; background:${color}"></div>
+                        </div>
+                    </div>
+                `;
+            });
         }
-        window.onload = runPredict;
+
+        function boost() {
+            const edu = document.getElementById('edu');
+            edu.value = parseInt(edu.value) + 2;
+            update();
+        }
+
+        window.onload = update;
     </script>
 </body>
 </html>
